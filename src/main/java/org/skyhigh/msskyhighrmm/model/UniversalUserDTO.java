@@ -9,5 +9,4 @@ import lombok.Data;
 @AllArgsConstructor
 public class UniversalUserDTO {
     private int id;
-    private int lol;
 }
