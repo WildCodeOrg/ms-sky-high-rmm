@@ -9,7 +9,7 @@ import java.util.UUID;
 @Setter
 @Getter
 @AllArgsConstructor
-public class blockReason {
+public class BlockReason {
     private UUID id;
     private String description;
 }
