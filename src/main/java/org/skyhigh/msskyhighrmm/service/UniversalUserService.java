@@ -1,11 +1,18 @@
 package org.skyhigh.msskyhighrmm.service;
 
+import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface UniversalUserService {
+
+    /**
+     * Создает нового клиента
+     * @param registeringUniversalUser - клиент для создания
+     */
+    UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser);
 
     /**
      * Создает нового клиента

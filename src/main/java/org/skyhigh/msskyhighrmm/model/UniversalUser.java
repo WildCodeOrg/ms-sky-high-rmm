@@ -11,6 +11,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class UniversalUser {
+
     private UUID id;
     private String login;
     private String password;

@@ -1,7 +1,9 @@
 package org.skyhigh.msskyhighrmm.controller;
 
+import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService;
+import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +22,15 @@ public class UniversalUserController {
     @Autowired
     public UniversalUserController(UniversalUserService universalUserService) {
         this.universalUserService = universalUserService;
+
     }
 
+    //project logic - comment it if you wanna just only test the project availability and try the part below
+    @ValidParams
     @PostMapping(value = "/users")
-    public ResponseEntity<?> create(@RequestBody UniversalUser universalUser) {
-        universalUserService.create(universalUser);
-        //log.info(universalUser.toString());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<UUID> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
+        UUID registered_user_id = universalUserService.registerUser(registerUserDTO);
+        return new ResponseEntity<>(registered_user_id, HttpStatus.OK);
     }
 
     @GetMapping(value = "/users")
@@ -37,6 +41,25 @@ public class UniversalUserController {
                 ? new ResponseEntity<>(users, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+
+    //test controller methods - uncomment to test the project availability
+    /*
+
+    @ValidParams
+    @GetMapping("/check")
+    public void checkDeliveryAvailability(@RequestBody DeliveryRequestRegisterUserDTO requestDto) {
+        System.out.println("Validation!");
+    }
+
+    @PostMapping(value = "/users")
+    public ResponseEntity<?> create(@RequestBody UniversalUser universalUser) {
+        universalUserService.create(universalUser);
+        //log.info(universalUser.toString());
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+
 
     @GetMapping(value = "/users/{user_id}")
     public ResponseEntity<UniversalUser> read(@PathVariable(name = "user_id") UUID user_id) {
@@ -63,5 +86,5 @@ public class UniversalUserController {
         return deleted
                 ? new ResponseEntity<>(HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-    }
+    }*/
 }

@@ -1,6 +1,8 @@
 package org.skyhigh.msskyhighrmm.service;
 
+import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.UserInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -8,6 +10,15 @@ import java.util.*;
 @Service
 public class UniversalUserServiceImpl implements UniversalUserService {
     private static final Map<UUID, UniversalUser> UNIVERSAL_USER_MAP = new HashMap<>();
+
+    @Override
+    public UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser) {
+        final UUID universal_user_id = UUID.randomUUID();
+        UniversalUser universalUser = new UniversalUser(universal_user_id, registeringUniversalUser.getLogin(),
+                registeringUniversalUser.getPassword(), new UserInfo(), null);
+        UNIVERSAL_USER_MAP.put(universal_user_id, universalUser);
+        return universal_user_id;
+    }
 
     @Override
     public void create(UniversalUser universal_user) {
