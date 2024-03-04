@@ -33,16 +33,6 @@ public class UniversalUserController {
         return new ResponseEntity<>(registered_user_id, HttpStatus.OK);
     }
 
-    @GetMapping(value = "/users")
-    public ResponseEntity<List<UniversalUser>> read() {
-        final List<UniversalUser> users = universalUserService.readAll();
-
-        return users != null &&  !users.isEmpty()
-                ? new ResponseEntity<>(users, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-
     //test controller methods - uncomment to test the project availability
     /*
 
@@ -59,7 +49,14 @@ public class UniversalUserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @GetMapping(value = "/users")
+    public ResponseEntity<List<UniversalUser>> read() {
+        final List<UniversalUser> users = universalUserService.readAll();
 
+        return users != null &&  !users.isEmpty()
+                ? new ResponseEntity<>(users, HttpStatus.OK)
+                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     @GetMapping(value = "/users/{user_id}")
     public ResponseEntity<UniversalUser> read(@PathVariable(name = "user_id") UUID user_id) {
