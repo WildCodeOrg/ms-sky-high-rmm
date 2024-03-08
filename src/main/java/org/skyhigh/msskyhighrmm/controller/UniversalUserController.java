@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 @RestController
 public class UniversalUserController {
     //private static Logger log = Logger.getLogger(UniversalUserController.class.getName());
+    //dvpopov_updates branch initial commit
 
     private final UniversalUserService universalUserService;
 
