@@ -15,9 +15,25 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     public UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser) {
         final UUID universal_user_id = UUID.randomUUID();
         UniversalUser universalUser = new UniversalUser(universal_user_id, registeringUniversalUser.getLogin(),
-                registeringUniversalUser.getPassword(), new UserInfo(), null);
+                registeringUniversalUser.getPassword(), null, null);
         UNIVERSAL_USER_MAP.put(universal_user_id, universalUser);
         return universal_user_id;
+    }
+
+    @Override
+    public UUID checkUser(String login) {
+        ArrayList<UniversalUser> universalUsers = new ArrayList<>(UNIVERSAL_USER_MAP.values());
+        UUID id = null;
+
+        for (UniversalUser user : universalUsers)
+        {
+            if (Objects.equals(user.getLogin(), login)) {
+                id = user.getId();
+                break;
+            }
+        }
+
+        return id;
     }
 
     @Override

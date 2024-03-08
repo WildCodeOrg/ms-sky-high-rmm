@@ -48,4 +48,12 @@ public interface UniversalUserService {
      * @return - true если юзер был удален, иначе false
      */
     boolean delete(UUID id);
+
+    /**
+     * Проверяет, есть ли юзер с заданным логином в Системе
+     * @param login - логин юзера, по которому осущствляется поиск
+     * @return - значение UUID записи юзера, если он был найден,
+     * null - если такого юзера не существует
+     */
+    UUID checkUser(String login);
 }
