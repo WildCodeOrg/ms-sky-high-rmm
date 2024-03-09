@@ -2,6 +2,7 @@ package org.skyhigh.msskyhighrmm.service;
 
 import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.UUID;
@@ -55,5 +56,5 @@ public interface UniversalUserService {
      * @return - значение UUID записи юзера, если он был найден,
      * null - если такого юзера не существует
      */
-    UUID checkUser(String login);
+    ResponseEntity<?> checkUser(String login, String password);
 }

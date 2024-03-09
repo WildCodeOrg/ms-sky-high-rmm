@@ -40,28 +40,7 @@ public class UniversalUserController {
     @ValidParams
     @PostMapping(value = "/login")
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
-        final String input_login = loginUserDTO.getLogin();
-        final String input_pass = loginUserDTO.getPassword();
-        final UUID found_user_id = universalUserService.checkUser(input_login);
-
-        if (found_user_id == null) {
-            return new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    2,
-                    "Ошибка авторизации",
-                    400,
-                    "Данного пользователя не существует"
-            ), HttpStatus.BAD_REQUEST);
-        }
-
-        return input_pass.equals(universalUserService.read(found_user_id).getPassword())
-            ? new ResponseEntity<>(new DeliveryResponseLoginUserDTO(input_login, found_user_id,
-                "Авторизация пользователя прошла успешно."), HttpStatus.OK)
-            : new ResponseEntity<>(new CommonExceptionResponseDTO(
-                3,
-                "Ошибка авторизации",
-                400,
-                "Неправильный пароль"
-                ), HttpStatus.BAD_REQUEST);
+        return universalUserService.checkUser(loginUserDTO.getLogin(), loginUserDTO.getPassword());
     }
 
     @GetMapping(value = "/users")

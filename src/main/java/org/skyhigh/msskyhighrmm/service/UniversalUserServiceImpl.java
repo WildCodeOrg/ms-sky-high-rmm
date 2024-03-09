@@ -1,8 +1,12 @@
 package org.skyhigh.msskyhighrmm.service;
 
+import org.skyhigh.msskyhighrmm.model.DTO.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.UserInfo;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,19 +25,35 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     }
 
     @Override
-    public UUID checkUser(String login) {
+    public ResponseEntity<?> checkUser(String login, String password) {
         ArrayList<UniversalUser> universalUsers = new ArrayList<>(UNIVERSAL_USER_MAP.values());
         UUID id = null;
 
         for (UniversalUser user : universalUsers)
-        {
             if (Objects.equals(user.getLogin(), login)) {
                 id = user.getId();
                 break;
             }
+
+
+        if (id == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    2,
+                    "Ошибка авторизации",
+                    400,
+                    "Данного пользователя не существует"
+            ), HttpStatus.BAD_REQUEST);
         }
 
-        return id;
+        return password.equals(UNIVERSAL_USER_MAP.get(id).getPassword())
+                ? new ResponseEntity<>(new DeliveryResponseLoginUserDTO(login, id,
+                "Авторизация пользователя прошла успешно."), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                3,
+                "Ошибка авторизации",
+                400,
+                "Неправильный пароль"
+        ), HttpStatus.BAD_REQUEST);
     }
 
     @Override
