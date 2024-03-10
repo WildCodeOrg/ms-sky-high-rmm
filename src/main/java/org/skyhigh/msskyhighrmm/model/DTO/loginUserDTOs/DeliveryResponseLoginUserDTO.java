@@ -1,18 +1,17 @@
-package org.skyhigh.msskyhighrmm.model.DTO;
+package org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
+import java.util.UUID;
+
 @Setter
 @Getter
 @AllArgsConstructor
-public class DeliveryRequestRegisterUserDTO {
-
-    @NotEmpty
+public class DeliveryResponseLoginUserDTO {
     private String login;
-
-    @NotEmpty
-    private String password;
+    private UUID id;
+    private String message;
 }

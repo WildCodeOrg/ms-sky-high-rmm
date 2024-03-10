@@ -1,6 +1,6 @@
 package org.skyhigh.msskyhighrmm.service;
 
-import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
 import org.springframework.http.ResponseEntity;
 
@@ -16,10 +16,19 @@ public interface UniversalUserService {
     UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser);
 
     /**
-     * Создает нового клиента
-     * @param universal_user - клиент для создания
+     * Проверяет, есть ли юзер с заданным логином в Системе
+     * @param login - логин юзера, по которому осущствляется поиск
+     * @return - значение UUID записи юзера, если он был найден,
+     * null - если такого юзера не существует
      */
-    void create(UniversalUser universal_user);
+    UUID checkUser(String login);
+
+    /**
+     * Возвращает .юзера по его ID
+     * @param id - ID юзера
+     * @return - объект юзера с заданным ID
+     */
+    UniversalUser getUserById(UUID id);
 
     /**
      * Возвращает список всех имеющихся юзеров
@@ -27,12 +36,6 @@ public interface UniversalUserService {
      */
     List<UniversalUser> readAll();
 
-    /**
-     * Возвращает .юзера по его ID
-     * @param id - ID юзера
-     * @return - объект юзера с заданным ID
-     */
-    UniversalUser read(UUID id);
 
     /**
      * Обновляет юзера с заданным ID,
@@ -51,10 +54,8 @@ public interface UniversalUserService {
     boolean delete(UUID id);
 
     /**
-     * Проверяет, есть ли юзер с заданным логином в Системе
-     * @param login - логин юзера, по которому осущствляется поиск
-     * @return - значение UUID записи юзера, если он был найден,
-     * null - если такого юзера не существует
+     * Создает нового клиента
+     * @param universal_user - клиент для создания
      */
-    ResponseEntity<?> checkUser(String login, String password);
+    void create(UniversalUser universal_user);
 }

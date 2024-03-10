@@ -1,10 +1,12 @@
 package org.skyhigh.msskyhighrmm.controller;
 
 import org.skyhigh.msskyhighrmm.model.DTO.CommonExceptionResponseDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestLoginUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.DeliveryRequestRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.DeliveryResponseLoginUserDTO;
-import org.skyhigh.msskyhighrmm.model.Mismatch;
+import org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs.DeliveryRequestLoginUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs.DeliveryResponseLoginUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryResponseRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.UniversalUser;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
@@ -13,14 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
 @RestController
 public class UniversalUserController {
-    //private static Logger log = Logger.getLogger(UniversalUserController.class.getName());
+    private static final Logger log = Logger.getLogger(UniversalUserController.class.getName());
 
     private final UniversalUserService universalUserService;
 
@@ -33,14 +34,81 @@ public class UniversalUserController {
     @ValidParams
     @PostMapping(value = "/users")
     public ResponseEntity<?> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
-        UUID registered_user_id = universalUserService.registerUser(registerUserDTO);
-        return new ResponseEntity<>(registered_user_id, HttpStatus.OK);
+        log.info("Registering process for '" + registerUserDTO.getLogin() + "' started");
+
+        final UUID registered_user_id = universalUserService.registerUser(registerUserDTO);
+
+        return registered_user_id != null
+                ? new ResponseEntity<>(new DeliveryResponseRegisterUserDTO(registered_user_id),
+                    HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    2,
+                    "Ошибка регистрации",
+                    400,
+                    "Пользователь с таким логином уже существует."
+                    ), HttpStatus.BAD_REQUEST);
     }
 
     @ValidParams
     @PostMapping(value = "/login")
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
-        return universalUserService.checkUser(loginUserDTO.getLogin(), loginUserDTO.getPassword());
+        log.info("Login process for '" + loginUserDTO.getLogin() + "' started");
+
+        final String login = loginUserDTO.getLogin();
+        final UUID id = universalUserService.checkUser(login);
+
+        if (id == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    3,
+                    "Ошибка авторизации",
+                    400,
+                    "Данного пользователя не существует"
+            ), HttpStatus.BAD_REQUEST);
+        }
+
+        return loginUserDTO.getPassword().equals(universalUserService.getUserById(id).getPassword())
+                ? new ResponseEntity<>(new DeliveryResponseLoginUserDTO(login, id,
+                    "Авторизация пользователя прошла успешно."), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    4,
+                    "Ошибка авторизации",
+                    400,
+                    "Неправильный пароль"), HttpStatus.BAD_REQUEST);
+    }
+
+    //при одновременном использовании @ValidParams и параметров в url возникает ошибка,
+    // т.к. ValidParams не умеет проверять параметры такого рода (необходима доработка)
+    @GetMapping(value = "/users/{user_id}")
+    public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId, @ValidParams
+                                         @RequestBody DeliveryRequestGetUserByIdDTO getUserByIdDTO) {
+        log.info("Getting user by Id '" + searchForUserId +
+                "' process started by '" + getUserByIdDTO.getUserMadeRequestId() + "'");
+
+        universalUserService.registerUser(new DeliveryRequestRegisterUserDTO("s", "s"));//to del
+        final UUID userMadeRequestId = getUserByIdDTO.getUserMadeRequestId();
+        final UniversalUser foundUniversalUser;
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа",
+                    400,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.BAD_REQUEST);
+        }
+
+        foundUniversalUser = universalUserService.getUserById(searchForUserId);
+
+        return foundUniversalUser != null
+                ? new ResponseEntity<>(new DeliveryResponseGetUserByIdDTO("Пользователь найден.",
+                    foundUniversalUser), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    6,
+                    "Ошибка выполнения поиска пользователя по идентификатору.",
+                    400,
+                    "Искомый пользователь не найден."
+                    ), HttpStatus.BAD_REQUEST);
+
     }
 
     @GetMapping(value = "/users")
