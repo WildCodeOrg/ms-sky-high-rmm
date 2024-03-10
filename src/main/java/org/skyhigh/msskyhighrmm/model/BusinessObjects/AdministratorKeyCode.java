@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,8 @@ import java.util.UUID;
 @Setter
 @Getter
 @AllArgsConstructor
-public class BlockReason {
+public class AdministratorKeyCode {
     private UUID id;
-    private String description;
+    private UUID user_id;
+    private String key_code_value;
 }

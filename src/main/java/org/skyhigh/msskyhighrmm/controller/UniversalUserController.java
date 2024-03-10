@@ -1,13 +1,17 @@
 package org.skyhigh.msskyhighrmm.controller;
 
-import org.skyhigh.msskyhighrmm.model.DTO.CommonExceptionResponseDTO;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
+import org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs.DeliveryRequestLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryResponseRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +47,7 @@ public class UniversalUserController {
                     HttpStatus.OK)
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(
                     2,
-                    "Ошибка регистрации",
+                    "Ошибка регистрации.",
                     400,
                     "Пользователь с таким логином уже существует."
                     ), HttpStatus.BAD_REQUEST);
@@ -60,9 +64,9 @@ public class UniversalUserController {
         if (id == null) {
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     3,
-                    "Ошибка авторизации",
+                    "Ошибка авторизации.",
                     400,
-                    "Данного пользователя не существует"
+                    "Данного пользователя не существует."
             ), HttpStatus.BAD_REQUEST);
         }
 
@@ -71,13 +75,11 @@ public class UniversalUserController {
                     "Авторизация пользователя прошла успешно."), HttpStatus.OK)
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(
                     4,
-                    "Ошибка авторизации",
+                    "Ошибка авторизации.",
                     400,
-                    "Неправильный пароль"), HttpStatus.BAD_REQUEST);
+                    "Неправильный пароль."), HttpStatus.BAD_REQUEST);
     }
 
-    //при одновременном использовании @ValidParams и параметров в url возникает ошибка,
-    // т.к. ValidParams не умеет проверять параметры такого рода (необходима доработка)
     @GetMapping(value = "/users/{user_id}")
     public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId, @ValidParams
                                          @RequestBody DeliveryRequestGetUserByIdDTO getUserByIdDTO) {
@@ -91,10 +93,10 @@ public class UniversalUserController {
         if (universalUserService.getUserById(userMadeRequestId) == null) {
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
-                    "Ошибка прав доступа",
-                    400,
+                    "Ошибка прав доступа.",
+                    401,
                     "Пользователь, инициировавший операцию, не найден."
-            ), HttpStatus.BAD_REQUEST);
+            ), HttpStatus.UNAUTHORIZED);
         }
 
         foundUniversalUser = universalUserService.getUserById(searchForUserId);
@@ -105,10 +107,38 @@ public class UniversalUserController {
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(
                     6,
                     "Ошибка выполнения поиска пользователя по идентификатору.",
-                    400,
+                    404,
                     "Искомый пользователь не найден."
-                    ), HttpStatus.BAD_REQUEST);
+                    ), HttpStatus.NOT_FOUND);
+    }
 
+    @ValidParams
+    @PostMapping(value = "/users/search")
+    public ResponseEntity<?> searchUsers(@RequestBody DeliveryRequestSearchUsersDTO searchUsersDTO) {
+        final UUID userMadeRequestId = searchUsersDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        ListOfUniversalUser result = universalUserService.searchUsers(searchUsersDTO.getPagination(),
+                searchUsersDTO.getFilters(), searchUsersDTO.getSort());
+
+        return result != null
+                ? new ResponseEntity<>(new DeliveryResponseSearchUsersDTO(result.getItemCount(),
+                    new PageInfo(result.getPageNumber(), result.getPaginationItemCount()),
+                    result.getUniversalUsers()), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    7,
+                    "Ошибка выполнения поиска пользователей по параметрам.",
+                    404,
+                    "Пользователи, удовлетворяющие критериям поиска, не найдены."
+                    ), HttpStatus.NOT_FOUND);
     }
 
     @GetMapping(value = "/users")

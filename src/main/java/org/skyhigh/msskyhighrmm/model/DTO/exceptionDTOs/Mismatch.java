@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model;
+package org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

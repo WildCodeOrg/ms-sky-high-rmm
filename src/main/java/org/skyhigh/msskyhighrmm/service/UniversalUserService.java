@@ -1,8 +1,11 @@
 package org.skyhigh.msskyhighrmm.service;
 
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.UniversalUser;
-import org.springframework.http.ResponseEntity;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Filters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUserSearchSort.UniversalUserSort;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,11 +27,21 @@ public interface UniversalUserService {
     UUID checkUser(String login);
 
     /**
-     * Возвращает .юзера по его ID
+     * Возвращает юзера по его ID
      * @param id - ID юзера
      * @return - объект юзера с заданным ID
      */
     UniversalUser getUserById(UUID id);
+
+    /**
+     * Возвращает страницу/выборку/набор зарегистрированных юзеров в соответствии с
+     *      параметрами фильтрации и пагинации
+     * @param pagination - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
+     * @param filters - параметры фильтрации (зависят от параметров юзера -
+     *      причина блокировки, ФИО, возраст и т.п.)
+     * @return список юзеров, удовлетворяющих условиям поиска
+     */
+    ListOfUniversalUser searchUsers(Pagination pagination, Filters filters, UniversalUserSort universalUserSort);
 
     /**
      * Возвращает список всех имеющихся юзеров

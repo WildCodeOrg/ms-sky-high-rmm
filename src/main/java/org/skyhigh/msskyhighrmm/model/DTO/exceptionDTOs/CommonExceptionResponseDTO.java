@@ -1,11 +1,8 @@
-package org.skyhigh.msskyhighrmm.model.DTO;
+package org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.Mismatch;
-
-import java.util.ArrayList;
 
 @Setter
 @Getter

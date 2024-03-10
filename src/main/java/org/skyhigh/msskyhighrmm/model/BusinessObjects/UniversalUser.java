@@ -1,16 +1,17 @@
-package org.skyhigh.msskyhighrmm.model;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects;
 
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 
 import java.util.UUID;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class UniversalUser {
+public class UniversalUser{
 
     private UUID id;
     private String login;

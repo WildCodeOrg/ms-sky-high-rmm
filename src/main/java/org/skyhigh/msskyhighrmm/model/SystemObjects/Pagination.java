@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs;
+package org.skyhigh.msskyhighrmm.model.SystemObjects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
-import java.util.UUID;
-
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DeliveryRequestGetUserByIdDTO {
+public class Pagination {
     @NotEmpty
-    private UUID userMadeRequestId;
+    private int page;
+
+    @NotEmpty
+    private int requestedItemCount;
 }
