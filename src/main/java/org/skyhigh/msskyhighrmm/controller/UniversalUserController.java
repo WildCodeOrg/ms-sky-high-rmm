@@ -121,8 +121,8 @@ public class UniversalUserController {
     }
 
     //test controller methods - uncomment to test the project availability
-    /*
 
+    /*
     @ValidParams
     @GetMapping("/check")
     public void checkDeliveryAvailability(@RequestBody DeliveryRequestRegisterUserDTO requestDto) {
