@@ -1,7 +1,8 @@
-package org.skyhigh.msskyhighrmm.service;
+package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
@@ -43,6 +44,14 @@ public interface UniversalUserService {
      * @return список юзеров, удовлетворяющих условиям поиска
      */
     ListOfUniversalUser searchUsers(Pagination pagination, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort);
+
+    /**
+     * Обновляет данные о пользователе по его id и возвращает обновленный объект юзера
+     * @param userId - идентификатор юзера, данные о котором необходимо обновить
+     * @param newUserInfoAttributes - объект с новыми значениями полей иноформации о юзере
+     * @return обновленный объект юзера
+     */
+    UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes);
 
     /**
      * Возвращает список всех имеющихся юзеров

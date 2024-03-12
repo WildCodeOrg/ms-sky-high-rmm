@@ -1,13 +1,10 @@
-package org.skyhigh.msskyhighrmm.service;
+package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.LoginUniversalUserComparator;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.UserIdUniversalUserComparator;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSortParameter;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 import org.springframework.stereotype.Service;
 
@@ -91,6 +88,15 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         }
 
         return new ListOfUniversalUser(itemCount, paginationItemCount, paginationPageNumber, resultUniversalUsersList);
+    }
+
+    @Override
+    public UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes) {
+        UniversalUser foundUniversalUser = UNIVERSAL_USER_MAP.get(userId);
+        UNIVERSAL_USER_MAP.put(userId, new UniversalUser(userId, foundUniversalUser.getLogin(),
+                foundUniversalUser.getPassword(), newUserInfoAttributes, foundUniversalUser.getBlock_reason_id()));
+
+        return UNIVERSAL_USER_MAP.get(userId);
     }
 
     @Override

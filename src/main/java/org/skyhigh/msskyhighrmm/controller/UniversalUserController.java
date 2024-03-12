@@ -1,5 +1,6 @@
 package org.skyhigh.msskyhighrmm.controller;
 
+import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
@@ -11,9 +12,10 @@ import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryResponseRegis
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.updateUserById.DeliveryRequestUpdateUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.updateUserById.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
-import org.skyhigh.msskyhighrmm.service.UniversalUserService;
+import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +26,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+@Getter
 @RestController
+@RequestMapping("/users")
 public class UniversalUserController {
     private static final Logger log = Logger.getLogger(UniversalUserController.class.getName());
 
@@ -37,9 +41,9 @@ public class UniversalUserController {
 
     //project logic - comment it if you wanna just only test the project availability and try the part below
     @ValidParams
-    @PostMapping(value = "/users")
+    @PostMapping
     public ResponseEntity<?> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
-        log.info("Registering process for '" + registerUserDTO.getLogin() + "' started");
+        log.info("Registering process for '" + registerUserDTO.getLogin() + "' was started");
 
         final UUID registered_user_id = universalUserService.registerUser(registerUserDTO.getLogin(),
                 registerUserDTO.getPassword());
@@ -58,7 +62,7 @@ public class UniversalUserController {
     @ValidParams
     @PostMapping(value = "/login")
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
-        log.info("Login process for '" + loginUserDTO.getLogin() + "' started");
+        log.info("Login process for '" + loginUserDTO.getLogin() + "' was started");
 
         final String login = loginUserDTO.getLogin();
         final UUID id = universalUserService.checkUser(login);
@@ -82,11 +86,11 @@ public class UniversalUserController {
                     "Неправильный пароль."), HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/users/{user_id}")
+    @GetMapping(value = "/{user_id}")
     public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId, @ValidParams
                                          @RequestBody DeliveryRequestGetUserByIdDTO getUserByIdDTO) {
         log.info("Getting user by Id '" + searchForUserId +
-                "' process started by '" + getUserByIdDTO.getUserMadeRequestId() + "'");
+                "' process was started by '" + getUserByIdDTO.getUserMadeRequestId() + "'");
 
         final UUID userMadeRequestId = getUserByIdDTO.getUserMadeRequestId();
         final UniversalUser foundUniversalUser;
@@ -107,15 +111,17 @@ public class UniversalUserController {
                     foundUniversalUser), HttpStatus.OK)
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(
                     6,
-                    "Ошибка выполнения поиска пользователя по идентификатору.",
+                    "Ошибка выполнения операции.",
                     404,
                     "Искомый пользователь не найден."
                     ), HttpStatus.NOT_FOUND);
     }
 
     @ValidParams
-    @PostMapping(value = "/users/search")
+    @PostMapping(value = "/search")
     public ResponseEntity<?> searchUsers(@RequestBody DeliveryRequestSearchUsersDTO searchUsersDTO) {
+        log.info("Getting users by criteria process was started by '" + searchUsersDTO.getUserMadeRequestId() + "'");
+
         final UUID userMadeRequestId = searchUsersDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
@@ -142,7 +148,34 @@ public class UniversalUserController {
                     ), HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping(value = "/users")
+    @PutMapping(value = "/{user_id}")
+    public ResponseEntity<?> updateUserById(@PathVariable(name = "user_id") UUID updateUserId, @ValidParams
+                                            @RequestBody DeliveryRequestUpdateUserByIdDTO updateUserByIdDTO) {
+        final UUID userMadeRequestId = updateUserByIdDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        return universalUserService.getUserById(updateUserId) != null
+                ? new ResponseEntity<>(new DeliveryResponseUpdateUserByIdDTO(
+                    "Запись пользователя успешно обновлена",universalUserService.updateUserById(updateUserId,
+                                updateUserByIdDTO.getNewUserInfoAttributes())
+                    ), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    6,
+                    "Ошибка выполнения операции.",
+                    404,
+                    "Искомый пользователь не найден."
+                    ), HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping
     public ResponseEntity<List<UniversalUser>> read() {
         final List<UniversalUser> users = universalUserService.readAll();
 
