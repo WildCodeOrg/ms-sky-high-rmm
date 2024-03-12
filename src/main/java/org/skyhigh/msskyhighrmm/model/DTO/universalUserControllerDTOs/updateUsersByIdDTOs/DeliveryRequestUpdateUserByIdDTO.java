@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.updateUsersByIdDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUsersByIdDTOs;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

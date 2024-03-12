@@ -1,9 +1,8 @@
-package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.loginUserDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.loginUserDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
 import java.util.UUID;
 

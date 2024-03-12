@@ -1,9 +1,8 @@
-package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.searchUsersDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.searchUsersDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
 

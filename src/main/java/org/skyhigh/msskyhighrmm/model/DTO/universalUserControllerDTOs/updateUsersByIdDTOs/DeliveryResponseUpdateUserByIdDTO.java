@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.getUserByIdDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUsersByIdDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 @Setter
 @Getter
 @AllArgsConstructor
-public class DeliveryResponseGetUserByIdDTO {
+public class DeliveryResponseUpdateUserByIdDTO {
     private String message;
-    private UniversalUser foundUniversalUser;
+    private UniversalUser updatedUniversalUser;
 }
