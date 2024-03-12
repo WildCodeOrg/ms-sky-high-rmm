@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.registerUserDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

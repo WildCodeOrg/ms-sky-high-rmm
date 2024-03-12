@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.loginUserDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.registerUserDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,8 @@ import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 @Setter
 @Getter
 @AllArgsConstructor
-public class DeliveryRequestLoginUserDTO {
+public class DeliveryRequestRegisterUserDTO {
+
     @NotEmpty
     private String login;
 

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs.ErrorDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.exceptionDTOs.ErrorDTO;
 
 @ControllerAdvice
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {

@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.exceptionDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOS.updateUserById.exceptionDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
