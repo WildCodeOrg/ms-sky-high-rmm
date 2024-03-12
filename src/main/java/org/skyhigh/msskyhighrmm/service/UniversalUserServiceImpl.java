@@ -2,14 +2,13 @@ package org.skyhigh.msskyhighrmm.service;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
-import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Comparators.UniversalUser.LoginUniversalUserComparator;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Comparators.UniversalUser.UserIdUniversalUserComparator;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Filters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.LoginUniversalUserComparator;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.UserIdUniversalUserComparator;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUserSearchSort.SortParameters.UniversalUserSortParameter;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUserSearchSort.UniversalUserSort;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSortParameter;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,20 +18,21 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private static final Map<UUID, UniversalUser> UNIVERSAL_USER_MAP = new HashMap<>();
 
     @Override
-    public UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser) {
+    public UUID registerUser(String login, String password) {
         ArrayList<UniversalUser> universalUsers = new ArrayList<>(UNIVERSAL_USER_MAP.values());
+
         boolean isUserExisting = false;
 
         for (UniversalUser user : universalUsers)
-            if (Objects.equals(user.getLogin(), registeringUniversalUser.getLogin())) {
+            if (Objects.equals(user.getLogin(), login)) {
                 isUserExisting = true;
                 break;
             }
 
         if (!isUserExisting) {
             final UUID universal_user_id = UUID.randomUUID();
-            UniversalUser universalUser = new UniversalUser(universal_user_id, registeringUniversalUser.getLogin(),
-                    registeringUniversalUser.getPassword(), null, null);
+            UniversalUser universalUser = new UniversalUser(universal_user_id, login,
+                    password, null, null);
             UNIVERSAL_USER_MAP.put(universal_user_id, universalUser);
             return universal_user_id;
         } else {
@@ -60,31 +60,16 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     }
 
     @Override
-    public ListOfUniversalUser searchUsers(Pagination pagination, Filters filters, UniversalUserSort universalUserSort) {
+    public ListOfUniversalUser searchUsers(Pagination pagination, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort) {
         ArrayList<UniversalUser> temporaryAllUsersList = new ArrayList<>(UNIVERSAL_USER_MAP.values());
 
-        if (filters != null) {
-            deleteInappropriateElementsOfUserListByParams(temporaryAllUsersList,
-                    filters.getBlock_reason_id(), filters.getUser_info());
+        if (universalUserFilters != null) {
+            temporaryAllUsersList = UniversalUserFilters.filter(temporaryAllUsersList,
+                    universalUserFilters.getBlock_reason_id(), universalUserFilters.getUser_info());
         }
 
         if (universalUserSort != null) {
-            switch (universalUserSort.getDirection()) {
-                case ASC -> {
-                    if (universalUserSort.getSortBy() == UniversalUserSortParameter.LOGIN) {
-                        temporaryAllUsersList.sort(new LoginUniversalUserComparator());
-                    } else if (universalUserSort.getSortBy() == UniversalUserSortParameter.USER_ID) {
-                        temporaryAllUsersList.sort(new UserIdUniversalUserComparator());
-                    }
-                }
-                case DESC -> {
-                    if (universalUserSort.getSortBy() == UniversalUserSortParameter.LOGIN) {
-                        temporaryAllUsersList.sort(new LoginUniversalUserComparator().reversed());
-                    } else if (universalUserSort.getSortBy() == UniversalUserSortParameter.USER_ID) {
-                        temporaryAllUsersList.sort(new UserIdUniversalUserComparator().reversed());
-                    }
-                }
-            }
+            UniversalUserSort.sort(temporaryAllUsersList, universalUserSort);
         }
 
         int paginationItemCount = pagination.getRequestedItemCount();
@@ -106,65 +91,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         }
 
         return new ListOfUniversalUser(itemCount, paginationItemCount, paginationPageNumber, resultUniversalUsersList);
-    }
-
-    void deleteInappropriateElementsOfUserListByParams(ArrayList<UniversalUser> usersList, UUID block_reason_id,
-                                                       UserInfo userInfoFilters)
-    {
-        HashSet<Integer> toDeleteElementPositionsSet = new HashSet<>();
-
-        if (block_reason_id != null) {
-            for (int i = 0; i < usersList.size(); i++) {
-                if (!usersList.get(i).getBlock_reason_id().equals(block_reason_id)) {
-                    toDeleteElementPositionsSet.add(i);
-                }
-            }
-        }
-
-        if (userInfoFilters != null) {
-            final String filer_first_name = userInfoFilters.getFirstName();
-            final String filter_second_name = userInfoFilters.getSecondName();
-            final int filter_age = userInfoFilters.getAge();
-
-            if (filer_first_name != null) {
-                for (int i = 0; i < usersList.size(); i++) {
-                    if (!usersList.get(i).getUser_info().getFirstName().equals(filer_first_name)) {
-                        toDeleteElementPositionsSet.add(i);
-                    }
-                }
-            }
-
-            if (filter_second_name != null) {
-                for (int i = 0; i < usersList.size(); i++) {
-                    if (!usersList.get(i).getUser_info().getSecondName().equals(filter_second_name)) {
-                        toDeleteElementPositionsSet.add(i);
-                    }
-                }
-            }
-
-            if (filter_age != 0) {
-                for (int i = 0; i < usersList.size(); i++) {
-                    if (usersList.get(i).getUser_info().getAge() != filter_age) {
-                        toDeleteElementPositionsSet.add(i);
-                    }
-                }
-            }
-        }
-
-        int[] toDeleteElementPositionsList = new int[toDeleteElementPositionsSet.size()];
-        int iter = 0;
-        for (Integer toDeleteElementPosition : toDeleteElementPositionsSet) {
-            toDeleteElementPositionsList[iter] = toDeleteElementPosition;
-            ++iter;
-            //usersList.remove((int) toDeleteElementPosition);
-        }
-        for (int i = 0; i < toDeleteElementPositionsList.length; i++) {
-            usersList.remove(toDeleteElementPositionsList[i]);
-            if (i != toDeleteElementPositionsList.length - 1)
-                for (int j = i + 1; j < toDeleteElementPositionsList.length; j++) {
-                    toDeleteElementPositionsList[j] -= 1;
-                }
-        }
     }
 
     @Override

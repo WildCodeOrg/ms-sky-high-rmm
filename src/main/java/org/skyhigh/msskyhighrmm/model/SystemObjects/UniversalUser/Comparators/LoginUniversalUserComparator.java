@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.SystemObjects.Comparators.UniversalUser;
+package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 

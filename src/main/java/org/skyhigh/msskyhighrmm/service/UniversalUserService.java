@@ -1,11 +1,10 @@
 package org.skyhigh.msskyhighrmm.service;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
-import org.skyhigh.msskyhighrmm.model.DTO.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Filters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUserSearchSort.UniversalUserSort;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,10 +12,12 @@ import java.util.UUID;
 public interface UniversalUserService {
 
     /**
-     * Создает нового клиента
-     * @param registeringUniversalUser - клиент для создания
+     * Создает нового юзера
+     * @param login - логин юзера для создания
+     * @param password - пароль юзера для создания
+     * @return - значение UUID созданной записи юзера
      */
-    UUID registerUser(DeliveryRequestRegisterUserDTO registeringUniversalUser);
+    UUID registerUser(String login, String password);
 
     /**
      * Проверяет, есть ли юзер с заданным логином в Системе
@@ -37,11 +38,11 @@ public interface UniversalUserService {
      * Возвращает страницу/выборку/набор зарегистрированных юзеров в соответствии с
      *      параметрами фильтрации и пагинации
      * @param pagination - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
-     * @param filters - параметры фильтрации (зависят от параметров юзера -
+     * @param universalUserFilters - параметры фильтрации (зависят от параметров юзера -
      *      причина блокировки, ФИО, возраст и т.п.)
      * @return список юзеров, удовлетворяющих условиям поиска
      */
-    ListOfUniversalUser searchUsers(Pagination pagination, Filters filters, UniversalUserSort universalUserSort);
+    ListOfUniversalUser searchUsers(Pagination pagination, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort);
 
     /**
      * Возвращает список всех имеющихся юзеров

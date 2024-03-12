@@ -12,6 +12,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,8 @@ public class UniversalUserController {
     public ResponseEntity<?> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
         log.info("Registering process for '" + registerUserDTO.getLogin() + "' started");
 
-        final UUID registered_user_id = universalUserService.registerUser(registerUserDTO);
+        final UUID registered_user_id = universalUserService.registerUser(registerUserDTO.getLogin(),
+                registerUserDTO.getPassword());
 
         return registered_user_id != null
                 ? new ResponseEntity<>(new DeliveryResponseRegisterUserDTO(registered_user_id),
@@ -86,7 +88,6 @@ public class UniversalUserController {
         log.info("Getting user by Id '" + searchForUserId +
                 "' process started by '" + getUserByIdDTO.getUserMadeRequestId() + "'");
 
-        universalUserService.registerUser(new DeliveryRequestRegisterUserDTO("s", "s"));//to del
         final UUID userMadeRequestId = getUserByIdDTO.getUserMadeRequestId();
         final UniversalUser foundUniversalUser;
 
