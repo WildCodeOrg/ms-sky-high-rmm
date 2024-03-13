@@ -224,8 +224,6 @@ public class RMMController {
         ), HttpStatus.BAD_REQUEST);
     }
 
-    @
-
     //test controller methods - uncomment to test the project availability
 
     /*
