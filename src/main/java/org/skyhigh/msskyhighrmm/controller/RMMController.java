@@ -2,6 +2,8 @@ package org.skyhigh.msskyhighrmm.controller;
 
 import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
@@ -15,6 +17,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.searchUser
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
+import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +31,24 @@ import java.util.logging.Logger;
 
 @Getter
 @RestController
-@RequestMapping("/users")
-public class UniversalUserController {
-    private static final Logger log = Logger.getLogger(UniversalUserController.class.getName());
+public class RMMController {
+    private static final Logger log = Logger.getLogger(RMMController.class.getName());
 
     private final UniversalUserService universalUserService;
+    private final RolesService rolesService;
 
     @Autowired
-    public UniversalUserController(UniversalUserService universalUserService) {
+    public RMMController(UniversalUserService universalUserService, RolesService rolesService) {
         this.universalUserService = universalUserService;
+        this.rolesService = rolesService;
     }
 
     //project logic - comment it if you wanna just only test the project availability and try the part below
+
+    //Users request mapping
+
     @ValidParams
-    @PostMapping
+    @PostMapping(value = "/users")
     public ResponseEntity<?> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
         log.info("Registering process for '" + registerUserDTO.getLogin() + "' was started");
 
@@ -60,7 +67,7 @@ public class UniversalUserController {
     }
 
     @ValidParams
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/users/login")
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
         log.info("Login process for '" + loginUserDTO.getLogin() + "' was started");
 
@@ -86,7 +93,7 @@ public class UniversalUserController {
                     "Неправильный пароль."), HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping(value = "/{user_id}")
+    @GetMapping(value = "/users/{user_id}")
     public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId, @ValidParams
                                          @RequestBody DeliveryRequestGetUserByIdDTO getUserByIdDTO) {
         log.info("Getting user by Id '" + searchForUserId +
@@ -118,7 +125,7 @@ public class UniversalUserController {
     }
 
     @ValidParams
-    @PostMapping(value = "/search")
+    @PostMapping(value = "/users/search")
     public ResponseEntity<?> searchUsers(@RequestBody DeliveryRequestSearchUsersDTO searchUsersDTO) {
         log.info("Getting users by criteria process was started by '" + searchUsersDTO.getUserMadeRequestId() + "'");
 
@@ -148,7 +155,7 @@ public class UniversalUserController {
                     ), HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping(value = "/{user_id}")
+    @PutMapping(value = "/users/{user_id}")
     public ResponseEntity<?> updateUserById(@PathVariable(name = "user_id") UUID updateUserId, @ValidParams
                                             @RequestBody DeliveryRequestUpdateUserByIdDTO updateUserByIdDTO) {
         final UUID userMadeRequestId = updateUserByIdDTO.getUserMadeRequestId();
@@ -175,7 +182,7 @@ public class UniversalUserController {
                     ), HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping
+    @GetMapping(value = "/users")
     public ResponseEntity<List<UniversalUser>> read() {
         final List<UniversalUser> users = universalUserService.readAll();
 
@@ -183,6 +190,41 @@ public class UniversalUserController {
                 ? new ResponseEntity<>(users, HttpStatus.OK)
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+
+    //Roles request mapping
+
+    @ValidParams
+    @PostMapping(value = "/roles")
+    public ResponseEntity<?> addUserGroupRole(@RequestBody DeliveryRequestAddUserGroupRoleDTO addUserGroupRoleDTO) {
+        log.info("Adding process for role '" + addUserGroupRoleDTO.getRole_name() + "' was started");
+
+        final UUID userMadeRequestId = addUserGroupRoleDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        final UUID addedUserGroupRoleId = rolesService.addRole(addUserGroupRoleDTO.getRole_name(),
+                addUserGroupRoleDTO.getDescription(), false);
+
+        return addedUserGroupRoleId != null
+                ? new ResponseEntity<>(new DeliveryResponseAddUserGroupRoleDTO("Роль успешно добавлена.",
+                        addedUserGroupRoleId), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    8,
+                    "Ошибка создания роли.",
+                    400,
+                    "Роль с таким наименованием уже существует."
+        ), HttpStatus.BAD_REQUEST);
+    }
+
+    @
 
     //test controller methods - uncomment to test the project availability
 

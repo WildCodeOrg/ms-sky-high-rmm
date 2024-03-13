@@ -16,21 +16,26 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
     @Override
     public UUID registerUser(String login, String password) {
-        ArrayList<UniversalUser> universalUsers = new ArrayList<>(UNIVERSAL_USER_MAP.values());
 
         boolean isUserExisting = false;
 
-        for (UniversalUser user : universalUsers)
+        for (UniversalUser user : UNIVERSAL_USER_MAP.values())
             if (Objects.equals(user.getLogin(), login)) {
                 isUserExisting = true;
                 break;
             }
 
         if (!isUserExisting) {
-            final UUID universal_user_id = UUID.randomUUID();
+            UUID universal_user_id = UUID.randomUUID();
+
+            while (UNIVERSAL_USER_MAP.get(universal_user_id) != null) {
+                universal_user_id = UUID.randomUUID();
+            }
+
             UniversalUser universalUser = new UniversalUser(universal_user_id, login,
                     password, null, null);
             UNIVERSAL_USER_MAP.put(universal_user_id, universalUser);
+
             return universal_user_id;
         } else {
             return null;
