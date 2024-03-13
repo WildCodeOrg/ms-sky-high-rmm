@@ -59,6 +59,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     @Override
     public ListOfUniversalUser searchUsers(Pagination pagination, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort) {
         ArrayList<UniversalUser> temporaryAllUsersList = new ArrayList<>(UNIVERSAL_USER_MAP.values());
+        ArrayList<UniversalUser> resultUniversalUsersList = new ArrayList<>();
 
         if (universalUserFilters != null) {
             temporaryAllUsersList = UniversalUserFilters.filter(temporaryAllUsersList,
@@ -69,22 +70,28 @@ public class UniversalUserServiceImpl implements UniversalUserService {
             UniversalUserSort.sort(temporaryAllUsersList, universalUserSort);
         }
 
-        int paginationItemCount = pagination.getRequestedItemCount();
-        int paginationPageNumber = pagination.getPage();
-        int firstElementOfResultListPosition = ((paginationPageNumber - 1) * paginationItemCount);
+        int paginationItemCount = temporaryAllUsersList.size();
+        int paginationPageNumber = 1;
+        int firstElementOfResultListPosition = 0;
         int itemCount = temporaryAllUsersList.size();
 
-        if (firstElementOfResultListPosition >= temporaryAllUsersList.size()
-                || paginationItemCount <= 0 || paginationPageNumber <= 0)
-            return null;
+        if (pagination != null) {
+            paginationItemCount = pagination.getRequestedItemCount();
+            paginationPageNumber = pagination.getPage();
+            firstElementOfResultListPosition = ((paginationPageNumber - 1) * paginationItemCount);
 
-        ArrayList<UniversalUser> resultUniversalUsersList = new ArrayList<>();
+            if (firstElementOfResultListPosition >= temporaryAllUsersList.size()
+                    || paginationItemCount <= 0 || paginationPageNumber <= 0)
+                return null;
 
-        for (int i = firstElementOfResultListPosition;
-             i < firstElementOfResultListPosition + paginationItemCount; i++)
-        {
-            resultUniversalUsersList.add(temporaryAllUsersList.get(i));
-            if (i == temporaryAllUsersList.size() - 1) break;
+            for (int i = firstElementOfResultListPosition;
+                 i < firstElementOfResultListPosition + paginationItemCount; i++)
+            {
+                resultUniversalUsersList.add(temporaryAllUsersList.get(i));
+                if (i == temporaryAllUsersList.size() - 1) break;
+            }
+        } else {
+            resultUniversalUsersList = new ArrayList<>(temporaryAllUsersList);
         }
 
         return new ListOfUniversalUser(itemCount, paginationItemCount, paginationPageNumber, resultUniversalUsersList);

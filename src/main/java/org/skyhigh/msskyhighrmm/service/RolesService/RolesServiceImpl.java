@@ -10,4 +10,10 @@ import java.util.UUID;
 @Service
 public class RolesServiceImpl implements RolesService{
     private static final Map<UUID, UserGroupRole> ROLE_MAP = new HashMap<>();
+
+
+    @Override
+    public UUID addRole(String roleName, String description, boolean isCritical) {
+        return null;
+    }
 }
