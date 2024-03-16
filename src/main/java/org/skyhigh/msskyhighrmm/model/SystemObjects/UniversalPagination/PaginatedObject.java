@@ -1,6 +1,5 @@
-package org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +26,7 @@ public class PaginatedObject<E> {
                 result.add(listToPaginate.get(i));
                 if (i == listToPaginate.size() - 1) break;
             }
+
             this.resultList = result;
         }
     }

@@ -19,7 +19,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PageInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
@@ -265,48 +265,5 @@ public class RMMController {
     @GetMapping("/check")
     public void checkDeliveryAvailability(@RequestBody DeliveryRequestRegisterUserDTO requestDto) {
         System.out.println("Validation!");
-    }
-
-    @PostMapping(value = "/users")
-    public ResponseEntity<?> create(@RequestBody UniversalUser universalUser) {
-        universalUserService.create(universalUser);
-        //log.info(universalUser.toString());
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @GetMapping(value = "/users")
-    public ResponseEntity<List<UniversalUser>> read() {
-        final List<UniversalUser> users = universalUserService.readAll();
-
-        return users != null &&  !users.isEmpty()
-                ? new ResponseEntity<>(users, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping(value = "/users/{user_id}")
-    public ResponseEntity<UniversalUser> read(@PathVariable(name = "user_id") UUID user_id) {
-        final UniversalUser client = universalUserService.read(user_id);
-
-        return client != null
-                ? new ResponseEntity<>(client, HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @PutMapping(value = "/users/{user_id}")
-    public ResponseEntity<?> update(@PathVariable(name = "user_id") UUID user_id, @RequestBody UniversalUser universalUser) {
-        final boolean updated = universalUserService.update(universalUser, user_id);
-
-        return updated
-                ? new ResponseEntity<>(HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-    }
-
-    @DeleteMapping(value = "/users/{user_id}")
-    public ResponseEntity<?> delete(@PathVariable(name = "user_id") UUID user_id) {
-        final boolean deleted = universalUserService.delete(user_id);
-
-        return deleted
-                ? new ResponseEntity<>(HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
     }*/
 }

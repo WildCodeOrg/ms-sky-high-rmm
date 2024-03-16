@@ -4,7 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 
 import java.util.List;
@@ -58,27 +58,4 @@ public interface UniversalUserService {
      * @return список юзеров
      */
     List<UniversalUser> readAll();
-
-
-    /**
-     * Обновляет юзера с заданным ID,
-     * в соответствии с переданным юзером
-     * @param universal_user - юзер в соответсвии с которым нужно обновить данные
-     * @param id - id юзера которого нужно обновить
-     * @return - true если данные были обновлены, иначе false
-     */
-    boolean update(UniversalUser universal_user, UUID id);
-
-    /**
-     * Удаляет юзера с заданным ID
-     * @param id - id юзера, которого нужно удалить
-     * @return - true если юзер был удален, иначе false
-     */
-    boolean delete(UUID id);
-
-    /**
-     * Создает нового клиента
-     * @param universal_user - клиент для создания
-     */
-    void create(UniversalUser universal_user);
 }

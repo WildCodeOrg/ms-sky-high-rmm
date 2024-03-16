@@ -1,10 +1,9 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginatedObject;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 import org.springframework.stereotype.Service;

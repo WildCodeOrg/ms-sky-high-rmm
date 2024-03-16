@@ -3,8 +3,8 @@ package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginatedObject;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 import org.springframework.stereotype.Service;
@@ -103,33 +103,5 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 foundUniversalUser.getPassword(), newUserInfoAttributes, foundUniversalUser.getBlock_reason_id()));
 
         return UNIVERSAL_USER_MAP.get(userId);
-    }
-
-    @Override
-    public void create(UniversalUser universal_user) {
-        final UUID universal_user_id = UUID.randomUUID();
-        universal_user.setId(universal_user_id);
-        UNIVERSAL_USER_MAP.put(universal_user_id, universal_user);
-    }
-
-    @Override
-    public List<UniversalUser> readAll() {
-        return new ArrayList<>(UNIVERSAL_USER_MAP.values());
-    }
-
-    @Override
-    public boolean update(UniversalUser universal_user, UUID id) {
-        if (UNIVERSAL_USER_MAP.containsKey(id)) {
-            universal_user.setId(id);
-            UNIVERSAL_USER_MAP.put(id, universal_user);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean delete(UUID id) {
-        return UNIVERSAL_USER_MAP.remove(id) != null;
     }
 }
