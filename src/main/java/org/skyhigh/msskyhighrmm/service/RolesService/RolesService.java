@@ -1,6 +1,12 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 
 import java.util.UUID;
 
@@ -17,9 +23,17 @@ public interface RolesService {
     UUID addRole(String roleName, String description, boolean isCritical);
 
     /**
-     * Возвращает роль по идентификатору, или null, если таковой роли в Системе не существует
-     * @param id - идентификатор искомой роли
-     * @return - объект найденной роли или null, если такой роли в Системе не существует
+     * Возвращает страницу/выборку/набор существующих ролей в соответствии с
+     *      параметрами фильтрации и пагинации
+     * @param pagination - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
+     * @param roleId - идентификатор искомой роли (при вводе данного параметра - возвращает 1 объект в списке)
+     * @param userGroupRolesFilters - параметры фильтрации (зависят от параметров роли -
+     *      название роли, описание роли, критичность роли)
+     * @param userGroupRolesSort - параметры сортировки (направление сортировки и атрибут,
+     *      по которому необходимо отсортировать список ответов)
+     * @return список юзеров, удовлетворяющих условиям поиска
      */
-    UserGroupRole getRoleById(UUID id);
+    ListOfUserGroupRoles rolesSearch(Pagination pagination, UUID roleId, UserGroupRolesFilters userGroupRolesFilters,
+                                     UserGroupRolesSort userGroupRolesSort);
+
 }

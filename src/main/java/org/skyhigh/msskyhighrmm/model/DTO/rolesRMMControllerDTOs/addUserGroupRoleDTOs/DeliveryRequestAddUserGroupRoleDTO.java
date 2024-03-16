@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.rolesControllerDTOs.addUserGroupRoleDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.getUserByIdDTOs;
+package org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

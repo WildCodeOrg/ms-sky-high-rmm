@@ -2,20 +2,23 @@ package org.skyhigh.msskyhighrmm.controller;
 
 import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
-import org.skyhigh.msskyhighrmm.model.DTO.rolesControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.rolesControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
@@ -222,6 +225,37 @@ public class RMMController {
                     400,
                     "Роль с таким наименованием уже существует."
         ), HttpStatus.BAD_REQUEST);
+    }
+
+    @ValidParams
+    @PostMapping(value = "/roles/search")
+    public ResponseEntity<?> searchRoles(@RequestBody DeliveryRequestSearchRolesDTO searchRolesDTO) {
+        log.info("Getting roles by criteria process was started by '" + searchRolesDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = searchRolesDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        ListOfUserGroupRoles result = rolesService.rolesSearch(searchRolesDTO.getPagination(),
+                searchRolesDTO.getRoleId(), searchRolesDTO.getFilters(), searchRolesDTO.getSort());
+
+        return result != null
+                ? new ResponseEntity<>(new DeliveryResponseSearchRolesDTO(result.getItemCount(),
+                new PageInfo(result.getPageNumber(), result.getPaginationItemCount()),
+                result.getRoles()), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                9,
+                "Ошибка выполнения поиска ролей по параметрам.",
+                404,
+                "Роли, удовлетворяющие критериям поиска, не найдены."
+        ), HttpStatus.NOT_FOUND);
     }
 
     //test controller methods - uncomment to test the project availability
