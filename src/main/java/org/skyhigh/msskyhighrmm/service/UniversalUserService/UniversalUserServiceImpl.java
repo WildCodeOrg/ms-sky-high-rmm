@@ -104,4 +104,9 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
         return UNIVERSAL_USER_MAP.get(userId);
     }
+
+    @Override
+    public List<UniversalUser> readAll() {
+        return new ArrayList<>(UNIVERSAL_USER_MAP.values());
+    }
 }
