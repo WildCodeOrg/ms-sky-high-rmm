@@ -4,7 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 
 import java.util.List;
@@ -38,12 +38,12 @@ public interface UniversalUserService {
     /**
      * Возвращает страницу/выборку/набор зарегистрированных юзеров в соответствии с
      *      параметрами фильтрации и пагинации
-     * @param pagination - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
+     * @param paginationInfo - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
      * @param universalUserFilters - параметры фильтрации (зависят от параметров юзера -
      *      причина блокировки, ФИО, возраст и т.п.)
      * @return список юзеров, удовлетворяющих условиям поиска
      */
-    ListOfUniversalUser searchUsers(Pagination pagination, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort);
+    ListOfUniversalUser searchUsers(PaginationInfo paginationInfo, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort);
 
     /**
      * Обновляет данные о пользователе по его id и возвращает обновленный объект юзера

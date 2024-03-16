@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 
@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DeliveryRequestSearchUsersDTO {
 
-    private Pagination pagination;
+    private PaginationInfo pagination;
 
     @NotNull
     private UUID userMadeRequestId;

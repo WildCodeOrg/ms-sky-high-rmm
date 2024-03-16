@@ -1,8 +1,10 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginatedObject;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,7 @@ public class RolesServiceImpl implements RolesService{
     }
 
     @Override
-    public ListOfUserGroupRoles rolesSearch(Pagination pagination, UUID roleId, UserGroupRolesFilters userGroupRolesFilters, UserGroupRolesSort userGroupRolesSort) {
+    public ListOfUserGroupRoles rolesSearch(PaginationInfo paginationInfo, UUID roleId, UserGroupRolesFilters userGroupRolesFilters, UserGroupRolesSort userGroupRolesSort) {
         ArrayList<UserGroupRole> temporaryAllRolesList = new ArrayList<>(ROLE_MAP.values());
         ArrayList<UserGroupRole> resultUserGroupRolesList = new ArrayList<>();
 
@@ -63,29 +65,22 @@ public class RolesServiceImpl implements RolesService{
 
         int paginationItemCount = temporaryAllRolesList.size();
         int paginationPageNumber = 1;
-        int firstElementOfResultListPosition = 0;
         int itemCount = temporaryAllRolesList.size();
 
-        if (pagination != null) {
-            paginationItemCount = pagination.getRequestedItemCount();
-            paginationPageNumber = pagination.getPage();
-            firstElementOfResultListPosition = ((paginationPageNumber - 1) * paginationItemCount);
+        if (paginationInfo != null) {
+            paginationItemCount = paginationInfo.getRequestedItemCount();
+            paginationPageNumber = paginationInfo.getPage();
 
-            if (firstElementOfResultListPosition >= temporaryAllRolesList.size()
-                    || paginationItemCount <= 0 || paginationPageNumber <= 0)
-                return null;
-
-            for (int i = firstElementOfResultListPosition;
-                 i < firstElementOfResultListPosition + paginationItemCount; i++)
-            {
-                resultUserGroupRolesList.add(temporaryAllRolesList.get(i));
-                if (i == temporaryAllRolesList.size() - 1) break;
-            }
+            PaginatedObject<UserGroupRole> paginated = new PaginatedObject<>(paginationItemCount,
+                    paginationPageNumber, temporaryAllRolesList);
+            resultUserGroupRolesList = paginated.getResultList();
         } else {
             resultUserGroupRolesList = new ArrayList<>(temporaryAllRolesList);
         }
 
-        return new ListOfUserGroupRoles(itemCount, paginationItemCount, paginationPageNumber, resultUserGroupRolesList);
+        return resultUserGroupRolesList != null
+            ? new ListOfUserGroupRoles(itemCount, paginationItemCount, paginationPageNumber, resultUserGroupRolesList)
+            : null;
     }
 
     private UserGroupRole getRoleById(UUID id) {

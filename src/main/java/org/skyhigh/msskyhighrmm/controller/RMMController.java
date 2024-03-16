@@ -19,7 +19,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.PageInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;

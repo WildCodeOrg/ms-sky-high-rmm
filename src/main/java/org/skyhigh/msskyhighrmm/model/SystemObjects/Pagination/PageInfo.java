@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.SystemObjects;
+package org.skyhigh.msskyhighrmm.model.SystemObjects.Pagination;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
