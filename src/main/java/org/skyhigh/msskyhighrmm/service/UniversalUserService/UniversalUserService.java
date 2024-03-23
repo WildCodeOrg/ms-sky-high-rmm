@@ -75,7 +75,7 @@ public interface UniversalUserService {
      *          0 - выполнено успешно для всех переданных связок;
      *          1 - выполнено частично (некоторые связки обработаны успешно, некоторые - нет);
      *          2 - не выполнено ни для одной связки в связи с ошибками.
-     *     ArrayList<BlockUsersResultMessageListElement> certainBlockUsersResults - список связок
+     *      certainBlockUsersResults - список связок (тип BlockUsersResultMessageListElement)
      *          "id блокируемого пользователя + сообщение + код"
      *          для каждой связки id юзера + код причины блокировки. Возможные значения кода:
      *              0 - выполнено успешно;
