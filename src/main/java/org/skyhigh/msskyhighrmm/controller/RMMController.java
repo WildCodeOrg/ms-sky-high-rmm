@@ -226,17 +226,21 @@ public class RMMController {
             case 1 -> {
                 log.info("Blocking users with request '{" + blockUserDTO +
                         "}' process was finished half successfully (with some errors)");
-                yield new ResponseEntity<>(new DeliveryResponseBlockUserDTO(
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        12,
                         "Операция выполнена с ошибками (частично успешно): " + resultMessage.getGlobalMessage(),
-                        resultMessage.getCertainBlockUsersResults()
+                        400,
+                        resultMessage.getCertainBlockUsersResults().toString()
                 ), HttpStatus.BAD_REQUEST);
             }
             case 2 -> {
                 log.info("Blocking users with request '" + blockUserDTO +
                         "' process was finished unsuccessfully (all data pairs with errors)");
-                yield new ResponseEntity<>(new DeliveryResponseBlockUserDTO(
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        13,
                         "Ошибка выполнения операции: " + resultMessage.getGlobalMessage(),
-                        resultMessage.getCertainBlockUsersResults()
+                        400,
+                        resultMessage.getCertainBlockUsersResults().toString()
                 ), HttpStatus.BAD_REQUEST);
             }
             default -> null;
