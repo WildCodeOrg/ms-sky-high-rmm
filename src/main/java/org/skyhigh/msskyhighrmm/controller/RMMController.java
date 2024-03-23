@@ -1,12 +1,16 @@
 package org.skyhigh.msskyhighrmm.controller;
 
 import lombok.Getter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
@@ -14,11 +18,13 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUs
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
@@ -185,6 +191,58 @@ public class RMMController {
                     ), HttpStatus.NOT_FOUND);
     }
 
+    @ValidParams
+    @PostMapping
+    public ResponseEntity<?> blockUsers(@RequestBody DeliveryRequestBlockUserDTO blockUserDTO) {
+        log.info("Blocking users with request '" + blockUserDTO.toString() +
+                "' process was started by '" + blockUserDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = blockUserDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        BlockUsersResultMessage resultMessage = universalUserService.blockUsers(
+                blockUserDTO.getUsersToBlock(),
+                blockUserDTO.getUserToBlockId(),
+                blockUserDTO.getBlockReasonId()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Blocking users with request '" + blockUserDTO +
+                        "' process was finished successfully");
+                yield new ResponseEntity<>(new DeliveryResponseBlockUserDTO(
+                        "Операция выполнена успешно: " + resultMessage.getGlobalMessage(),
+                        resultMessage.getCertainBlockUsersResults()
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Blocking users with request '{" + blockUserDTO +
+                        "}' process was finished half successfully (with some errors)");
+                yield new ResponseEntity<>(new DeliveryResponseBlockUserDTO(
+                        "Операция выполнена с ошибками (частично успешно): " + resultMessage.getGlobalMessage(),
+                        resultMessage.getCertainBlockUsersResults()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 2 -> {
+                log.info("Blocking users with request '" + blockUserDTO +
+                        "' process was finished unsuccessfully (all data pairs with errors)");
+                yield new ResponseEntity<>(new DeliveryResponseBlockUserDTO(
+                        "Ошибка выполнения операции: " + resultMessage.getGlobalMessage(),
+                        resultMessage.getCertainBlockUsersResults()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> null;
+        };
+    }
+
     @GetMapping(value = "/users")
     public ResponseEntity<List<UniversalUser>> read() {
         final List<UniversalUser> users = universalUserService.readAll();
@@ -256,6 +314,58 @@ public class RMMController {
                 404,
                 "Роли, удовлетворяющие критериям поиска, не найдены."
         ), HttpStatus.NOT_FOUND);
+    }
+
+    @ValidParams
+    @DeleteMapping
+    public ResponseEntity<?> deleteRole(@RequestBody DeliveryRequestDeleteUserGroupRoleDTO deleteUserGroupRoleDTO) {
+        log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                "' process was started by '" + deleteUserGroupRoleDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = deleteUserGroupRoleDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        DeleteUserGroupRoleResultMessage result = rolesService.
+                deleteRole(deleteUserGroupRoleDTO.getRoleToDeleteId());
+
+        return switch (result.getOperationCode()) {
+            case 0 -> {
+                log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                        "' process finished successfully");
+                yield new ResponseEntity<>(new DeliveryResponseDeleteUserGroupRoleDTO(
+                    result.getMessage()
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                        "' process finished with error status" + 10);
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10,
+                        "Ошибка выполнения удаления роли",
+                        404,
+                        result.getMessage()
+                ), HttpStatus.NOT_FOUND);
+            }
+            case 2 -> {
+                log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                        "' process finished with error status" + 11);
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        11,
+                        "Ошибка выполнения удаления роли",
+                        400,
+                        result.getMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> null;
+        };
     }
 
     //test controller methods - uncomment to test the project availability

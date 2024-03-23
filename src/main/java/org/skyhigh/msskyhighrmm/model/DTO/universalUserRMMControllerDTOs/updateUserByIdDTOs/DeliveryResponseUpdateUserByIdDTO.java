@@ -3,7 +3,7 @@ package org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.update
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 
 @Setter
 @Getter

@@ -3,7 +3,7 @@ package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.LoginUniversalUserComparator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.UserIdUniversalUserComparator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.SortDirection;

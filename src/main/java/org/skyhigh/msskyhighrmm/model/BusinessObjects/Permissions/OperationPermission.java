@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.BusinessObjects;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,34 +9,9 @@ import java.util.UUID;
 @Setter
 @Getter
 @AllArgsConstructor
-public class UserGroupRole {
+public class OperationPermission {
     private UUID id;
-    private String role_name;
-    private String description;
+    private String permission_name;
+    private String operation_endpoint;
     private boolean is_critical;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

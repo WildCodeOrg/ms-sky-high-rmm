@@ -1,12 +1,15 @@
 package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +46,9 @@ public interface UniversalUserService {
      *      причина блокировки, ФИО, возраст и т.п.)
      * @return список юзеров, удовлетворяющих условиям поиска
      */
-    ListOfUniversalUser searchUsers(PaginationInfo paginationInfo, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort);
+    ListOfUniversalUser searchUsers(PaginationInfo paginationInfo,
+                                    UniversalUserFilters universalUserFilters,
+                                    UniversalUserSort universalUserSort);
 
     /**
      * Обновляет данные о пользователе по его id и возвращает обновленный объект юзера
@@ -52,6 +57,33 @@ public interface UniversalUserService {
      * @return обновленный объект юзера
      */
     UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes);
+
+    /**
+     * Выполняет блокировку пользователя/списка пользователей (устанавливает пользователям с
+     *      переданными идентификаторами указанный код причины блокировки) и возвращает
+     *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждой
+     *      переданной связке "id юзера + код причины блокировки")
+     * @param usersInfoToBlock - список связок "userId + blockReasonId" (id пользователя, которого нужно
+*           заблокировать, а также код причины блокировки)
+     * @param userToBlockId - идентификатор пользователя, которого нужно заблокировать (передается либо он,
+     *                      либо usersInfoToBlock - при попытке передаче обоих параметров возникает ошибка)
+     * @param blockReasonId - код причины блокировки для указанного пользователя (не передается, если указан
+     *                      usersInfoToBlock - выбрасывает ошибку)
+     * @return - объект BlockUsersResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно для всех переданных связок;
+     *          1 - выполнено частично (некоторые связки обработаны успешно, некоторые - нет);
+     *          2 - не выполнено ни для одной связки в связи с ошибками.
+     *     ArrayList<BlockUsersResultMessageListElement> certainBlockUsersResults - список связок
+     *          "id блокируемого пользователя + сообщение + код"
+     *          для каждой связки id юзера + код причины блокировки. Возможные значения кода:
+     *              0 - выполнено успешно;
+     *              1 - юзер по указанному id не найден;
+     *              2 - причина блокировки с указанным кодом не найдена.
+     */
+    BlockUsersResultMessage blockUsers(ArrayList<UsersToBlockInfoListElement> usersInfoToBlock,
+                                       UUID userToBlockId, String blockReasonId);
 
     /**
      * Возвращает список всех имеющихся юзеров

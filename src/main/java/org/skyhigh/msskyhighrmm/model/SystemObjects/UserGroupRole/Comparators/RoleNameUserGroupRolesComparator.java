@@ -1,6 +1,6 @@
 package org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Comparators;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 
 import java.util.Comparator;
 

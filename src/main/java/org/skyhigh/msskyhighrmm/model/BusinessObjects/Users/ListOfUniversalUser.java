@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.BusinessObjects;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects.Users;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +11,9 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ListOfUserGroupRoles {
+public class ListOfUniversalUser {
     private int itemCount;
     private int paginationItemCount;
     private int pageNumber;
-    private List<UserGroupRole> roles;
+    private List<UniversalUser> universalUsers;
 }

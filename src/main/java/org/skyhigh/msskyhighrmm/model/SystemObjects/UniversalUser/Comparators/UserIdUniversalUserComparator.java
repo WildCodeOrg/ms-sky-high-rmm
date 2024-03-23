@@ -1,6 +1,6 @@
 package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 
 import java.util.Comparator;
 

@@ -1,6 +1,7 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
@@ -32,5 +33,17 @@ public interface RolesService {
      */
     ListOfUserGroupRoles rolesSearch(PaginationInfo paginationInfo, UUID roleId, UserGroupRolesFilters userGroupRolesFilters,
                                      UserGroupRolesSort userGroupRolesSort);
+
+
+    /**
+     * Удаляет некритическую роль из Системы по идентификатору (в т.ч. удаляет её из ролей пользователей)
+     *      и возвращает результат выполнения операции (сообщение + код)
+     * @param roleId - идентификатор удаляемой записи
+     * @return - объект класса DeleteUserGroupRoleResultMessage, содержащий поле message - сообщения о
+     *      результате выполнения операции, operationCode - код результата выполнения операции:
+     *      0 - успешное выполнение, 1 - ошибка из-за отсутствия записи в системе,
+     *      2 - ошибка в связи с попыткой удаления критичной роли из системы
+     */
+    DeleteUserGroupRoleResultMessage deleteRole(UUID roleId);
 
 }

@@ -1,7 +1,8 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.ListOfUserGroupRoles;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
@@ -80,6 +81,26 @@ public class RolesServiceImpl implements RolesService{
         return resultUserGroupRolesList != null
             ? new ListOfUserGroupRoles(itemCount, paginationItemCount, paginationPageNumber, resultUserGroupRolesList)
             : null;
+    }
+
+    @Override
+    public DeleteUserGroupRoleResultMessage deleteRole(UUID roleId) {
+        if (getRoleById(roleId) == null)
+            return new DeleteUserGroupRoleResultMessage(
+                    "Роли с идентификатором '" + roleId + "' не сущетсвует",
+                    1
+            );
+        if (getRoleById(roleId).is_critical())
+            return new DeleteUserGroupRoleResultMessage(
+                    "Роль с идентификатором '" + roleId + "' является критичной",
+                    2
+            );
+
+        ROLE_MAP.remove(roleId);
+        return new DeleteUserGroupRoleResultMessage(
+                "Роль с идентификатором '" + roleId + "' успешно удалена",
+                0
+        );
     }
 
     private UserGroupRole getRoleById(UUID id) {

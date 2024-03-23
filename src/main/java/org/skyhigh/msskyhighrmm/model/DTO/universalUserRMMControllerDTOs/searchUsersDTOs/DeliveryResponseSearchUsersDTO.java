@@ -3,7 +3,7 @@ package org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.search
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 
 import java.util.List;

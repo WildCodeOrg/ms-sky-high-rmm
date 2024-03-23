@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.BusinessObjects;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects.CommonObjects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

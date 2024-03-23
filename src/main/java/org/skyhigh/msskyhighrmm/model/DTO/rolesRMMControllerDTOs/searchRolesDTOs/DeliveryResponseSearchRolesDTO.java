@@ -3,7 +3,7 @@ package org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTO
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 
 import java.util.List;

@@ -4,14 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Criticality;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserGroupRole;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.CommonObjects.Criticality;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.UUID;
 
 @Setter
 @Getter

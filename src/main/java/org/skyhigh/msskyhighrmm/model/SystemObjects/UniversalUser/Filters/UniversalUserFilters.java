@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo.UserInfo;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,12 +16,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UniversalUserFilters {
-    private UUID block_reason_id;
+    private String block_reason_id;
     private UserInfo user_info;
 
 
     public static ArrayList<UniversalUser> filter(ArrayList<UniversalUser> usersList,
-                                                  UUID block_reason_id,
+                                                  String block_reason_id,
                                                   UserInfo userInfoFilters)
     {
         if (block_reason_id == null && userInfoFilters != null &&

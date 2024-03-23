@@ -1,4 +1,4 @@
-package org.skyhigh.msskyhighrmm.model.BusinessObjects.UserInfo;
+package org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo;
 
 public enum UserInfoTypes {
     FIRST_NAME,
