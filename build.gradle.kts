@@ -37,12 +37,6 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
-tasks.register<Javadoc>("myJavadoc") {
-	source = sourceSets["main"].allJava
-	classpath = configurations.compileClasspath.get()
-	file("$buildDir/docs/javadoc").also { layout.buildDirectory = it }
-}
-
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
