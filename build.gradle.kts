@@ -28,6 +28,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-aop")
 	//implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
 	//implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	//implementation("org.springframework.boot:spring-boot-starter-data-rest")
+	//implementation("org.springframework.boot:spring-boot-starter-tomcat")
 	//implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
