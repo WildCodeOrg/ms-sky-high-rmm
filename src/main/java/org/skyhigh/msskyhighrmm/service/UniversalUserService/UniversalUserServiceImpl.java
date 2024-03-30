@@ -2,7 +2,6 @@ package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUserForEntity;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
@@ -11,6 +10,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
 import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
@@ -34,6 +34,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
         this.usersRolesRepository = usersRolesRepository;
+        //
     }
 
     @Override
@@ -78,52 +79,53 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         );
     }
 
+    //Проверка существования пользователя с указанным логином
     @Override
     public UUID checkUser(String login) {
-        ArrayList<UniversalUser> universalUsers = new ArrayList<>(UNIVERSAL_USER_MAP.values());
-        UUID id = null;
+        ArrayList<UniversalUserEntity> users = (ArrayList<UniversalUserEntity>) universalUserRepository
+                .findByLogin(login);
 
-        for (UniversalUser user : universalUsers)
-            if (Objects.equals(user.getLogin(), login)) {
-                id = user.getId();
-                break;
-            }
+        if (users.size() != 1)
+            return null;
 
-        return id;
+        return users.get(0).getId();
     }
 
     @Override
     public UniversalUser getUserById(UUID id) {
-        return UNIVERSAL_USER_MAP.get(id);
+        return UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(id));
     }
 
     @Override
     public ListOfUniversalUser searchUsers(PaginationInfo paginationInfo, UniversalUserFilters universalUserFilters, UniversalUserSort universalUserSort) {
-        ArrayList<UniversalUser> temporaryAllUsersList = new ArrayList<>(UNIVERSAL_USER_MAP.values());
-        ArrayList<UniversalUser> resultUniversalUsersList;
+        ArrayList<UniversalUser> resultUniversalUsersList = (ArrayList<UniversalUser>) UserEntityToUserBOConverter
+                .convertList(
+                    universalUserRepository.findAll()
+                );
 
         if (universalUserFilters != null) {
-            temporaryAllUsersList = UniversalUserFilters.filter(temporaryAllUsersList,
-                    universalUserFilters.getBlock_reason_id(), universalUserFilters.getUser_info());
+            resultUniversalUsersList = UniversalUserFilters.filter(universalUserFilters.getBlock_reason_id(),
+                    universalUserFilters.getUser_info(),
+                    universalUserRepository);
         }
+
+        if (resultUniversalUsersList == null) return null;
 
         if (universalUserSort != null) {
-            UniversalUserSort.sort(temporaryAllUsersList, universalUserSort);
+            UniversalUserSort.sort(resultUniversalUsersList, universalUserSort);
         }
 
-        int paginationItemCount = temporaryAllUsersList.size();
+        int paginationItemCount = resultUniversalUsersList.size();
         int paginationPageNumber = 1;
-        int itemCount = temporaryAllUsersList.size();
+        int itemCount = resultUniversalUsersList.size();
 
         if (paginationInfo != null) {
             paginationItemCount = paginationInfo.getRequestedItemCount();
             paginationPageNumber = paginationInfo.getPage();
 
             PaginatedObject<UniversalUser> paginated = new PaginatedObject<>(paginationItemCount,
-                    paginationPageNumber, temporaryAllUsersList);
+                    paginationPageNumber, resultUniversalUsersList);
             resultUniversalUsersList = paginated.getResultList();
-        } else {
-            resultUniversalUsersList = new ArrayList<>(temporaryAllUsersList);
         }
 
         return resultUniversalUsersList != null

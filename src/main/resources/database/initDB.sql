@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS universal_user
     id uuid NOT NULL,
     login varchar(20) NOT NULL,
     password varchar(20) NOT NULL,
-    user_info text NULL,
+    user_info JSON NULL,
     block_reason_id varchar(10) NULL,
     CONSTRAINT PK_UniversalUser PRIMARY KEY (id)
 )

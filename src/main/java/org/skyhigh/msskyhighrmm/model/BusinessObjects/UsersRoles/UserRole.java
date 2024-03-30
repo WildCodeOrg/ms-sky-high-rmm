@@ -12,12 +12,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class UserRole {
-    @NotNull
-    UUID id;
-
-    @NotNull
-    UUID user_id;
-
-    @NotNull
-    UUID role_id;
+    @NotNull UUID id;
+    @NotNull UUID user_id;
+    @NotNull UUID role_id;
 }

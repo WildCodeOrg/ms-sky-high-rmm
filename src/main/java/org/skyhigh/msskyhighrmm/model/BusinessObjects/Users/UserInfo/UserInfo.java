@@ -1,10 +1,12 @@
 package org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Map;
 
 
@@ -12,9 +14,14 @@ import java.util.Map;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserInfo {
+public class UserInfo implements Serializable {
+    @JsonProperty("firstName")
     private String firstName;
+
+    @JsonProperty("secondName")
     private String secondName;
+
+    @JsonProperty("age")
     private int age;
 
     UserInfo(Object userInfoStringParameter, UserInfoTypes parameterType) {
