@@ -25,6 +25,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
@@ -61,18 +62,53 @@ public class RMMController {
     public ResponseEntity<?> registerUser(@RequestBody DeliveryRequestRegisterUserDTO registerUserDTO) {
         log.info("Registering process for '" + registerUserDTO.getLogin() + "' was started");
 
-        final UUID registered_user_id = universalUserService.registerUser(registerUserDTO.getLogin(),
+        final RegisterUserResultMessage result = universalUserService.registerUser(registerUserDTO.getLogin(),
                 registerUserDTO.getPassword());
 
-        return registered_user_id != null
-                ? new ResponseEntity<>(new DeliveryResponseRegisterUserDTO(registered_user_id),
-                    HttpStatus.OK)
-                : new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    2,
-                    "Ошибка регистрации.",
-                    400,
-                    "Пользователь с таким логином уже существует."
-                    ), HttpStatus.BAD_REQUEST);
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished successfully (id: '" + result.getCreatedUserId() + "')");
+                yield new ResponseEntity<>(new DeliveryResponseRegisterUserDTO(
+                        result.getCreatedUserId()
+                ), HttpStatus.OK);
+            }
+
+            case 1 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with login validation exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10001,
+                        "Ошибка регистрации.",
+                        400,
+                        "Длина логина должна быть от 6 до 20 символов."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            case 2 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with password validation exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10002,
+                        "Ошибка регистрации.",
+                        400,
+                        "Длина пароля должна быть от 8 до 20 символов."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            case 3 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with UserAlreadyExists exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10003,
+                        "Ошибка регистрации.",
+                        400,
+                        "Пользователь с таким логином уже существует."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
     }
 
     @ValidParams

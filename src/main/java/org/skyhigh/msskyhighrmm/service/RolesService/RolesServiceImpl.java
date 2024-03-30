@@ -7,6 +7,9 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.Paginate
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
+import org.skyhigh.msskyhighrmm.repository.RolesOperationsRepository;
+import org.skyhigh.msskyhighrmm.repository.UserGroupRolesRepository;
+import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,6 +17,16 @@ import java.util.*;
 @Service
 public class RolesServiceImpl implements RolesService{
     private static final Map<UUID, UserGroupRole> ROLE_MAP = new HashMap<>();
+
+    private final UserGroupRolesRepository userGroupRolesRepository;
+    private final UsersRolesRepository usersRolesRepository;
+    private final RolesOperationsRepository rolesOperationsRepository;
+
+    public RolesServiceImpl(UserGroupRolesRepository userGroupRolesRepository, UsersRolesRepository usersRolesRepository, RolesOperationsRepository rolesOperationsRepository) {
+        this.userGroupRolesRepository = userGroupRolesRepository;
+        this.usersRolesRepository = usersRolesRepository;
+        this.rolesOperationsRepository = rolesOperationsRepository;
+    }
 
     @Override
     public UUID addRole(String roleName, String description, boolean isCritical)

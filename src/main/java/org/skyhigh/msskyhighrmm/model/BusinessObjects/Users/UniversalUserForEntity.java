@@ -1,6 +1,5 @@
 package org.skyhigh.msskyhighrmm.model.BusinessObjects.Users;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,16 +10,10 @@ import java.util.UUID;
 @Setter
 @Getter
 @AllArgsConstructor
-public class UniversalUser{
+public class UniversalUserForEntity {
     private UUID id;
     private String login;
     private String password;
-    private UserInfo user_info;
+    private String user_info;
     private String block_reason_id;
-
-    public String toString() {
-        return "UniversalUser(id=" + this.getId() + ", login=" + this.getLogin() +
-                ", password=" + this.getPassword() + ", user_data=" + this.getUser_info() +
-                ", block_reason_id=" + this. block_reason_id + ")";
-    }
 }

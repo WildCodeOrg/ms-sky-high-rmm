@@ -2,14 +2,21 @@ package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUserForEntity;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
+import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
+import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
+import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
+import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,33 +24,58 @@ import java.util.*;
 @Service
 public class UniversalUserServiceImpl implements UniversalUserService {
     private static final Map<UUID, UniversalUser> UNIVERSAL_USER_MAP = new HashMap<>();
+    private final UniversalUserRepository universalUserRepository;
+    private final BlockReasonsRepository blockReasonsRepository;
+    private final AdministratorKeyCodeRepository administratorKeyCodeRepository;
+    private final UsersRolesRepository usersRolesRepository;
+
+    public UniversalUserServiceImpl(UniversalUserRepository universalUserRepository, BlockReasonsRepository blockReasonsRepository, AdministratorKeyCodeRepository administratorKeyCodeRepository, UsersRolesRepository usersRolesRepository) {
+        this.universalUserRepository = universalUserRepository;
+        this.blockReasonsRepository = blockReasonsRepository;
+        this.administratorKeyCodeRepository = administratorKeyCodeRepository;
+        this.usersRolesRepository = usersRolesRepository;
+    }
 
     @Override
-    public UUID registerUser(String login, String password) {
-
-        boolean isUserExisting = false;
-
-        for (UniversalUser user : UNIVERSAL_USER_MAP.values())
-            if (Objects.equals(user.getLogin(), login)) {
-                isUserExisting = true;
-                break;
-            }
-
-        if (!isUserExisting) {
-            UUID universal_user_id = UUID.randomUUID();
-
-            while (UNIVERSAL_USER_MAP.get(universal_user_id) != null) {
-                universal_user_id = UUID.randomUUID();
-            }
-
-            UniversalUser universalUser = new UniversalUser(universal_user_id, login,
-                    password, null, null);
-            UNIVERSAL_USER_MAP.put(universal_user_id, universalUser);
-
-            return universal_user_id;
-        } else {
-            return null;
+    public RegisterUserResultMessage registerUser(String login, String password) {
+        if (!(6 <= login.length() && login.length() <= 20)) {
+            return new RegisterUserResultMessage(
+                    "Login length must be in the range from 6 to 20 characters.",
+                    1,
+                    null
+            );
         }
+
+        if (!(8 <= password.length() && password.length() <= 20)) {
+            return new RegisterUserResultMessage(
+                    "Password length must be in the range from 8 to 20 characters.",
+                    2,
+                    null
+            );
+        }
+
+        if (!universalUserRepository.findByLogin(login).isEmpty())
+            return new RegisterUserResultMessage(
+                    "User with this id already exists.",
+                    3,
+                    null
+            );
+
+        UniversalUserEntity user = new UniversalUserEntity(
+                null,
+                login,
+                password,
+                null,
+                null
+        );
+
+        UUID universal_user_id = ((UniversalUserEntity) universalUserRepository.save(user)).getId();
+
+        return new RegisterUserResultMessage(
+                "User created successfully.",
+                0,
+                universal_user_id
+        );
     }
 
     @Override
