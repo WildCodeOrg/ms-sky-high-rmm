@@ -24,20 +24,6 @@ public class UserEntityToUserBOConverter {
         resultUser.setPassword(user.getPassword());
         resultUser.setBlock_reason_id(user.getBlock_reason_id());
 
-        /*UserInfo userInfo = null;
-        if (user.getUser_info() != null) {
-            ObjectMapper mapper = new ObjectMapper();
-
-            try {
-                userInfo = mapper.readValue(user.getUser_info(), UserInfo.class);
-            } catch (JsonProcessingException e) {
-                log.info("JsonProcessingException occurred  while" +
-                        "converting UserEntity {" + user.toString() + "} to UserBO");
-
-                throw new RuntimeException(e);
-            }
-        }*/
-
         resultUser.setUser_info(user.getUser_info());
         return resultUser;
     }

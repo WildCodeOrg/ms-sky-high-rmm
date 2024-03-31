@@ -216,7 +216,7 @@ public class RMMController {
 
         return universalUserService.getUserById(updateUserId) != null
                 ? new ResponseEntity<>(new DeliveryResponseUpdateUserByIdDTO(
-                    "Запись пользователя успешно обновлена",universalUserService.updateUserById(updateUserId,
+                    "Запись пользователя успешно обновлена", universalUserService.updateUserById(updateUserId,
                                 updateUserByIdDTO.getNewUserInfoAttributes())
                     ), HttpStatus.OK)
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(

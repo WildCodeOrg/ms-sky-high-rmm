@@ -1,7 +1,10 @@
 package org.skyhigh.msskyhighrmm.repository;
 
+import jakarta.transaction.Transactional;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -136,4 +139,10 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
     List<UniversalUserEntity> findByBlockReasonId(
             String block_reason_id
     );
+
+    //изменение информации о пользователе
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE universal_user SET user_info = ?2 WHERE id = ?1", nativeQuery = true)
+    void updateUserInfoForUserWithId(UUID userId, UserInfo newUserInfoAttributes);
 }

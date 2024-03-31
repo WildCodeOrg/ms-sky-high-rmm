@@ -15,13 +15,10 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserInfo implements Serializable {
-    @JsonProperty("firstName")
     private String firstName;
 
-    @JsonProperty("secondName")
     private String secondName;
 
-    @JsonProperty("age")
     private int age;
 
     UserInfo(Object userInfoStringParameter, UserInfoTypes parameterType) {

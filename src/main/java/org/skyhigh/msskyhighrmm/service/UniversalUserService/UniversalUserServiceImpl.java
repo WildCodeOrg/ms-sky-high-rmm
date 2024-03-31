@@ -135,11 +135,15 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
     @Override
     public UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes) {
-        UniversalUser foundUniversalUser = UNIVERSAL_USER_MAP.get(userId);
-        UNIVERSAL_USER_MAP.put(userId, new UniversalUser(userId, foundUniversalUser.getLogin(),
-                foundUniversalUser.getPassword(), newUserInfoAttributes, foundUniversalUser.getBlock_reason_id()));
 
-        return UNIVERSAL_USER_MAP.get(userId);
+        if (!universalUserRepository.existsById(userId)) return null;
+
+        universalUserRepository.updateUserInfoForUserWithId(userId, newUserInfoAttributes);
+
+        List<UniversalUserEntity> e = universalUserRepository.findAll();
+        UniversalUser u = UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(userId));
+
+        return UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(userId));
     }
 
     @Override
