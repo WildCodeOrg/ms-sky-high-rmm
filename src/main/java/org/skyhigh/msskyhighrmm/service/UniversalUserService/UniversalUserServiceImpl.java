@@ -70,7 +70,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 null
         );
 
-        UUID universal_user_id = ((UniversalUserEntity) universalUserRepository.save(user)).getId();
+        UUID universal_user_id = (universalUserRepository.save(user)).getId();
 
         return new RegisterUserResultMessage(
                 "User created successfully.",
@@ -135,13 +135,9 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
     @Override
     public UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes) {
-
         if (!universalUserRepository.existsById(userId)) return null;
 
         universalUserRepository.updateUserInfoForUserWithId(userId, newUserInfoAttributes);
-
-        List<UniversalUserEntity> e = universalUserRepository.findAll();
-        UniversalUser u = UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(userId));
 
         return UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(userId));
     }

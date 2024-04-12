@@ -2,6 +2,7 @@ package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -31,28 +32,16 @@ public class RolesServiceImpl implements RolesService{
     @Override
     public UUID addRole(String roleName, String description, boolean isCritical)
     {
-        boolean isRoleExisting = false;
+        if (userGroupRolesRepository.findByRoleName(roleName) != null) return null;
 
-        for (UserGroupRole role : ROLE_MAP.values())
-            if (Objects.equals(role.getRole_name(), roleName)) {
-                isRoleExisting = true;
-                break;
-            }
-
-        if (!isRoleExisting) {
-            UUID generatedRoleId = UUID.randomUUID();
-
-            while (ROLE_MAP.get(generatedRoleId) != null) {
-                generatedRoleId = UUID.randomUUID();
-            }
-
-            UserGroupRole role = new UserGroupRole(generatedRoleId, roleName, description, isCritical);
-            ROLE_MAP.put(generatedRoleId, role);
-
-            return generatedRoleId;
-        } else {
-            return null;
-        }
+        return (userGroupRolesRepository
+                .save(new UserGroupRolesEntity(
+                        null,
+                        roleName,
+                        description,
+                        isCritical)
+                )
+        ).getId();
     }
 
     @Override

@@ -14,8 +14,5 @@ public class BlockUsersResultMessage {
 
     private int globalOperationCode;
 
-    /**
-     * 
-     */
     private ArrayList<BlockUsersResultMessageListElement> certainBlockUsersResults;
 }

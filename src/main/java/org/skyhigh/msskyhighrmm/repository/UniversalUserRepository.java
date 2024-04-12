@@ -17,8 +17,8 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + имени + фамилии + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?2 AND user_info ->> 'secondName' == ?3 " +
-            "AND user_info ->> 'age' == ?4", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?2 AND user_info ->> 'secondName' = ?3 " +
+            "AND user_info ->> 'age' = ?4", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDFirstNameANDSecondNameANDAge(
             String block_reason_id,
             String firstName,
@@ -28,7 +28,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + имени + фамилии
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?2 AND user_info ->> 'secondName' == ?3", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?2 AND user_info ->> 'secondName' = ?3", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDFirstNameANDSecondName(
             String block_reason_id,
             String firstName,
@@ -37,8 +37,8 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по имени + фамилии + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?1 AND user_info ->> 'secondName' == ?2 " +
-            "AND user_info ->> 'age' == ?3", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?1 AND user_info ->> 'secondName' = ?2 " +
+            "AND user_info ->> 'age' = ?3", nativeQuery = true)
     List<UniversalUserEntity> findByFirstNameANDSecondNameANDAge(
             String firstName,
             String secondName,
@@ -47,8 +47,8 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + фамилии + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'secondName' == ?2 " +
-            "AND user_info ->> 'age' == ?3", nativeQuery = true)
+            "AND user_info ->> 'secondName' = ?2 " +
+            "AND user_info ->> 'age' = ?3", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDSecondNameANDAge(
             String block_reason_id,
             String secondName,
@@ -57,8 +57,8 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + имени + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?2 " +
-            "AND user_info ->> 'age' == ?3", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?2 " +
+            "AND user_info ->> 'age' = ?3", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDFirstNameANDAge(
             String block_reason_id,
             String firstName,
@@ -67,7 +67,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + имени
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?2", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDFirstName(
             String block_reason_id,
             String firstName
@@ -75,7 +75,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + фамилии
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'secondName' == ?2", nativeQuery = true)
+            "AND user_info ->> 'secondName' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDSecondName(
             String block_reason_id,
             String secondName
@@ -83,7 +83,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по причине блокировки + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE block_reason_id=?1 AND user_info IS NOT NULL " +
-            "AND user_info ->> 'age' == ?2", nativeQuery = true)
+            "AND user_info ->> 'age' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findByBlockReasonIdANDAge(
             String block_reason_id,
             int age
@@ -91,7 +91,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по имени + фамилии
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?1 AND user_info ->> 'secondName' == ?2", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?1 AND user_info ->> 'secondName' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findByFirstNameANDSecondName(
             String firstName,
             String secondName
@@ -99,7 +99,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по имени + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?1 AND user_info ->> 'age' == ?2", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?1 AND user_info ->> 'age' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findByFirstNameANDAge(
             String firstName,
             int age
@@ -107,7 +107,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по фамилии + возрасту
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'secondName' == ?1 AND user_info ->> 'age' == ?2", nativeQuery = true)
+            "AND user_info ->> 'secondName' = ?1 AND user_info ->> 'age' = ?2", nativeQuery = true)
     List<UniversalUserEntity> findBySecondNameANDAge(
             String secondName,
             int age
@@ -115,21 +115,21 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //поиск по имени
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'firstName' == ?1", nativeQuery = true)
+            "AND user_info ->> 'firstName' = ?1", nativeQuery = true)
     List<UniversalUserEntity> findByFirstName(
             String firstName
     );
 
     //поиск по фамилии
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'secondName' == ?1", nativeQuery = true)
+            "AND user_info ->> 'secondName' = ?1", nativeQuery = true)
     List<UniversalUserEntity> findBySecondName(
             String secondName
     );
 
     //поиск по возрасту
     @Query(value = "SELECT * FROM universal_user WHERE user_info IS NOT NULL " +
-            "AND user_info ->> 'age' == ?1", nativeQuery = true)
+            "AND user_info ->> 'age' = ?1", nativeQuery = true)
     List<UniversalUserEntity> findByAge(
             int age
     );
@@ -142,7 +142,7 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
 
     //изменение информации о пользователе
     @Transactional
-    @Modifying
+    @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query(value = "UPDATE universal_user SET user_info = ?2 WHERE id = ?1", nativeQuery = true)
     void updateUserInfoForUserWithId(UUID userId, UserInfo newUserInfoAttributes);
 }

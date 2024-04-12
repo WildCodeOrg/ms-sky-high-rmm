@@ -11,9 +11,7 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.Use
 import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -28,8 +26,6 @@ public class UniversalUserFilters {
                                                   UserInfo userInfoFilters,
                                                   UniversalUserRepository universalUserRepository)
     {
-        ArrayList<UniversalUser> result = new ArrayList<>();
-
         if (block_reason_id == null && userInfoFilters != null &&
                 userInfoFilters.getFirstName() == null && userInfoFilters.getSecondName() == null &&
                 userInfoFilters.getAge() == 0)
@@ -37,8 +33,6 @@ public class UniversalUserFilters {
 
         if (userInfoFilters == null && block_reason_id == null)
             return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(universalUserRepository.findAll());
-
-        //HashSet<UniversalUser> resultSet = new HashSet<>();
 
         if (userInfoFilters != null) {
             final String filter_first_name = userInfoFilters.getFirstName();
@@ -55,13 +49,6 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
-
             } else if (block_reason_id != null && filter_first_name != null && filter_second_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDFirstNameANDSecondName(
                         block_reason_id,
@@ -70,12 +57,6 @@ public class UniversalUserFilters {
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name))
-                        resultSet.add(user);*/
 
             } else if (filter_first_name != null && filter_second_name != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByFirstNameANDSecondNameANDAge(
@@ -86,12 +67,6 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
-
             } else if (block_reason_id != null && filter_second_name != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDSecondNameANDAge(
                         block_reason_id,
@@ -100,12 +75,6 @@ public class UniversalUserFilters {
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
 
             } else if (block_reason_id != null && filter_first_name != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDFirstNameANDAge(
@@ -116,12 +85,6 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
-
             } else if (block_reason_id != null && filter_first_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDFirstName(
                         block_reason_id,
@@ -129,11 +92,6 @@ public class UniversalUserFilters {
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getFirstName().equals(filter_first_name))
-                        resultSet.add(user);*/
 
             } else if (block_reason_id != null && filter_second_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDSecondName(
@@ -143,11 +101,6 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name))
-                        resultSet.add(user);*/
-
             } else if (block_reason_id != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonIdANDAge(
                         block_reason_id,
@@ -155,11 +108,6 @@ public class UniversalUserFilters {
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
 
             } else if (filter_first_name != null && filter_second_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByFirstNameANDSecondName(
@@ -169,11 +117,6 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getSecondName().equals(filter_second_name))
-                        resultSet.add(user);*/
-
             } else if (filter_first_name != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByFirstNameANDAge(
                         filter_first_name,
@@ -181,11 +124,6 @@ public class UniversalUserFilters {
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getFirstName().equals(filter_first_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
 
             } else if (filter_second_name != null && filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findBySecondNameANDAge(
@@ -195,21 +133,12 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getSecondName().equals(filter_second_name) &&
-                            user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
-
             } else if (filter_first_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByFirstName(
                         filter_first_name
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getFirstName().equals(filter_first_name))
-                        resultSet.add(user);*/
 
             } else if (filter_second_name != null) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findBySecondName(
@@ -218,20 +147,12 @@ public class UniversalUserFilters {
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
 
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getSecondName().equals(filter_second_name))
-                        resultSet.add(user);*/
-
             } else if (filter_age != 0) {
                 List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByAge(
                         filter_age
                 );
 
                 return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-
-                /*for (UniversalUser user : usersList)
-                    if (user.getUser_info().getAge() == filter_age)
-                        resultSet.add(user);*/
             }
         } else {
             List<UniversalUserEntity> usersFromDatabase = universalUserRepository.findByBlockReasonId(
@@ -239,9 +160,6 @@ public class UniversalUserFilters {
             );
 
             return (ArrayList<UniversalUser>) UserEntityToUserBOConverter.convertList(usersFromDatabase);
-            /*for (UniversalUser user : usersList)
-                    if (user.getBlock_reason_id().equals(block_reason_id))
-                        resultSet.add(user);*/
         }
 
         return null;
