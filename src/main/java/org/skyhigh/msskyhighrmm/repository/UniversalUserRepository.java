@@ -145,4 +145,10 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
     @Modifying(clearAutomatically=true, flushAutomatically=true)
     @Query(value = "UPDATE universal_user SET user_info = ?2 WHERE id = ?1", nativeQuery = true)
     void updateUserInfoForUserWithId(UUID userId, UserInfo newUserInfoAttributes);
+
+    //блокировка пользователя
+    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "UPDATE universal_user SET block_reason_id = ?2 WHERE id = ?1", nativeQuery = true)
+    void setBlockReasonIdForUserWithId(UUID userId, String blockReasonId);
 }

@@ -31,10 +31,6 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-rest")
 	implementation("org.springframework.boot:spring-boot-starter-tomcat")
 
-	//implementation("com.vladmihalcea:hibernate-types-60:2.21.1")
-	//implementation("org.hibernate:hibernate-annotations:3.4.0.GA")
-	//implementation("io.hypersistence:hypersistence-utils-hibernate-55:3.7.0")
-
 	//implementation("org.springframework.boot:spring-boot-starter-jdbc")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")

@@ -183,7 +183,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
         //Если указан конкретный пользователь
         if (userToBlockId != null) {
-            if (getUserById(userToBlockId) == null) {
+            if (!universalUserRepository.existsById(userToBlockId)) {
                 if (resultMessage.getGlobalOperationCode() == 0)
                     resultMessage.setGlobalOperationCode(2);
 
@@ -192,11 +192,18 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                 userToBlockId + "' не найден",
                         1
                 ));
-            } //else if () - необходимо добавить проверку наличия причины блокировки с указанным кодом
-            else {
-                UniversalUser temp = UNIVERSAL_USER_MAP.get(userToBlockId);
-                temp.setBlock_reason_id(blockReasonId);
-                UNIVERSAL_USER_MAP.replace(userToBlockId, temp);
+            }
+            else if (!blockReasonsRepository.existsById(blockReasonId)) {
+                if (resultMessage.getGlobalOperationCode() == 0)
+                    resultMessage.setGlobalOperationCode(2);
+
+                certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
+                        "Причина блокировки с идентификатором '" +
+                                blockReasonId + "' не найдена",
+                        2
+                ));
+            } else {
+                universalUserRepository.setBlockReasonIdForUserWithId(userToBlockId, blockReasonId);
 
                 certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
                         "Пользователь с идентификатором '" +
@@ -206,7 +213,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
             }
 
             switch (resultMessage.getGlobalOperationCode()) {
-                case 0 -> resultMessage.setGlobalMessage("Все пользователи из списка успешно заблокированы");
+                case 0 -> resultMessage.setGlobalMessage("Указанный пользователь успешно заблокированы");
                 case 2 -> resultMessage.setGlobalMessage("Указанный пользователь не заблокирован из-за ошибки");
             }
 
@@ -217,7 +224,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
         //если указан список пользователей (и не указан конкретный пользователь)
         for (UsersToBlockInfoListElement element : usersInfoToBlock) {
-            if (getUserById(element.getUserId()) == null) {
+            if (!universalUserRepository.existsById(element.getUserId())) {
                 if (resultMessage.getGlobalOperationCode() == 0)
                     resultMessage.setGlobalOperationCode(2);
 
@@ -226,14 +233,25 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                 element.getUserId() + "' не найден",
                         1
                 ));
-            } //else if () - необходимо добавить проверку наличия причины блокировки с указанным кодом
+            }
+            else if (!blockReasonsRepository.existsById(element.getBlockReasonId())) {
+                if (resultMessage.getGlobalOperationCode() == 0)
+                    resultMessage.setGlobalOperationCode(2);
+
+                certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
+                        "Причина блокировки с идентификатором '" +
+                                element.getBlockReasonId() + "' не найдена",
+                        2
+                ));
+            }
             else {
                 if (resultMessage.getGlobalOperationCode() == 2)
                     resultMessage.setGlobalOperationCode(1);
 
-                UniversalUser temp = UNIVERSAL_USER_MAP.get(element.getUserId());
-                temp.setBlock_reason_id(element.getBlockReasonId());
-                UNIVERSAL_USER_MAP.replace(element.getUserId(), temp);
+                universalUserRepository.setBlockReasonIdForUserWithId(
+                        element.getUserId(),
+                        element.getBlockReasonId()
+                );
 
                 certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
                         "Пользователь с идентификатором '" +
@@ -256,6 +274,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
     @Override
     public List<UniversalUser> readAll() {
-        return new ArrayList<>(UNIVERSAL_USER_MAP.values());
+        return UserEntityToUserBOConverter.convertList(universalUserRepository.findAll());
     }
 }
