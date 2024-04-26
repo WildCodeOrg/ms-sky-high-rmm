@@ -10,6 +10,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroup
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
@@ -24,12 +26,14 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
+import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserServiceImpl;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,11 +52,13 @@ public class RMMController {
 
     private final UniversalUserService universalUserService;
     private final RolesService rolesService;
+    private final UniversalUserServiceImpl universalUserServiceImpl;
 
     @Autowired
-    public RMMController(UniversalUserService universalUserService, RolesService rolesService) {
+    public RMMController(UniversalUserService universalUserService, RolesService rolesService, UniversalUserServiceImpl universalUserServiceImpl) {
         this.universalUserService = universalUserService;
         this.rolesService = rolesService;
+        this.universalUserServiceImpl = universalUserServiceImpl;
     }
 
     //Users request mapping
@@ -63,7 +69,7 @@ public class RMMController {
         log.info("Registering process for '" + registerUserDTO.getLogin() + "' was started");
 
         final RegisterUserResultMessage result = universalUserService.registerUser(registerUserDTO.getLogin(),
-                registerUserDTO.getPassword());
+                registerUserDTO.getPassword(), registerUserDTO.isAdminRegistration(), registerUserDTO.getAdminKey());
 
         return switch (result.getGlobalOperationCode()) {
             case 0 -> {
@@ -374,7 +380,7 @@ public class RMMController {
     }
 
     @ValidParams
-    @DeleteMapping
+    @DeleteMapping(value = "/roles")
     public ResponseEntity<?> deleteRole(@RequestBody DeliveryRequestDeleteUserGroupRoleDTO deleteUserGroupRoleDTO) {
         log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
                 "' process was started by '" + deleteUserGroupRoleDTO.getUserMadeRequestId() + "'");
@@ -422,6 +428,66 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
             default -> throw new IllegalStateException("Unexpected value: " + result.getOperationCode());
+        };
+    }
+
+    @ValidParams
+    @PostMapping(value = "/admins/key_code_value")
+    public ResponseEntity<?> addAdminKeyCode(@RequestBody DeliveryRequestAddAdminKeyCodeDTO deliveryRequestAddAdminKeyCodeDTO) {
+        log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                "' process was started by '" + deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                    "' process was finished with error as user made request does not exist");
+
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        AddAdminKeyResultMessage resultMessage = universalUserService.addAdminKey(
+                userMadeRequestId,
+                deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished successfully:" + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new DeliveryResponseAddAdminKeyCodeDTO(
+                        "Ключ-код администратора успешно добавлен.",
+                        resultMessage.getAdminKeyReferenceId()
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        13001,
+                        "Ошибка выполнения загрузки ключ-кода администратора.",
+                        400,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 2 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        13002,
+                        "Ошибка выполнения загрузки ключ-кода администратора.",
+                        400,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
 

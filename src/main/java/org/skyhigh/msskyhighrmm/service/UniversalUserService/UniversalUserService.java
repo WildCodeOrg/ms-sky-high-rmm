@@ -4,6 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
@@ -21,9 +22,21 @@ public interface UniversalUserService {
      * Создает нового юзера
      * @param login - логин юзера для создания
      * @param password - пароль юзера для создания
-     * @return - значение UUID созданной записи юзера
+     * @param isAdmin - признак, является ли регистрирующийся пользователь админом (true - да, false - нет)
+     * @param adminKey - ключ-код админа
+     * @return - RegisterUserResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *         0 - выполнено успешно;
+     *         1 - невалидный логин - должен быть от 6 до 20 символов;
+     *         2 - невалидный пароль - должен быть от 8 до 20 символов;
+     *         3 - ключ-код для админов должен не передан;
+     *         4 - ключ-код админа невалиден - должен иметь длину 32 символа;
+     *         5 - ключ-код админа не существует;
+     *         6 - по указанному ключ-коду админа уже существует зарегистрированный пользователь;
+     *      createdUserId - ID зарегистрированного в Системе пользователя.
      */
-    RegisterUserResultMessage registerUser(String login, String password);
+    RegisterUserResultMessage registerUser(String login, String password, boolean isAdmin, String adminKey);
 
     /**
      * Проверяет, есть ли юзер с заданным логином в Системе
@@ -100,6 +113,22 @@ public interface UniversalUserService {
      *      logonUserId - ID авторизованного пользователя в Системе.
      */
     LoginUserResultMessage loginUser(String login, String password);
+
+
+    /**
+     * Метод добавления нового ключ-кода админа
+     * @param userMadeRequest - ID пользователя, инициировавшего операцию (считается,
+     *                        что такой пользователь на момент вызова метода существует)
+     * @param adminKey - значение ключ-кода
+     * @return AddAdminKeyResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно;
+     *          1 - невалидный ключ-код;
+     *          2 - создающий ключ-код пользователь не является администратором;
+     *      adminKeyReferenceId - ID созданной записи с ключ-кодом админа
+     */
+    AddAdminKeyResultMessage addAdminKey(UUID userMadeRequest, String adminKey);
 
     /**
      * Возвращает список всех имеющихся юзеров

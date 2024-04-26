@@ -4,7 +4,9 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
@@ -45,7 +47,9 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     }
 
     @Override
-    public RegisterUserResultMessage registerUser(String login, String password) {
+    public RegisterUserResultMessage registerUser(String login, String password, boolean isAdmin, String adminKey) {
+        List<AdministratorKeyCodeEntity> adminKeyCodeEntities = new ArrayList<>();
+
         if (!(6 <= login.length() && login.length() <= 20)) {
             return new RegisterUserResultMessage(
                     "Login length must be in the range from 6 to 20 characters.",
@@ -60,6 +64,39 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     2,
                     null
             );
+        }
+
+        if (isAdmin) {
+            if (adminKey == null)
+                return new RegisterUserResultMessage(
+                        "AdminKey cannot be null for admins.",
+                        3,
+                        null
+                );
+
+            if (adminKey.length() != 32)
+                return new RegisterUserResultMessage(
+                        "AdminKey must be size of 32.",
+                        4,
+                        null
+                );
+
+            adminKeyCodeEntities =
+                    administratorKeyCodeRepository.findByCode(adminKey);
+
+            if (adminKeyCodeEntities == null || adminKeyCodeEntities.size() != 1)
+                return new RegisterUserResultMessage(
+                        "There is no such admin key code for admins.",
+                        5,
+                        null
+                );
+
+            if (adminKeyCodeEntities.get(0).getUser_id() != null)
+                return new RegisterUserResultMessage(
+                        "Admin with certain admin key code already exists.",
+                        6,
+                        null
+                );
         }
 
         if (!universalUserRepository.findByLogin(login).isEmpty())
@@ -80,6 +117,13 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         );
 
         UUID universal_user_id = (universalUserRepository.save(user)).getId();
+
+        if (isAdmin) {
+            administratorKeyCodeRepository.setRegisteredUserId(
+                    adminKeyCodeEntities.get(0).getId(),
+                    universal_user_id
+            );
+        }
 
         return new RegisterUserResultMessage(
                 "User created successfully.",
@@ -303,6 +347,41 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         resultMessage.setCertainBlockUsersResults(certainUserBlockResultList);
 
         return resultMessage;
+    }
+
+    @Override
+    public AddAdminKeyResultMessage addAdminKey(UUID userMadeRequest, String adminKey) {
+        List<AdministratorKeyCodeEntity> checkUserMadeRequestList =
+                administratorKeyCodeRepository.findByUserId(userMadeRequest);
+
+        if (checkUserMadeRequestList == null || checkUserMadeRequestList.isEmpty())
+            return new AddAdminKeyResultMessage(
+                    "User made request is not an administrator.",
+                    2,
+                    null
+            );
+
+        if (adminKey.length() != 32)
+            return new AddAdminKeyResultMessage(
+                    "Admin key length must be 32 characters.",
+                    1,
+                    null
+            );
+
+        AdministratorKeyCodeEntity administratorKeyCodeReferenceToCreate = new AdministratorKeyCodeEntity(
+                null,
+                null,
+                adminKey
+        );
+
+        UUID createdReferenceId = (administratorKeyCodeRepository.save(administratorKeyCodeReferenceToCreate))
+                .getId();
+
+        return new AddAdminKeyResultMessage(
+                "Admin key created.",
+                0,
+                createdReferenceId
+        );
     }
 
     @Override
