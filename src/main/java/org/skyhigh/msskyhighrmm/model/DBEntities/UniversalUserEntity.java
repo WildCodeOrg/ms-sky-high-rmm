@@ -35,7 +35,7 @@ public class UniversalUserEntity {
     private String login;
 
     @Column(name = "password", nullable = false)
-    @Length(min = 8, max = 20)
+    @Length(min = 8, max = 120)
     private String password;
 
     @Column(name = "user_info", columnDefinition = "jsonb")

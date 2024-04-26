@@ -5,6 +5,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -85,6 +86,20 @@ public interface UniversalUserService {
      */
     BlockUsersResultMessage blockUsers(ArrayList<UsersToBlockInfoListElement> usersInfoToBlock,
                                        UUID userToBlockId, String blockReasonId);
+
+    /**
+     * Метод авторизации пользователя в системе
+     * @param login - логин пользователя
+     * @param password - пароль пользователя
+     * @return LoginUserResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно;
+     *          1 - пользователя не существует (неверный логин);
+     *          2 - неправильный пароль;
+     *      logonUserId - ID авторизованного пользователя в Системе.
+     */
+    LoginUserResultMessage loginUser(String login, String password);
 
     /**
      * Возвращает список всех имеющихся юзеров

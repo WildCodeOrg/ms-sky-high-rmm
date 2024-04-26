@@ -3,28 +3,29 @@ package org.skyhigh.msskyhighrmm.controller;
 import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
@@ -41,6 +42,7 @@ import java.util.logging.Logger;
 
 @Getter
 @RestController
+@RequestMapping("/rmm-service/api")
 public class RMMController {
     private static final Logger log = Logger.getLogger(RMMController.class.getName());
 
@@ -52,8 +54,6 @@ public class RMMController {
         this.universalUserService = universalUserService;
         this.rolesService = rolesService;
     }
-
-    //project logic - comment it if you wanna just only test the project availability and try the part below
 
     //Users request mapping
 
@@ -116,26 +116,43 @@ public class RMMController {
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
         log.info("Login process for '" + loginUserDTO.getLogin() + "' was started");
 
-        final String login = loginUserDTO.getLogin();
-        final UUID id = universalUserService.checkUser(login);
+        LoginUserResultMessage loginResult = universalUserService.loginUser(
+                loginUserDTO.getLogin(),
+                loginUserDTO.getPassword()
+        );
 
-        if (id == null) {
-            return new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    3,
-                    "Ошибка авторизации.",
-                    400,
-                    "Данного пользователя не существует."
-            ), HttpStatus.BAD_REQUEST);
-        }
+        log.info("While logging by login '" + loginUserDTO.getLogin() + "' process got loginResult: {" +
+                loginResult.toString() + "}");
 
-        return loginUserDTO.getPassword().equals(universalUserService.getUserById(id).getPassword())
-                ? new ResponseEntity<>(new DeliveryResponseLoginUserDTO(login, id,
-                    "Авторизация пользователя прошла успешно."), HttpStatus.OK)
-                : new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    4,
-                    "Ошибка авторизации.",
-                    400,
-                    "Неправильный пароль."), HttpStatus.BAD_REQUEST);
+        return switch (loginResult.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished successfully");
+                yield new ResponseEntity<>(new DeliveryResponseLoginUserDTO(
+                    loginUserDTO.getLogin(),
+                    loginResult.getLogonUserId(),
+                    "Пользователь успешно авторизован."
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        11001,
+                        "Ошибка авторизации.",
+                        400,
+                        loginResult.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 2 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        11002,
+                        "Ошибка авторизации.",
+                        400,
+                        loginResult.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + loginResult.getGlobalOperationCode());
+        };
     }
 
     @GetMapping(value = "/users/{user_id}")
@@ -279,7 +296,7 @@ public class RMMController {
                         resultMessage.getCertainBlockUsersResults().toString()
                 ), HttpStatus.BAD_REQUEST);
             }
-            default -> null;
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
 
@@ -404,7 +421,7 @@ public class RMMController {
                         result.getMessage()
                 ), HttpStatus.BAD_REQUEST);
             }
-            default -> null;
+            default -> throw new IllegalStateException("Unexpected value: " + result.getOperationCode());
         };
     }
 

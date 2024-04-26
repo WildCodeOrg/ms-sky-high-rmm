@@ -7,6 +7,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoList
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -17,24 +18,30 @@ import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
 import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
 import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
 import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.spec.KeySpec;
 import java.util.*;
 
 @Service
 public class UniversalUserServiceImpl implements UniversalUserService {
-    private static final Map<UUID, UniversalUser> UNIVERSAL_USER_MAP = new HashMap<>();
     private final UniversalUserRepository universalUserRepository;
     private final BlockReasonsRepository blockReasonsRepository;
     private final AdministratorKeyCodeRepository administratorKeyCodeRepository;
     private final UsersRolesRepository usersRolesRepository;
 
-    public UniversalUserServiceImpl(UniversalUserRepository universalUserRepository, BlockReasonsRepository blockReasonsRepository, AdministratorKeyCodeRepository administratorKeyCodeRepository, UsersRolesRepository usersRolesRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UniversalUserServiceImpl(UniversalUserRepository universalUserRepository, BlockReasonsRepository blockReasonsRepository, AdministratorKeyCodeRepository administratorKeyCodeRepository, UsersRolesRepository usersRolesRepository, PasswordEncoder passwordEncoder) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
         this.usersRolesRepository = usersRolesRepository;
-        //
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -62,10 +69,12 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     null
             );
 
+        String encodedPass = passwordEncoder.encode(password);
+
         UniversalUserEntity user = new UniversalUserEntity(
                 null,
                 login,
-                password,
+                encodedPass,
                 null,
                 null
         );
@@ -77,6 +86,30 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 0,
                 universal_user_id
         );
+    }
+
+    @Override
+    public LoginUserResultMessage loginUser(String login, String password) {
+        LoginUserResultMessage result = new LoginUserResultMessage();
+
+        ArrayList<UniversalUserEntity> users = (ArrayList<UniversalUserEntity>) universalUserRepository
+                .findByLogin(login);
+
+        if (users.size() != 1) {
+            result.setGlobalOperationCode(1);
+            result.setGlobalMessage("Пользователя не существует.");
+            return result;
+        }
+
+        if (!passwordEncoder.matches(password, users.get(0).getPassword())) {
+            result.setGlobalOperationCode(2);
+            result.setGlobalMessage("Неправильный пароль.");
+            return result;
+        }
+
+        result.setGlobalOperationCode(0);
+        result.setLogonUserId(users.get(0).getId());
+        return result;
     }
 
     //Проверка существования пользователя с указанным логином

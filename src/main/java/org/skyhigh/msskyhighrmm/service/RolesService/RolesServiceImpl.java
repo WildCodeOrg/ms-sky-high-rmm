@@ -104,6 +104,8 @@ public class RolesServiceImpl implements RolesService{
             );
 
         userGroupRolesRepository.deleteById(roleId);
+        //TO DO - очистка таблицы-связки с ролями
+
         return new DeleteUserGroupRoleResultMessage(
                 "Роль с идентификатором '" + roleId + "' успешно удалена",
                 0
