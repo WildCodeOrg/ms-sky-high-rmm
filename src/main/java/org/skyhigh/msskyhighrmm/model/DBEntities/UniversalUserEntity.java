@@ -5,15 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
-
 import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
-
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
-
 
 import java.util.UUID;
 

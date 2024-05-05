@@ -1,6 +1,5 @@
 package org.skyhigh.msskyhighrmm.repository;
 
-import org.skyhigh.msskyhighrmm.model.DBEntities.RolesOperationsEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

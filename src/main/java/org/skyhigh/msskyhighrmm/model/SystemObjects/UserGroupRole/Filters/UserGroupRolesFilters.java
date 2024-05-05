@@ -10,7 +10,6 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Converters.Rol
 import org.skyhigh.msskyhighrmm.repository.UserGroupRolesRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 @Setter
 @Getter
