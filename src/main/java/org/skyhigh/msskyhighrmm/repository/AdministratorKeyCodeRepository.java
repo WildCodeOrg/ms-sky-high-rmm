@@ -2,7 +2,6 @@ package org.skyhigh.msskyhighrmm.repository;
 
 import jakarta.transaction.Transactional;
 import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

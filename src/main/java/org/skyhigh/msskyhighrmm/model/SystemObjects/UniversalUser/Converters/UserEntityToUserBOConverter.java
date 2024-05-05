@@ -1,10 +1,6 @@
 package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.skyhigh.msskyhighrmm.controller.RMMController;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 
 import java.util.ArrayList;

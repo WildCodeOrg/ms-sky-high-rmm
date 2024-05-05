@@ -1,6 +1,5 @@
 package org.skyhigh.msskyhighrmm.repository;
 
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.OperationPermission;
 import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 

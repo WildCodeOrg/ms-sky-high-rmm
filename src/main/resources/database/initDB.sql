@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS users_roles
 
 /* Drop Foreign Key Constraints if they exist*/
 
---ALTER TABLE administrator_key_code DROP CONSTRAINT IF EXISTS FK_administrator_key_code_universal_user;
+ALTER TABLE administrator_key_code DROP CONSTRAINT IF EXISTS FK_administrator_key_code_universal_user;
 
 ALTER TABLE roles_operations DROP CONSTRAINT IF EXISTS FK_roles_operations_operation_permissions;
 

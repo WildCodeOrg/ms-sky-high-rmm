@@ -20,14 +20,12 @@ import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
 import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
 import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
 import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import java.security.spec.KeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UniversalUserServiceImpl implements UniversalUserService {

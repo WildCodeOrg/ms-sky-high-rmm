@@ -1,8 +1,6 @@
 package org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Converters;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 
 import java.util.ArrayList;
