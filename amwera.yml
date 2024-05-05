@@ -1,0 +1,14 @@
+---
+meta:
+  environment: jvm
+  toolchain:
+    name: maven
+    version: 17
+  build:
+    artifacts:
+      target/*.jar: /
+    args: spring-boot-repackage
+  run:
+    jarName: ms-sky-high-rmm-0.0.1-SNAPSHOT.jar
+    persistenceMount: /data
+    containerPort: 8080
