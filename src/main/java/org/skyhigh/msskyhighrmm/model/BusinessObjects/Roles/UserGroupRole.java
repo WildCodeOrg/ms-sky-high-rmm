@@ -15,28 +15,3 @@ public class UserGroupRole {
     private String description;
     private boolean is_critical;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
