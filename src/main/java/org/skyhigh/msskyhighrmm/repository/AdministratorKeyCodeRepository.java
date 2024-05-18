@@ -22,3 +22,5 @@ public interface AdministratorKeyCodeRepository extends JpaRepository<Administra
     @Query(value = "SELECT * FROM administrator_key_code WHERE user_id = ?1", nativeQuery = true)
     List<AdministratorKeyCodeEntity> findByUserId(UUID userId);
 }
+
+

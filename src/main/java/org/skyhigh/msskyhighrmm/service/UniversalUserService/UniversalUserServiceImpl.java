@@ -389,3 +389,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         return UserEntityToUserBOConverter.convertList(universalUserRepository.findAll());
     }
 }
+
+
+
