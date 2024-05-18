@@ -9,10 +9,13 @@ import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 @Getter
 @AllArgsConstructor
 public class DeliveryRequestRegisterUserDTO {
-
     @NotEmpty
     private String login;
 
     @NotEmpty
     private String password;
+
+    boolean isAdminRegistration;
+
+    String adminKey;
 }

@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.CommonObjects.Criticality;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Converters.RoleEntityToRoleBOConverter;
+import org.skyhigh.msskyhighrmm.repository.UserGroupRolesRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,53 +20,67 @@ public class UserGroupRolesFilters {
     private String roleName;
     private String description;
     private Criticality criticality;
+    private UserGroupRolesRepository rolesRepository;
 
-    public static ArrayList<UserGroupRole> filter(ArrayList<UserGroupRole> userGroupRolesList,
-                                                  String roleName,
+    public static ArrayList<UserGroupRole> filter(String roleName,
                                                   String description,
-                                                  Criticality criticality)
+                                                  Criticality criticality,
+                                                  UserGroupRolesRepository rolesRepository)
     {
         if (roleName == null && description == null && criticality == null)
-            return userGroupRolesList;
-
-        HashSet<UserGroupRole> resultSet = new HashSet<>();
-
+            return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(rolesRepository.findAll());
 
         if (criticality != null) {
             final boolean isCritical = criticality.isCritical();
 
             if (roleName != null && description != null) {
-                for (UserGroupRole role : userGroupRolesList)
-                    if (role.getRole_name().equals(roleName) && role.getDescription().equals(description) &&
-                            role.is_critical() == isCritical)
-                        resultSet.add(role);
+                return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                        rolesRepository.findByRoleNameANDDescriptionANDCriticality(
+                            roleName,
+                            description,
+                            isCritical
+                        )
+                );
             } else if (roleName != null) {
-                for (UserGroupRole role : userGroupRolesList)
-                    if (role.getRole_name().equals(roleName) && role.is_critical() == isCritical)
-                        resultSet.add(role);
+                return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                        rolesRepository.findByRoleNameANDCriticality(
+                            roleName,
+                            isCritical
+                        )
+                );
             } else if (description != null) {
-                for (UserGroupRole role : userGroupRolesList)
-                    if (role.getDescription().equals(description) && role.is_critical() == isCritical)
-                        resultSet.add(role);
+                return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                        rolesRepository.findByDescriptionANDCriticality(
+                                description,
+                                isCritical
+                        )
+                );
             } else {
-                for (UserGroupRole role : userGroupRolesList)
-                    if (role.is_critical() == isCritical)
-                        resultSet.add(role);
+                return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                        rolesRepository.findByCriticality(
+                                isCritical
+                        )
+                );
             }
         } else if (roleName != null && description != null) {
-            for (UserGroupRole role : userGroupRolesList)
-                if (role.getRole_name().equals(roleName) && role.getDescription().equals(description))
-                    resultSet.add(role);
+            return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                    rolesRepository.findByRoleNameANDDescription(
+                            roleName,
+                            description
+                    )
+            );
         } else if (roleName != null) {
-            for (UserGroupRole role : userGroupRolesList)
-                if (role.getRole_name().equals(roleName))
-                    resultSet.add(role);
+            return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                    rolesRepository.findByRoleName(
+                            roleName
+                    )
+            );
         } else {
-            for (UserGroupRole role : userGroupRolesList)
-                if (role.getDescription().equals(description))
-                    resultSet.add(role);
+            return (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(
+                    rolesRepository.findByDescription(
+                            description
+                    )
+            );
         }
-
-        return new ArrayList<>(resultSet);
     }
 }

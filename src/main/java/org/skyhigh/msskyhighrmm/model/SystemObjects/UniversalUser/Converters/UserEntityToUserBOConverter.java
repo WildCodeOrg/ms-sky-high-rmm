@@ -1,26 +1,25 @@
 package org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.java.Log;
+import org.skyhigh.msskyhighrmm.controller.RMMController;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class UserBOToUserEntityConverter {
+public class UserEntityToUserBOConverter {
     private static final Logger log = Logger.getLogger(UserEntityToUserBOConverter.class.getName());
 
-    public static UniversalUserEntity convert(UniversalUser user) {
+    public static UniversalUser convert(UniversalUserEntity user) {
         if (user == null) return null;
 
-        UniversalUserEntity resultUser = new UniversalUserEntity();
+        UniversalUser resultUser = new UniversalUser();
 
-        if (user.getId() != null) resultUser.setId(user.getId());
+        resultUser.setId(user.getId());
         resultUser.setLogin(user.getLogin());
         resultUser.setPassword(user.getPassword());
         resultUser.setBlock_reason_id(user.getBlock_reason_id());
@@ -29,13 +28,13 @@ public class UserBOToUserEntityConverter {
         return resultUser;
     }
 
-    public static List<UniversalUserEntity> convertList(List<UniversalUser> users) {
-        if (users == null || users.isEmpty()) return null;
+    public static List<UniversalUser> convertList(List<UniversalUserEntity> userEntities) {
+        if (userEntities == null || userEntities.isEmpty()) return null;
 
-        List<UniversalUserEntity> resultList = new ArrayList<>();
+        List<UniversalUser> resultList = new ArrayList<>();
 
-        for (UniversalUser user : users)
-            resultList.add(convert(user));
+        for (UniversalUserEntity userEntity : userEntities)
+            resultList.add(convert(userEntity));
 
         return resultList;
     }

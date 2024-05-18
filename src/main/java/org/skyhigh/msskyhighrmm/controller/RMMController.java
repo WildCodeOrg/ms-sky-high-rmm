@@ -3,32 +3,37 @@ package org.skyhigh.msskyhighrmm.controller;
 import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
-import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
+import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserServiceImpl;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,19 +46,20 @@ import java.util.logging.Logger;
 
 @Getter
 @RestController
+@RequestMapping("/rmm-service/api")
 public class RMMController {
     private static final Logger log = Logger.getLogger(RMMController.class.getName());
 
     private final UniversalUserService universalUserService;
     private final RolesService rolesService;
+    private final UniversalUserServiceImpl universalUserServiceImpl;
 
     @Autowired
-    public RMMController(UniversalUserService universalUserService, RolesService rolesService) {
+    public RMMController(UniversalUserService universalUserService, RolesService rolesService, UniversalUserServiceImpl universalUserServiceImpl) {
         this.universalUserService = universalUserService;
         this.rolesService = rolesService;
+        this.universalUserServiceImpl = universalUserServiceImpl;
     }
-
-    //project logic - comment it if you wanna just only test the project availability and try the part below
 
     //Users request mapping
 
@@ -63,7 +69,7 @@ public class RMMController {
         log.info("Registering process for '" + registerUserDTO.getLogin() + "' was started");
 
         final RegisterUserResultMessage result = universalUserService.registerUser(registerUserDTO.getLogin(),
-                registerUserDTO.getPassword());
+                registerUserDTO.getPassword(), registerUserDTO.isAdminRegistration(), registerUserDTO.getAdminKey());
 
         return switch (result.getGlobalOperationCode()) {
             case 0 -> {
@@ -116,26 +122,43 @@ public class RMMController {
     public ResponseEntity<?> loginUser(@RequestBody DeliveryRequestLoginUserDTO loginUserDTO) {
         log.info("Login process for '" + loginUserDTO.getLogin() + "' was started");
 
-        final String login = loginUserDTO.getLogin();
-        final UUID id = universalUserService.checkUser(login);
+        LoginUserResultMessage loginResult = universalUserService.loginUser(
+                loginUserDTO.getLogin(),
+                loginUserDTO.getPassword()
+        );
 
-        if (id == null) {
-            return new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    3,
-                    "Ошибка авторизации.",
-                    400,
-                    "Данного пользователя не существует."
-            ), HttpStatus.BAD_REQUEST);
-        }
+        log.info("While logging by login '" + loginUserDTO.getLogin() + "' process got loginResult: {" +
+                loginResult.toString() + "}");
 
-        return loginUserDTO.getPassword().equals(universalUserService.getUserById(id).getPassword())
-                ? new ResponseEntity<>(new DeliveryResponseLoginUserDTO(login, id,
-                    "Авторизация пользователя прошла успешно."), HttpStatus.OK)
-                : new ResponseEntity<>(new CommonExceptionResponseDTO(
-                    4,
-                    "Ошибка авторизации.",
-                    400,
-                    "Неправильный пароль."), HttpStatus.BAD_REQUEST);
+        return switch (loginResult.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished successfully");
+                yield new ResponseEntity<>(new DeliveryResponseLoginUserDTO(
+                    loginUserDTO.getLogin(),
+                    loginResult.getLogonUserId(),
+                    "Пользователь успешно авторизован."
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        11001,
+                        "Ошибка авторизации.",
+                        400,
+                        loginResult.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 2 -> {
+                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        11002,
+                        "Ошибка авторизации.",
+                        400,
+                        loginResult.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + loginResult.getGlobalOperationCode());
+        };
     }
 
     @GetMapping(value = "/users/{user_id}")
@@ -216,7 +239,7 @@ public class RMMController {
 
         return universalUserService.getUserById(updateUserId) != null
                 ? new ResponseEntity<>(new DeliveryResponseUpdateUserByIdDTO(
-                    "Запись пользователя успешно обновлена",universalUserService.updateUserById(updateUserId,
+                    "Запись пользователя успешно обновлена", universalUserService.updateUserById(updateUserId,
                                 updateUserByIdDTO.getNewUserInfoAttributes())
                     ), HttpStatus.OK)
                 : new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -279,7 +302,7 @@ public class RMMController {
                         resultMessage.getCertainBlockUsersResults().toString()
                 ), HttpStatus.BAD_REQUEST);
             }
-            default -> null;
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
 
@@ -357,7 +380,7 @@ public class RMMController {
     }
 
     @ValidParams
-    @DeleteMapping
+    @DeleteMapping(value = "/roles")
     public ResponseEntity<?> deleteRole(@RequestBody DeliveryRequestDeleteUserGroupRoleDTO deleteUserGroupRoleDTO) {
         log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
                 "' process was started by '" + deleteUserGroupRoleDTO.getUserMadeRequestId() + "'");
@@ -404,7 +427,67 @@ public class RMMController {
                         result.getMessage()
                 ), HttpStatus.BAD_REQUEST);
             }
-            default -> null;
+            default -> throw new IllegalStateException("Unexpected value: " + result.getOperationCode());
+        };
+    }
+
+    @ValidParams
+    @PostMapping(value = "/admins/key_code_value")
+    public ResponseEntity<?> addAdminKeyCode(@RequestBody DeliveryRequestAddAdminKeyCodeDTO deliveryRequestAddAdminKeyCodeDTO) {
+        log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                "' process was started by '" + deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                    "' process was finished with error as user made request does not exist");
+
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        AddAdminKeyResultMessage resultMessage = universalUserService.addAdminKey(
+                userMadeRequestId,
+                deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished successfully:" + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new DeliveryResponseAddAdminKeyCodeDTO(
+                        "Ключ-код администратора успешно добавлен.",
+                        resultMessage.getAdminKeyReferenceId()
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        13001,
+                        "Ошибка выполнения загрузки ключ-кода администратора.",
+                        400,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 2 -> {
+                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        13002,
+                        "Ошибка выполнения загрузки ключ-кода администратора.",
+                        400,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
 

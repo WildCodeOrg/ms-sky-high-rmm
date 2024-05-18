@@ -5,10 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+
+import org.hibernate.type.SqlTypes;
 import org.hibernate.validator.constraints.Length;
+
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 
+
 import java.util.UUID;
+
 
 @Setter
 @Getter
@@ -27,11 +35,12 @@ public class UniversalUserEntity {
     private String login;
 
     @Column(name = "password", nullable = false)
-    @Length(min = 8, max = 20)
+    @Length(min = 8, max = 120)
     private String password;
 
-    @Column(name = "user_info")
-    private String user_info;
+    @Column(name = "user_info", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private UserInfo user_info;
 
     @Column(name = "block_reason_id", length = 10)
     private String block_reason_id;
