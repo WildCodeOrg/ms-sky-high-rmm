@@ -15,3 +15,8 @@ public class OperationPermission {
     private String operation_endpoint;
     private boolean is_critical;
 }
+
+
+
+
+

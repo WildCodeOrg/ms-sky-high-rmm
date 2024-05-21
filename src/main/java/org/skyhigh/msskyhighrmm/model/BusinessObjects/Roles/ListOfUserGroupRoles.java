@@ -17,3 +17,4 @@ public class ListOfUserGroupRoles {
     private int pageNumber;
     private List<UserGroupRole> roles;
 }
+

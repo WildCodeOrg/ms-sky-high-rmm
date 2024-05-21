@@ -7,6 +7,4 @@ import java.util.UUID;
 
 public interface RolesOperationsRepository extends JpaRepository<RolesOperationsEntity, UUID> {
 
-
-
 }

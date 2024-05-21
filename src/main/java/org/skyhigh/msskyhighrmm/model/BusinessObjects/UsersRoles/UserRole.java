@@ -15,3 +15,7 @@ public class UserRole {
     @NotNull UUID user_id;
     @NotNull UUID role_id;
 }
+
+
+
+

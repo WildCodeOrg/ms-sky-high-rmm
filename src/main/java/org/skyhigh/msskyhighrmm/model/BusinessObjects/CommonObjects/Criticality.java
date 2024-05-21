@@ -10,3 +10,6 @@ import lombok.Setter;
 public class Criticality {
     private boolean isCritical;
 }
+
+
+

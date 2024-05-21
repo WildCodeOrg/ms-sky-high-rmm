@@ -17,3 +17,4 @@ public class ListOfUniversalUser {
     private int pageNumber;
     private List<UniversalUser> universalUsers;
 }
+
