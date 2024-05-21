@@ -39,4 +39,15 @@ public class UniversalUserEntity {
 
     @Column(name = "block_reason_id", length = 10)
     private String block_reason_id;
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) || (
+                (id == null ? ((UniversalUserEntity) obj).getId() == null : id.equals(((UniversalUserEntity) obj).getId()))
+                || (login == null ? ((UniversalUserEntity) obj).getLogin() == null : login.equals(((UniversalUserEntity) obj).getLogin()))
+                || (password == null ? ((UniversalUserEntity) obj).getPassword() == null : password.equals(((UniversalUserEntity) obj).getPassword()))
+                || (user_info == null ? ((UniversalUserEntity) obj).getUser_info() == null : user_info.equals(((UniversalUserEntity) obj).getUser_info()))
+                || (block_reason_id == null ? ((UniversalUserEntity) obj).getBlock_reason_id() == null : block_reason_id.equals(((UniversalUserEntity) obj).getBlock_reason_id()))
+        );
+    }
 }

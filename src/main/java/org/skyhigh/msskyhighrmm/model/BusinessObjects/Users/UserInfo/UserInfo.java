@@ -37,4 +37,12 @@ public class UserInfo implements Serializable {
             }
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) || (
+                (firstName == null ? ((UserInfo) obj).getFirstName() == null : firstName.equals(((UserInfo) obj).firstName))
+                || (secondName == null ? ((UserInfo) obj).getSecondName() == null : secondName.equals(((UserInfo) obj).secondName))
+                || age == ((UserInfo) obj).getAge());
+    }
 }

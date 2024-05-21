@@ -113,6 +113,50 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
 
+            case 4 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with AdminKeyIsEmpty exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10004,
+                        "Ошибка регистрации.",
+                        400,
+                        "При регистрации администратора заполнение ключа администатора является обязательным."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            case 5 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with AdminKeySize exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10005,
+                        "Ошибка регистрации.",
+                        400,
+                        "Длина ключа администратора 32 символа."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            case 6 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with AdminKeyNotExist exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10006,
+                        "Ошибка регистрации.",
+                        400,
+                        "Указанного ключа администратора не существует."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
+            case 7 -> {
+                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                        "' process finished with AdminWithCertainKeyAlreadyExists exception");
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        10007,
+                        "Ошибка регистрации.",
+                        400,
+                        "Указанный ключ администратора уже используется другим пользователем."
+                ), HttpStatus.BAD_REQUEST);
+            }
+
             default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
         };
     }

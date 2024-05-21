@@ -16,4 +16,9 @@ public class PaginationInfo {
 
     @NotEmpty
     private int requestedItemCount;
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) || (this.page == ((PaginationInfo) obj).page && this.requestedItemCount == ((PaginationInfo) obj).requestedItemCount);
+    }
 }

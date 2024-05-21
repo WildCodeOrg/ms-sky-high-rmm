@@ -7,6 +7,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.SortDirection;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.LoginUniversalUserComparator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Comparators.UserIdUniversalUserComparator;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
 import java.util.ArrayList;
@@ -40,5 +41,12 @@ public class UniversalUserSort {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) || (
+                (direction == null ? ((UniversalUserSort) obj).getDirection() == null : this.direction.equals(((UniversalUserSort) obj).getDirection()))
+                && (sortBy == null ? ((UniversalUserSort) obj).getSortBy() == null : this.sortBy.equals(((UniversalUserSort) obj).getSortBy())));
     }
 }

@@ -7,11 +7,13 @@ import lombok.Setter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
 import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -163,5 +165,14 @@ public class UniversalUserFilters {
         }
 
         return null;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) ||
+                (block_reason_id == null ?  ((UniversalUserFilters) obj).block_reason_id == null : this.block_reason_id.equals(((UniversalUserFilters) obj).getBlock_reason_id()))
+                && (user_info.getFirstName() == null ? ((UniversalUserFilters) obj).user_info.getFirstName() == null : this.user_info.getFirstName().equals(((UniversalUserFilters) obj).getUser_info().getFirstName()))
+                && (user_info.getSecondName() == null ? ((UniversalUserFilters) obj).user_info.getSecondName() == null : this.user_info.getSecondName().equals(((UniversalUserFilters) obj).getUser_info().getSecondName()))
+                && this.user_info.getAge() == ((UniversalUserFilters) obj).getUser_info().getAge();
     }
 }

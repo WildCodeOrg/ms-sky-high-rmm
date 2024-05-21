@@ -68,14 +68,14 @@ public class UniversalUserServiceImpl implements UniversalUserService {
             if (adminKey == null)
                 return new RegisterUserResultMessage(
                         "AdminKey cannot be null for admins.",
-                        3,
+                        4,
                         null
                 );
 
             if (adminKey.length() != 32)
                 return new RegisterUserResultMessage(
                         "AdminKey must be size of 32.",
-                        4,
+                        5,
                         null
                 );
 
@@ -85,14 +85,14 @@ public class UniversalUserServiceImpl implements UniversalUserService {
             if (adminKeyCodeEntities == null || adminKeyCodeEntities.size() != 1)
                 return new RegisterUserResultMessage(
                         "There is no such admin key code for admins.",
-                        5,
+                        6,
                         null
                 );
 
             if (adminKeyCodeEntities.get(0).getUser_id() != null)
                 return new RegisterUserResultMessage(
                         "Admin with certain admin key code already exists.",
-                        6,
+                        7,
                         null
                 );
         }
