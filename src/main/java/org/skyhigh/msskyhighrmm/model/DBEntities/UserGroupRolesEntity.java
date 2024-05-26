@@ -21,11 +21,11 @@ public class UserGroupRolesEntity {
     private UUID id;
 
     @Column(name = "role_name", nullable = false)
-    private String role_name;
+    private String roleName;
 
     @Column(name = "description")
     private String description;
 
     @Column(name = "is_critical", nullable = false)
-    private boolean is_critical;
+    private boolean isCritical;
 }

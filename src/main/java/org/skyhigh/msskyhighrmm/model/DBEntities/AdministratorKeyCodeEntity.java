@@ -20,9 +20,8 @@ public class AdministratorKeyCodeEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "id", referencedColumnName = "id")
-    private UniversalUserEntity user_id;
+    @Column(name = "user_id")
+    private UUID user_id;
 
     @Column(name = "key_code_value", nullable = false, length = 32)
     private String key_code_value;

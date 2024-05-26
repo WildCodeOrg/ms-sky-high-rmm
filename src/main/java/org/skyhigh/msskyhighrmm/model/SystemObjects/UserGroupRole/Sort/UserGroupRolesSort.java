@@ -24,6 +24,9 @@ public class UserGroupRolesSort {
 
     public static void sort(ArrayList<UserGroupRole> userGroupRolesListToSort, UserGroupRolesSort userGroupRolesSort)
     {
+        if (userGroupRolesListToSort == null || userGroupRolesListToSort.isEmpty())
+            return;
+
         switch (userGroupRolesSort.getDirection()) {
             case ASC -> {
                 if (userGroupRolesSort.getSortBy() == UserGroupRoleSortParameter.ROLE_NAME) {

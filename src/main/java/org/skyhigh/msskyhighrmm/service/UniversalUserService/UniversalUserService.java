@@ -4,13 +4,17 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
+import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -130,6 +134,31 @@ public interface UniversalUserService {
      *      adminKeyReferenceId - ID созданной записи с ключ-кодом админа
      */
     AddAdminKeyResultMessage addAdminKey(UUID userMadeRequest, String adminKey);
+
+    /**
+     * Выполняет выдачу роли списку пользователей и возвращает
+     *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждому
+     *      переданному id юзера)
+     * @param usersToAddRoleIds - список id юзеров, которым необходимо выдать указанную роль
+     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param roleId - id выдаваемой пользователям роли
+     * @return - объект AddRoleToUserResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно для всех переданных id юзеров;
+     *          1 - выполнено частично (некоторые id пользователей обработаны успешно, некоторые - нет);
+     *          2 - ни одноиму из пользователей роль не была назначена;
+     *          3 - пользователь, инициировавший операцию, не найден;
+     *          4 - роли с указанным id не существует;
+     *          5 - массив id пользователей - пустой;
+     *      certainAddRoleToUsersResults - список связок (тип AddRoleToUserResultMessageListElement)
+     *          "id пользователя + сообщение + код"
+     *          для каждого id юзера. Возможные значения кода:
+     *              0 - выполнено успешно;
+     *              1 - юзер по указанному id не найден;
+     *              2 - у пользователя уже назначена указанная роль.
+     */
+    AddRoleToUserResultMessage addRoleToUsers(UUID userMadeRequestId, UUID roleId, List<UUID> usersToAddRoleIds);
 
     /**
      * Возвращает список всех имеющихся юзеров

@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS user_group_roles
     id uuid NOT NULL,
     role_name text NOT NULL,
     description text NULL,
-    is_critical boolean NOT NULL,
+    criticality boolean NOT NULL,
     CONSTRAINT PK_user_group_roles PRIMARY KEY (id)
 )
 ;

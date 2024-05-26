@@ -1,11 +1,13 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface RolesService {
@@ -15,10 +17,9 @@ public interface RolesService {
      *      а также возвращает идентификатор созданной роли
      * @param roleName - наименование создаваемой роли
      * @param description - описание создаваемой роли
-     * @param isCritical - признак критичности создаваемой роли
      * @return - идентификатор созданной роли в Системе
      */
-    UUID addRole(String roleName, String description, boolean isCritical);
+    UUID addRole(String roleName, String description);
 
     /**
      * Возвращает страницу/выборку/набор существующих ролей в соответствии с

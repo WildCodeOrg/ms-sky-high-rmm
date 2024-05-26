@@ -13,9 +13,9 @@ public class RoleBOToRoleEntityConverter {
         UserGroupRolesEntity resultRole = new UserGroupRolesEntity();
 
         if (role.getId() != null) resultRole.setId(role.getId());
-        resultRole.setRole_name(role.getRole_name());
+        resultRole.setRoleName(role.getRoleName());
         resultRole.setDescription(role.getDescription());
-        resultRole.set_critical(role.is_critical());
+        resultRole.setCritical(role.isCritical());
 
         return resultRole;
     }

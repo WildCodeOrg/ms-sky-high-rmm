@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserGroupRole {
     private UUID id;
-    private String role_name;
+    private String roleName;
     private String description;
-    private boolean is_critical;
+    private boolean isCritical;
 }

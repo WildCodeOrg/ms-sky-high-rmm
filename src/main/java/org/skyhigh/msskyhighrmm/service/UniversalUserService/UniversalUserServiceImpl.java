@@ -1,12 +1,18 @@
 package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
+import org.skyhigh.msskyhighrmm.controller.RMMController;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UsersRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
@@ -16,16 +22,15 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.Paginati
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
-import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
-import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
-import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
-import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
+import org.skyhigh.msskyhighrmm.repository.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class UniversalUserServiceImpl implements UniversalUserService {
@@ -33,15 +38,27 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private final BlockReasonsRepository blockReasonsRepository;
     private final AdministratorKeyCodeRepository administratorKeyCodeRepository;
     private final UsersRolesRepository usersRolesRepository;
+    private final UserGroupRolesRepository usersGroupRolesRepository;
 
     private final PasswordEncoder passwordEncoder;
+    private final UserGroupRolesRepository userGroupRolesRepository;
 
-    public UniversalUserServiceImpl(UniversalUserRepository universalUserRepository, BlockReasonsRepository blockReasonsRepository, AdministratorKeyCodeRepository administratorKeyCodeRepository, UsersRolesRepository usersRolesRepository, PasswordEncoder passwordEncoder) {
+    private static final Logger log = Logger.getLogger(UniversalUserServiceImpl.class.getName());
+
+    public UniversalUserServiceImpl(UniversalUserRepository universalUserRepository,
+                                    BlockReasonsRepository blockReasonsRepository,
+                                    AdministratorKeyCodeRepository administratorKeyCodeRepository,
+                                    UsersRolesRepository usersRolesRepository,
+                                    UserGroupRolesRepository userGroupRolesRepository,
+                                    UserGroupRolesRepository usersGroupRolesRepository,
+                                    PasswordEncoder passwordEncoder) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
         this.usersRolesRepository = usersRolesRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userGroupRolesRepository = userGroupRolesRepository;
+        this.usersGroupRolesRepository = usersGroupRolesRepository;
     }
 
     @Override
@@ -168,7 +185,8 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
     @Override
     public UniversalUser getUserById(UUID id) {
-        return UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(id));
+        Optional<UniversalUserEntity> user = universalUserRepository.findById(id);
+        return user.map(UserEntityToUserBOConverter::convert).orElse(null);
     }
 
     @Override
@@ -214,7 +232,8 @@ public class UniversalUserServiceImpl implements UniversalUserService {
 
         universalUserRepository.updateUserInfoForUserWithId(userId, newUserInfoAttributes);
 
-        return UserEntityToUserBOConverter.convert(universalUserRepository.getReferenceById(userId));
+        Optional<UniversalUserEntity> user = universalUserRepository.findById(userId);
+        return user.map(UserEntityToUserBOConverter::convert).orElse(null);
     }
 
     @Override
@@ -300,9 +319,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         //если указан список пользователей (и не указан конкретный пользователь)
         for (UsersToBlockInfoListElement element : usersInfoToBlock) {
             if (!universalUserRepository.existsById(element.getUserId())) {
-                if (resultMessage.getGlobalOperationCode() == 0)
-                    resultMessage.setGlobalOperationCode(2);
-
                 certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
                         "Пользователь с идентификатором '" +
                                 element.getUserId() + "' не найден",
@@ -310,9 +326,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 ));
             }
             else if (!blockReasonsRepository.existsById(element.getBlockReasonId())) {
-                if (resultMessage.getGlobalOperationCode() == 0)
-                    resultMessage.setGlobalOperationCode(2);
-
                 certainUserBlockResultList.add(new BlockUsersResultMessageListElement(
                         "Причина блокировки с идентификатором '" +
                                 element.getBlockReasonId() + "' не найдена",
@@ -320,9 +333,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 ));
             }
             else {
-                if (resultMessage.getGlobalOperationCode() == 2)
-                    resultMessage.setGlobalOperationCode(1);
-
                 universalUserRepository.setBlockReasonIdForUserWithId(
                         element.getUserId(),
                         element.getBlockReasonId()
@@ -335,6 +345,17 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 ));
             }
         }
+
+        int unsuccessfullyBlockAmount = 0;
+        for (BlockUsersResultMessageListElement certainUserBlockResultListElement : certainUserBlockResultList) {
+            if (certainUserBlockResultListElement.getOperationCode() != 0)
+                unsuccessfullyBlockAmount++;
+        }
+
+        if (unsuccessfullyBlockAmount == certainUserBlockResultList.size())
+            resultMessage.setGlobalOperationCode(2);
+        else if (unsuccessfullyBlockAmount != 0)
+            resultMessage.setGlobalOperationCode(1);
 
         switch (resultMessage.getGlobalOperationCode()) {
             case 0 -> resultMessage.setGlobalMessage("Все пользователи из списка заблокированы");
@@ -380,6 +401,105 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 0,
                 createdReferenceId
         );
+    }
+
+    @Override
+    public AddRoleToUserResultMessage addRoleToUsers(UUID userMadeRequestId, UUID roleId, List<UUID> usersToAddRoleIds) {
+        Optional<UserGroupRolesEntity> role = usersGroupRolesRepository.findById(roleId);
+
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new AddRoleToUserResultMessage(
+                    "Пользователь, инициировавший операцию, не найден",
+                    3,
+                    null
+            );
+
+        if (role.isEmpty())
+            return new AddRoleToUserResultMessage(
+                    "Роль с указанным идентификатором не существует.",
+                    4,
+                    null
+            );
+
+        if (usersToAddRoleIds == null || usersToAddRoleIds.isEmpty())
+            return new AddRoleToUserResultMessage(
+                    "Список идентификаторов пользователей userToAddRoleIds пуст.",
+                    5,
+                    null
+            );
+
+        AddRoleToUserResultMessage addRoleToUserResultMessage = new AddRoleToUserResultMessage();
+        addRoleToUserResultMessage.setGlobalOperationCode(0);
+        List<AddRoleToUserResultMessageListElement> roleToUserResultMessageListElements = new ArrayList<>();
+        for (UUID userToAddRoleId : usersToAddRoleIds) {
+            Optional<UniversalUserEntity> userToAddRole = universalUserRepository.findById(userToAddRoleId);
+
+            if (userToAddRole.isEmpty()) {
+                log.info("Adding role with id '" + roleId + "' process log: "
+                        + "User with id '" + userToAddRoleId + "' does not exist.");
+
+                roleToUserResultMessageListElements.add(new AddRoleToUserResultMessageListElement(
+                        userToAddRoleId,
+                        "Пользователь с указанным идентификатором не существует.",
+                        1
+                ));
+            }
+            else {
+                List<UsersRolesEntity> userRolesList = usersRolesRepository.findByUserId(userToAddRoleId);
+
+                boolean isRoleAlreadyAdded = false;
+                for (UsersRolesEntity userRole : userRolesList) {
+                    if (userRole.getRole_id().getId().equals(roleId)) {
+                        isRoleAlreadyAdded = true;
+                        break;
+                    }
+                }
+
+                if (isRoleAlreadyAdded) {
+                    roleToUserResultMessageListElements.add(new AddRoleToUserResultMessageListElement(
+                            userToAddRoleId,
+                            "Указанная роль уже назначена данному пользователю.",
+                            2
+                    ));
+                } else {
+                    UsersRolesEntity usersRolesEntity = new UsersRolesEntity();
+                    usersRolesEntity.setUser_id(userToAddRole.get());
+                    usersRolesEntity.setRole_id(role.get());
+
+                    UUID createdReferenceId = (usersRolesRepository.save(usersRolesEntity)).getId();
+                    log.info("Adding role with id '" + roleId + "' process log: "
+                            + "A reference in users_roles table was created with id '" + createdReferenceId
+                            + "' for user with id '" + userToAddRoleId + "'");
+
+                    roleToUserResultMessageListElements.add(new AddRoleToUserResultMessageListElement(
+                            userToAddRoleId,
+                            "Роль успешно добавлена для указанного пользователя.",
+                            0
+                    ));
+                }
+            }
+        }
+
+        int unsuccessfullyAddRoleAmount = 0;
+        for (AddRoleToUserResultMessageListElement roleToUserResultMessageListElement : roleToUserResultMessageListElements) {
+            if (roleToUserResultMessageListElement.getOperationCode() != 0)
+                unsuccessfullyAddRoleAmount++;
+        }
+
+        if (unsuccessfullyAddRoleAmount == roleToUserResultMessageListElements.size()) {
+            addRoleToUserResultMessage.setGlobalOperationCode(2);
+            addRoleToUserResultMessage.setGlobalMessage("Ни одному из переданных пользователей не была назначена указанная роль.");
+        }
+        else if (unsuccessfullyAddRoleAmount != 0) {
+            addRoleToUserResultMessage.setGlobalOperationCode(1);
+            addRoleToUserResultMessage.setGlobalMessage("Роль добавлена успешно лишь части указанных пользователей.");
+        } else {
+            addRoleToUserResultMessage.setGlobalMessage("Роль была успешно добавлена всем указанным пользователям.");
+        }
+
+        addRoleToUserResultMessage.setCertainAddRoleToUsersResults(roleToUserResultMessageListElements);
+
+        return addRoleToUserResultMessage;
     }
 
     @Override

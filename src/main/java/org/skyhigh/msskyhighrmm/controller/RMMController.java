@@ -12,6 +12,9 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryRequestAddRoleToUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserFullSuccessfulDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserPartlySuccessfulDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
@@ -27,6 +30,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
@@ -379,7 +383,7 @@ public class RMMController {
         }
 
         final UUID addedUserGroupRoleId = rolesService.addRole(addUserGroupRoleDTO.getRole_name(),
-                addUserGroupRoleDTO.getDescription(), false);
+                addUserGroupRoleDTO.getDescription());
 
         return addedUserGroupRoleId != null
                 ? new ResponseEntity<>(new DeliveryResponseAddUserGroupRoleDTO("Роль успешно добавлена.",
@@ -476,7 +480,7 @@ public class RMMController {
     }
 
     @ValidParams
-    @PostMapping(value = "/admins/key_code_value")
+    @PostMapping(value = "/admins/key-code-value")
     public ResponseEntity<?> addAdminKeyCode(@RequestBody DeliveryRequestAddAdminKeyCodeDTO deliveryRequestAddAdminKeyCodeDTO) {
         log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
                 "' process was started by '" + deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId() + "'");
@@ -517,7 +521,7 @@ public class RMMController {
                         13001,
                         "Ошибка выполнения загрузки ключ-кода администратора.",
                         400,
-                        resultMessage.getGlobalMessage()
+                        "Длина ключ-кода администратора 32 символа."
                 ), HttpStatus.BAD_REQUEST);
             }
             case 2 -> {
@@ -528,13 +532,88 @@ public class RMMController {
                         13002,
                         "Ошибка выполнения загрузки ключ-кода администратора.",
                         400,
-                        resultMessage.getGlobalMessage()
+                        "Пользователь, инициировавший операцию, не обладает требуемыми правами."
                 ), HttpStatus.BAD_REQUEST);
             }
             default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
 
+    @ValidParams
+    @PostMapping(value = "/users/roles")
+    public ResponseEntity<?> addRoleToUser(@RequestBody DeliveryRequestAddRoleToUserDTO deliveryRequestAddRoleToUserDTO) {
+        log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                "' process was started by '" + deliveryRequestAddRoleToUserDTO.getUserMadeRequestId() + "'");
+
+        AddRoleToUserResultMessage resultMessage = universalUserService.addRoleToUsers(
+                deliveryRequestAddRoleToUserDTO.getUserMadeRequestId(),
+                deliveryRequestAddRoleToUserDTO.getRoleId(),
+                deliveryRequestAddRoleToUserDTO.getUsersToAddRoleIds()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                    "' process was finished successfully: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new DeliveryResponseAddRoleToUserFullSuccessfulDTO(
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                        "' process was finished partly successfully: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new DeliveryResponseAddRoleToUserPartlySuccessfulDTO(
+                        resultMessage.getGlobalMessage(),
+                        resultMessage.getCertainAddRoleToUsersResults()
+                ), HttpStatus.OK);
+            }
+            case 2 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new DeliveryResponseAddRoleToUserPartlySuccessfulDTO(
+                        resultMessage.getGlobalMessage(),
+                        resultMessage.getCertainAddRoleToUsersResults()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 3 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        5,
+                        "Ошибка прав доступа.",
+                        401,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            case 4 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        14003,
+                        "Ошибка выполнения добавления роли списку пользователей.",
+                        404,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.NOT_FOUND);
+            }
+            case 5 -> {
+                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                        "' process was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(new CommonExceptionResponseDTO(
+                        14004,
+                        "Ошибка выполнения добавления роли списку пользователей.",
+                        400,
+                        resultMessage.getGlobalMessage()
+                ), HttpStatus.BAD_REQUEST);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
     //test controller methods - uncomment to test the project availability
 
     /*

@@ -25,6 +25,9 @@ public class UniversalUserSort {
 
     public static void sort(ArrayList<UniversalUser> usersListToSort, UniversalUserSort universalUserSort)
     {
+        if (usersListToSort == null || usersListToSort.isEmpty())
+            return;
+
         switch (universalUserSort.getDirection()) {
             case ASC -> {
                 if (universalUserSort.getSortBy() == UniversalUserSortParameter.LOGIN) {

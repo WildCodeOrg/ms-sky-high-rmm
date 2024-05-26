@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdministratorKeyCodeRepository extends JpaRepository<AdministratorKeyCodeEntity, UUID> {
-    @Query(value = "SELECT * FROM administrator_key_code WHERE key_code_value = ?1", nativeQuery = true)
+    @Query(value = "SELECT * FROM find_a_key_code_by_value(?1)", nativeQuery = true)
     List<AdministratorKeyCodeEntity> findByCode(String adminCode);
 
     @Transactional

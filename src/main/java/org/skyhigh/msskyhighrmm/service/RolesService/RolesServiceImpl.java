@@ -2,10 +2,12 @@ package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Converters.RoleEntityToRoleBOConverter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
@@ -14,10 +16,7 @@ import org.skyhigh.msskyhighrmm.repository.UserGroupRolesRepository;
 import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class RolesServiceImpl implements RolesService{
@@ -35,16 +34,17 @@ public class RolesServiceImpl implements RolesService{
 
     //Добавление новой роли
     @Override
-    public UUID addRole(String roleName, String description, boolean isCritical)
+    public UUID addRole(String roleName, String description)
     {
-        if (userGroupRolesRepository.findByRoleName(roleName) != null) return null;
+        List<UserGroupRolesEntity> rolesWithSameName = userGroupRolesRepository.findByRoleName(roleName);
+        if (rolesWithSameName != null && !rolesWithSameName.isEmpty()) return null;
 
         return (userGroupRolesRepository
                 .save(new UserGroupRolesEntity(
                         null,
                         roleName,
                         description,
-                        isCritical)
+                        false)
                 )
         ).getId();
     }
@@ -61,15 +61,17 @@ public class RolesServiceImpl implements RolesService{
                 );
             } else return null;
         } else if (userGroupRolesFilters != null) {
-            resultUserGroupRolesList = new ArrayList<>(
-                    UserGroupRolesFilters.filter(
-                        userGroupRolesFilters.getRoleName(),
-                        userGroupRolesFilters.getDescription(),
-                        userGroupRolesFilters.getCriticality(),
-                        userGroupRolesRepository
-                    )
+            resultUserGroupRolesList = UserGroupRolesFilters.filter(
+                    userGroupRolesFilters.getRoleName(),
+                    userGroupRolesFilters.getDescription(),
+                    userGroupRolesFilters.getCriticality(),
+                    userGroupRolesRepository
             );
+        } else {
+            resultUserGroupRolesList = (ArrayList<UserGroupRole>) RoleEntityToRoleBOConverter.convertList(userGroupRolesRepository.findAll());
         }
+
+        if (resultUserGroupRolesList == null) return null;
 
         if (userGroupRolesSort != null) {
             UserGroupRolesSort.sort(resultUserGroupRolesList, userGroupRolesSort);
@@ -100,7 +102,7 @@ public class RolesServiceImpl implements RolesService{
                     "Роли с идентификатором '" + roleId + "' не сущетсвует",
                     1
             );
-        if (getRoleById(roleId).is_critical())
+        if (getRoleById(roleId).isCritical())
             return new DeleteUserGroupRoleResultMessage(
                     "Роль с идентификатором '" + roleId + "' является критичной",
                     2
@@ -116,8 +118,7 @@ public class RolesServiceImpl implements RolesService{
     }
 
     private UserGroupRole getRoleById(UUID id) {
-        return RoleEntityToRoleBOConverter.convert(
-                userGroupRolesRepository.getReferenceById(id)
-        );
+        Optional<UserGroupRolesEntity> userGroupRoleOptional = userGroupRolesRepository.findById(id);
+        return userGroupRoleOptional.map(RoleEntityToRoleBOConverter::convert).orElse(null);
     }
 }

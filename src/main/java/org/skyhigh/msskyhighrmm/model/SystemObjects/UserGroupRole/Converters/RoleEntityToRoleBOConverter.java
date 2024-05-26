@@ -12,9 +12,9 @@ public class RoleEntityToRoleBOConverter {
 
         return new UserGroupRole(
                 role.getId(),
-                role.getRole_name(),
+                role.getRoleName(),
                 role.getDescription(),
-                role.is_critical()
+                role.isCritical()
         );
     }
 

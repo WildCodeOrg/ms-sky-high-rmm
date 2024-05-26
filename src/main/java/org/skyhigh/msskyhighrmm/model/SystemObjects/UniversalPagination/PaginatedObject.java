@@ -13,6 +13,11 @@ public class PaginatedObject<E> {
     public PaginatedObject(int paginationItemCount, int paginationPageNumber,
                                        ArrayList<E> listToPaginate) {
 
+        if (listToPaginate == null || listToPaginate.isEmpty()) {
+            resultList = null;
+            return;
+        }
+
         ArrayList<E> result = new ArrayList<>();
 
         int firstElementOfResultListPosition = ((paginationPageNumber - 1) * paginationItemCount);
