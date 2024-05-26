@@ -20,6 +20,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUs
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserRolesDTOs.DeliveryRequestGetUserRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserRolesDTOs.DeliveryResponseGetUserRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
@@ -32,6 +34,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceM
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
@@ -614,6 +617,78 @@ public class RMMController {
             default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
         };
     }
+
+
+    @GetMapping(value = "/users/{user_id}/roles")
+    public ResponseEntity<?> getUserRoles(@PathVariable(name = "user_id") UUID userId, @ValidParams
+                                          @RequestBody DeliveryRequestGetUserRolesDTO getUserRolesDTO) {
+        log.info("Getting roles for user: '" + userId + "' " +
+                "process was started by '" + getUserRolesDTO.getUserMadeRequestId() + "'");
+
+        GetUserRolesResultMessage resultMessage = universalUserService.getUserRoles(
+                getUserRolesDTO.getUserMadeRequestId(),
+                userId
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Getting roles for user: '" + userId + "' " +
+                        "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
+                        "' was finished successfully: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseGetUserRolesDTO(
+                                resultMessage.getGlobalMessage(),
+                                resultMessage.getRolesOfUser()
+                        )
+                , HttpStatus.OK);
+            }
+            case 1 -> {
+                log.info("Getting roles for user: '" + userId + "' " +
+                        "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
+                        "' was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                             5,
+                             "Ошибка прав доступа",
+                             401,
+                                resultMessage.getGlobalMessage()
+                        )
+                , HttpStatus.UNAUTHORIZED);
+            }
+            case 2 -> {
+                log.info("Getting roles for user: '" + userId + "' " +
+                        "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
+                        "' was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                15001,
+                                "Ошибка выполнения поиска ролей пользователя",
+                                404,
+                                resultMessage.getGlobalMessage()
+                        )
+                , HttpStatus.NOT_FOUND);
+            }
+            case 3 -> {
+                log.info("Getting roles for user: '" + userId + "' " +
+                        "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
+                        "' was finished with error: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                15002,
+                                "Ошибка выполнения поиска ролей пользователя",
+                                404,
+                                resultMessage.getGlobalMessage()
+                        )
+                , HttpStatus.NOT_FOUND);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
+
     //test controller methods - uncomment to test the project availability
 
     /*

@@ -4,17 +4,15 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
-import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
-import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -159,6 +157,21 @@ public interface UniversalUserService {
      *              2 - у пользователя уже назначена указанная роль.
      */
     AddRoleToUserResultMessage addRoleToUsers(UUID userMadeRequestId, UUID roleId, List<UUID> usersToAddRoleIds);
+
+    /**
+     * Выполняет поиск и выдачу ролей пользователя
+     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param userId - id пользователя, роли которого необходимо отобразить;
+     * @return - объект GetUserRolesResultMessage, имеющий поля:
+     *      globalMessage -  глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - пользователь, роли которого необходимо отобразить, не найден;
+     *          3 - у искомого пользователя нет назначенных ролей;
+     *      rolesOfUser - список ролей пользователя в виде: id роли (roleId) + наименование роли (roleName).
+     */
+    GetUserRolesResultMessage getUserRoles(UUID userMadeRequestId, UUID userId);
 
     /**
      * Возвращает список всех имеющихся юзеров

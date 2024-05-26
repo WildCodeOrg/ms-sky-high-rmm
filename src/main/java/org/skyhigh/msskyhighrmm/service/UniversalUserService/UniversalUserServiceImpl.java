@@ -1,7 +1,5 @@
 package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
-import org.skyhigh.msskyhighrmm.controller.RMMController;
-import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
@@ -15,6 +13,8 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
@@ -500,6 +500,45 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         addRoleToUserResultMessage.setCertainAddRoleToUsersResults(roleToUserResultMessageListElements);
 
         return addRoleToUserResultMessage;
+    }
+
+    @Override
+    public GetUserRolesResultMessage getUserRoles(UUID userMadeRequestId, UUID userId) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new GetUserRolesResultMessage(
+                    "Пользователь с id '" + userMadeRequestId + "' не найден.",
+                    1,
+                    null
+            );
+
+        if (!universalUserRepository.existsById(userId))
+            return new GetUserRolesResultMessage(
+                    "Пользователь с id '" + userId + "' не найден.",
+                    2,
+                    null
+            );
+
+        List<UserGroupRolesEntity> rolesOfUser = userGroupRolesRepository.getRolesOfUser(userId);
+        if (rolesOfUser == null || rolesOfUser.isEmpty())
+            return new GetUserRolesResultMessage(
+                    "У пользователя с id '" + userId + "' нет назначенных ролей.",
+                    3,
+                    null
+            );
+
+        List<GetUserRolesListElement> resultMessageElement = new ArrayList<>();
+        for (UserGroupRolesEntity role : rolesOfUser) {
+            resultMessageElement.add(new GetUserRolesListElement(
+                    role.getId(),
+                    role.getRoleName()
+            ));
+        }
+
+        return new GetUserRolesResultMessage(
+                "Роли пользователя успешно найдены.",
+                0,
+                resultMessageElement
+        );
     }
 
     @Override

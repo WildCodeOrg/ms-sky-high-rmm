@@ -89,4 +89,10 @@ public interface UserGroupRolesRepository extends JpaRepository<UserGroupRolesEn
     List<UserGroupRolesEntity> findByCriticality(
             boolean isCritical
     );
+
+    @Query(value = "SELECT ugr.id, ugr.role_name, ugr.description, ugr.is_critical " +
+            "FROM user_group_roles ugr " +
+            "JOIN users_roles ur on ugr.id = ur.role_id " +
+            "WHERE ur.user_id = ?1", nativeQuery = true)
+    List<UserGroupRolesEntity> getRolesOfUser(UUID userId);
 }
