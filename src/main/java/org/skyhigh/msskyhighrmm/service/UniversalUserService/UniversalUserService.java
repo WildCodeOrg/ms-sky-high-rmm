@@ -10,6 +10,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
@@ -172,6 +173,34 @@ public interface UniversalUserService {
      *      rolesOfUser - список ролей пользователя в виде: id роли (roleId) + наименование роли (roleName).
      */
     GetUserRolesResultMessage getUserRoles(UUID userMadeRequestId, UUID userId);
+
+    /**
+     * Выполняет отмену роли списку пользователей и возвращает
+     *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждому
+     *      переданному id юзера)
+     * @param usersToRemoveRoleIds - список id юзеров, у которых необходимо отменить указанную роль
+     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param roleId - id отменяемой у пользователей роли
+     * @return - объект AddRoleToUserResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно для всех переданных id юзеров;
+     *          1 - выполнено частично (некоторые id пользователей обработаны успешно, некоторые - нет);
+     *          2 - ни одноиму из пользователей роль не назначена;
+     *          3 - пользователь, инициировавший операцию, не найден;
+     *          4 - роли с указанным id не существует;
+     *          5 - массив id пользователей - пустой;
+     *          6 - отмену критической роли может выполнять только пользователь с правами администратора;
+     *          7 - произошла системная ошибка;
+     *      certainResultMessages - список связок (тип RemoveRoleFromUserListResultMessageListElement)
+     *          "id пользователя + сообщение + код"
+     *          для каждого id юзера. Возможные значения кода:
+     *              0 - выполнено успешно;
+     *              1 - юзер по указанному id не найден;
+     *              2 - у пользователя нет указанной роли;
+     *              3 - непредвиденная ошибка.
+     */
+    RemoveRoleFromUserListResultMessage removeRoleFromUserList(UUID userMadeRequestId, UUID roleId, List<UUID> usersToRemoveRoleIds);
 
     /**
      * Возвращает список всех имеющихся юзеров

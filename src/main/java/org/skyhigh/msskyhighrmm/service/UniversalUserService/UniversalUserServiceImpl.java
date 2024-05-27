@@ -17,6 +17,8 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
@@ -539,6 +541,133 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 0,
                 resultMessageElement
         );
+    }
+
+    @Override
+    public RemoveRoleFromUserListResultMessage removeRoleFromUserList(UUID userMadeRequestId, UUID roleId, List<UUID> usersToRemoveRoleIds) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new RemoveRoleFromUserListResultMessage(
+                    "Пользователь, инициировавший выполнение операции, не найден.",
+                    3,
+                    null
+            );
+
+        if (!userGroupRolesRepository.existsById(roleId))
+            return new RemoveRoleFromUserListResultMessage(
+                    "Роли с указанным id не существует.",
+                    4,
+                    null
+            );
+
+        if (usersToRemoveRoleIds == null || usersToRemoveRoleIds.isEmpty())
+            return new RemoveRoleFromUserListResultMessage(
+                    "Список идентификаторов userIds пуст.",
+                    5,
+                    null
+            );
+
+        Optional<UserGroupRolesEntity> userGroupRolesEntityOptional = userGroupRolesRepository.findById(roleId);
+
+        if (userGroupRolesEntityOptional.isEmpty())
+            return new RemoveRoleFromUserListResultMessage(
+                    "Произошла системная ошибка.",
+                    7,
+                    null
+            );
+
+        if (userGroupRolesEntityOptional.get().isCritical()) {
+            Optional<UniversalUserEntity> universalUserEntityOptional = universalUserRepository.findById(userMadeRequestId);
+
+            if (universalUserEntityOptional.isEmpty())
+                return new RemoveRoleFromUserListResultMessage(
+                        "Произошла системная ошибка.",
+                        7,
+                        null
+                );
+
+            List<AdministratorKeyCodeEntity> userAdminListById = administratorKeyCodeRepository.findByUserId(userMadeRequestId);
+            if (userAdminListById == null || userAdminListById.isEmpty())
+                return new RemoveRoleFromUserListResultMessage(
+                        "Отмену критической роли может выполнять только пользователь с правами администратора.",
+                        6,
+                        null
+                );
+        }
+
+        RemoveRoleFromUserListResultMessage resultMessage = new RemoveRoleFromUserListResultMessage();
+        resultMessage.setGlobalOperationCode(0);
+        List<RemoveRoleFromUserListResultMessageListElement> removeRoleResultList = new ArrayList<>();
+
+        for (UUID userId : usersToRemoveRoleIds) {
+            Optional<UniversalUserEntity> userToRemoveRole = universalUserRepository.findById(userId);
+
+            if (userToRemoveRole.isEmpty()) {
+                log.info("Removing role with id '" + roleId + "' process log: "
+                        + "User with id '" + userId + "' does not exist.");
+
+                removeRoleResultList.add(new RemoveRoleFromUserListResultMessageListElement(
+                        userId,
+                        "Пользователь с указанным идентификатором не существует.",
+                        1
+                ));
+            }
+            else {
+                List<UsersRolesEntity> userRolesList = usersRolesRepository.findByUserId(userId);
+
+                UsersRolesEntity usersRolesEntity = null;
+                for (UsersRolesEntity userRole : userRolesList) {
+                    if (userRole.getRole_id().getId().equals(roleId)) {
+                        usersRolesEntity = userRole;
+                        break;
+                    }
+                }
+
+                if (usersRolesEntity == null) {
+                    log.info("Removing role with id '" + roleId + "' process log: "
+                            + "user with id '" + userId + "' does not have this role.");
+
+                    removeRoleResultList.add(new RemoveRoleFromUserListResultMessageListElement(
+                            userId,
+                            "У пользователя нет указанной роли.",
+                            2
+                    ));
+                } else {
+                    UUID removedUserRoleId = usersRolesEntity.getId();
+                    usersRolesRepository.deleteById(removedUserRoleId);
+
+                    log.info("Removing role with id '" + roleId + "' process log: "
+                            + "A reference in users_roles table with id '" + removedUserRoleId
+                            + "' was removed for user with id '" + userId + "'");
+
+                    removeRoleResultList.add(new RemoveRoleFromUserListResultMessageListElement(
+                            userId,
+                            "Роль успешно отменена для указанного пользователя.",
+                            0
+                    ));
+                }
+            }
+        }
+
+        int unsuccessfullyRemoveRoleAmount = 0;
+        for (RemoveRoleFromUserListResultMessageListElement removeRoleFromUserListResultMessageListElement : removeRoleResultList) {
+            if (removeRoleFromUserListResultMessageListElement.getOperationCode() != 0)
+                unsuccessfullyRemoveRoleAmount++;
+        }
+
+        if (unsuccessfullyRemoveRoleAmount == removeRoleResultList.size()) {
+            resultMessage.setGlobalOperationCode(2);
+            resultMessage.setGlobalMessage("Ни одному из переданных пользователей не назначена указанная роль.");
+        }
+        else if (unsuccessfullyRemoveRoleAmount != 0) {
+            resultMessage.setGlobalOperationCode(1);
+            resultMessage.setGlobalMessage("Роль отменена успешно лишь для части указанных пользователей.");
+        } else {
+            resultMessage.setGlobalMessage("Роль была успешно отменена для всех указанных пользователей.");
+        }
+
+        resultMessage.setCertainResultMessages(removeRoleResultList);
+
+        return resultMessage;
     }
 
     @Override

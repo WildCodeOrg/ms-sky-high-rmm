@@ -111,7 +111,7 @@ ALTER TABLE users_roles ADD CONSTRAINT FK_users_roles_user_group_roles
 CREATE OR REPLACE FUNCTION public.find_a_key_code_by_value(p_key_code_value character varying)
     RETURNS TABLE(id uuid, user_id uuid, key_code_value character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -123,13 +123,12 @@ begin
         where
             akc.key_code_value = p_key_code_value;
 end;
-$function$
-;
+';
 
 CREATE OR REPLACE FUNCTION public.find_by_age(p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -142,15 +141,14 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_age(p_block_reason_id uuid, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -164,15 +162,14 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name(p_block_reason_id uuid, p_f_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -186,15 +183,14 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_age(p_block_reason_id uuid, p_f_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -208,16 +204,15 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_second_name(p_block_reason_id uuid, p_f_name character varying, p_s_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -231,16 +226,15 @@ begin
         where
             us.block_reason_id = p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'secondName' = p_s_name;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''secondName'' = p_s_name;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_second_name_and_age(p_block_reason_id uuid, p_f_name character varying, p_s_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -254,17 +248,16 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'secondName' = p_s_name
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''secondName'' = p_s_name
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_second_name(p_block_reason_id uuid, p_s_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -278,15 +271,14 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'secondName' = p_s_name;
-end;
-$function$
+          and us.user_info ->> ''secondName'' = p_s_name;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_second_name_and_age(p_block_reason_id uuid, p_s_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -300,16 +292,16 @@ begin
         where
             us.block_reason_id=p_block_reason_id
           and us.user_info is not NULL
-          and us.user_info ->> 'secondName' = p_s_name
-          and us.user_info ->> 'age' = p_age::text;
+          and us.user_info ->> ''secondName'' = p_s_name
+          and us.user_info ->> ''age'' = p_age::text;
 end;
-$function$
+'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name(p_f_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -322,16 +314,15 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name;
+end;'
 ;
 
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_and_age(p_f_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -344,16 +335,15 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_and_second_name(p_f_name character varying, p_s_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -366,16 +356,15 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'secondName' = p_s_name;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''secondName'' = p_s_name;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_ans_second_name_and_age(p_f_name character varying, p_s_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -388,17 +377,16 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'firstName' = p_f_name
-          and us.user_info ->> 'secondName' = p_s_name
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''firstName'' = p_f_name
+          and us.user_info ->> ''secondName'' = p_s_name
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_second_name(p_s_name character varying)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -411,15 +399,14 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'secondName' = p_s_name;
-end;
-$function$
+          and us.user_info ->> ''secondName'' = p_s_name;
+end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_second_name_and_age(p_s_name character varying, p_age integer)
     RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
-AS $function$
+AS '
 begin
     return query
         select
@@ -432,8 +419,7 @@ begin
             universal_user us
         where
             us.user_info is not NULL
-          and us.user_info ->> 'secondName' = p_s_name
-          and us.user_info ->> 'age' = p_age::text;
-end;
-$function$
+          and us.user_info ->> ''secondName'' = p_s_name
+          and us.user_info ->> ''age'' = p_age::text;
+end;'
 ;

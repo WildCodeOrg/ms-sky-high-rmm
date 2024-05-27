@@ -26,6 +26,9 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUs
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryResponseLoginUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryRequestRegisterUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.registerUserDTOs.DeliveryResponseRegisterUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.removeRoleFromUserListDTOs.DeliveryRequestRemoveRoleFromUserListDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.removeRoleFromUserListDTOs.DeliveryResponseRemoveRoleFromUserListFullSuccessDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.removeRoleFromUserListDTOs.DeliveryResponseRemoveRoleFromUserListPartlySuccessDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryRequestSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
@@ -37,6 +40,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
@@ -88,8 +92,9 @@ public class RMMController {
             }
 
             case 1 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with login validation exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10001,
                         "Ошибка регистрации.",
@@ -99,8 +104,9 @@ public class RMMController {
             }
 
             case 2 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with password validation exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10002,
                         "Ошибка регистрации.",
@@ -110,8 +116,9 @@ public class RMMController {
             }
 
             case 3 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with UserAlreadyExists exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10003,
                         "Ошибка регистрации.",
@@ -121,8 +128,9 @@ public class RMMController {
             }
 
             case 4 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with AdminKeyIsEmpty exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10004,
                         "Ошибка регистрации.",
@@ -132,8 +140,9 @@ public class RMMController {
             }
 
             case 5 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with AdminKeySize exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10005,
                         "Ошибка регистрации.",
@@ -143,8 +152,9 @@ public class RMMController {
             }
 
             case 6 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with AdminKeyNotExist exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10006,
                         "Ошибка регистрации.",
@@ -154,8 +164,9 @@ public class RMMController {
             }
 
             case 7 -> {
-                log.info("Registering a user with login '" + registerUserDTO.getLogin() +
+                log.warning("Registering a user with login '" + registerUserDTO.getLogin() +
                         "' process finished with AdminWithCertainKeyAlreadyExists exception");
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10007,
                         "Ошибка регистрации.",
@@ -184,6 +195,7 @@ public class RMMController {
         return switch (loginResult.getGlobalOperationCode()) {
             case 0 -> {
                 log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished successfully");
+
                 yield new ResponseEntity<>(new DeliveryResponseLoginUserDTO(
                     loginUserDTO.getLogin(),
                     loginResult.getLogonUserId(),
@@ -191,7 +203,9 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                log.warning("Login process for '" + loginUserDTO.getLogin() + "' was finished with error: "
+                        + loginResult.getGlobalMessage());
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         11001,
                         "Ошибка авторизации.",
@@ -200,7 +214,9 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
             case 2 -> {
-                log.info("Login process for '" + loginUserDTO.getLogin() + "' was finished with error 400");
+                log.warning("Login process for '" + loginUserDTO.getLogin() + "' was finished with error: "
+                    + loginResult.getGlobalMessage());
+
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         11002,
                         "Ошибка авторизации.",
@@ -222,6 +238,10 @@ public class RMMController {
         final UniversalUser foundUniversalUser;
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Getting user by Id '" + searchForUserId +
+                    "' process started by '" + getUserByIdDTO.getUserMadeRequestId() +
+                    "' finished with exception code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -232,6 +252,9 @@ public class RMMController {
 
         foundUniversalUser = universalUserService.getUserById(searchForUserId);
 
+        log.info("Getting user by Id '" + searchForUserId +
+                "' process started by '" + getUserByIdDTO.getUserMadeRequestId() + "'" +
+                " was finished");
         return foundUniversalUser != null
                 ? new ResponseEntity<>(new DeliveryResponseGetUserByIdDTO("Пользователь найден.",
                     foundUniversalUser), HttpStatus.OK)
@@ -251,6 +274,9 @@ public class RMMController {
         final UUID userMadeRequestId = searchUsersDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Getting users by criteria process started by '" + searchUsersDTO.getUserMadeRequestId() +
+                    "' finished with exception code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -261,6 +287,9 @@ public class RMMController {
 
         ListOfUniversalUser result = universalUserService.searchUsers(searchUsersDTO.getPagination(),
                 searchUsersDTO.getFilters(), searchUsersDTO.getSort());
+
+        log.info("Getting users by criteria process started by '" + searchUsersDTO.getUserMadeRequestId() +
+                "' finished");
 
         return result != null
                 ? new ResponseEntity<>(new DeliveryResponseSearchUsersDTO(result.getItemCount(),
@@ -277,9 +306,16 @@ public class RMMController {
     @PutMapping(value = "/users/{user_id}")
     public ResponseEntity<?> updateUserById(@PathVariable(name = "user_id") UUID updateUserId, @ValidParams
                                             @RequestBody DeliveryRequestUpdateUserByIdDTO updateUserByIdDTO) {
+        log.info("Updating user with id '" + updateUserId +
+                "' process was started by '" + updateUserByIdDTO.getUserMadeRequestId() + "'");
+
         final UUID userMadeRequestId = updateUserByIdDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Updating user with id '" + updateUserId +
+                    "' process started by '" + updateUserByIdDTO.getUserMadeRequestId() +
+                    "' finished with exception code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -288,6 +324,9 @@ public class RMMController {
             ), HttpStatus.UNAUTHORIZED);
         }
 
+        log.info("Updating user with id '" + updateUserId +
+                "' process started by '" + updateUserByIdDTO.getUserMadeRequestId() +
+                "' finished");
         return universalUserService.getUserById(updateUserId) != null
                 ? new ResponseEntity<>(new DeliveryResponseUpdateUserByIdDTO(
                     "Запись пользователя успешно обновлена", universalUserService.updateUserById(updateUserId,
@@ -310,6 +349,10 @@ public class RMMController {
         final UUID userMadeRequestId = blockUserDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Blocking users with request '" + blockUserDTO.toString() +
+                    "' process started by '" + blockUserDTO.getUserMadeRequestId() +
+                    "' finished with error code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -334,7 +377,7 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Blocking users with request '{" + blockUserDTO +
+                log.warning("Blocking users with request '{" + blockUserDTO +
                         "}' process was finished half successfully (with some errors)");
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         12,
@@ -344,7 +387,7 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
             case 2 -> {
-                log.info("Blocking users with request '" + blockUserDTO +
+                log.warning("Blocking users with request '" + blockUserDTO +
                         "' process was finished unsuccessfully (all data pairs with errors)");
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         13,
@@ -377,6 +420,9 @@ public class RMMController {
         final UUID userMadeRequestId = addUserGroupRoleDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.info("Adding process for role '" + addUserGroupRoleDTO.getRole_name() +
+                    "' was finished with error code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -388,6 +434,7 @@ public class RMMController {
         final UUID addedUserGroupRoleId = rolesService.addRole(addUserGroupRoleDTO.getRole_name(),
                 addUserGroupRoleDTO.getDescription());
 
+        log.info("Adding process for role '" + addUserGroupRoleDTO.getRole_name() + "' was finished");
         return addedUserGroupRoleId != null
                 ? new ResponseEntity<>(new DeliveryResponseAddUserGroupRoleDTO("Роль успешно добавлена.",
                         addedUserGroupRoleId), HttpStatus.OK)
@@ -407,6 +454,9 @@ public class RMMController {
         final UUID userMadeRequestId = searchRolesDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Getting roles by criteria process started by '" + searchRolesDTO.getUserMadeRequestId() +
+                    "' finished with error code 5");
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -418,6 +468,8 @@ public class RMMController {
         ListOfUserGroupRoles result = rolesService.rolesSearch(searchRolesDTO.getPagination(),
                 searchRolesDTO.getRoleId(), searchRolesDTO.getFilters(), searchRolesDTO.getSort());
 
+        log.info("Getting roles by criteria process started by '" + searchRolesDTO.getUserMadeRequestId() +
+                "' was finished");
         return result != null
                 ? new ResponseEntity<>(new DeliveryResponseSearchRolesDTO(result.getItemCount(),
                 new PageInfo(result.getPageNumber(), result.getPaginationItemCount()),
@@ -439,6 +491,9 @@ public class RMMController {
         final UUID userMadeRequestId = deleteUserGroupRoleDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                    "' process finished with error status" + 5);
+
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
                     5,
                     "Ошибка прав доступа.",
@@ -459,7 +514,7 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                log.warning("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
                         "' process finished with error status" + 10);
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         10,
@@ -469,7 +524,7 @@ public class RMMController {
                 ), HttpStatus.NOT_FOUND);
             }
             case 2 -> {
-                log.info("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
+                log.warning("Deleting a role with id '" + deleteUserGroupRoleDTO.getRoleToDeleteId() +
                         "' process finished with error status" + 11);
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         11,
@@ -491,7 +546,7 @@ public class RMMController {
         final UUID userMadeRequestId = deliveryRequestAddAdminKeyCodeDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
-            log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+            log.warning("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
                     "' process was finished with error as user made request does not exist");
 
             return new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -518,7 +573,7 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                log.warning("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
                         13001,
@@ -528,7 +583,7 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
             case 2 -> {
-                log.info("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
+                log.warning("Adding an admin code: '" + deliveryRequestAddAdminKeyCodeDTO.getAdminKeyCode() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -564,7 +619,7 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                log.warning("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
                         "' process was finished partly successfully: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new DeliveryResponseAddRoleToUserPartlySuccessfulDTO(
@@ -573,7 +628,7 @@ public class RMMController {
                 ), HttpStatus.OK);
             }
             case 2 -> {
-                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                log.warning("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new DeliveryResponseAddRoleToUserPartlySuccessfulDTO(
@@ -582,7 +637,7 @@ public class RMMController {
                 ), HttpStatus.BAD_REQUEST);
             }
             case 3 -> {
-                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                log.warning("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -590,10 +645,10 @@ public class RMMController {
                         "Ошибка прав доступа.",
                         401,
                         resultMessage.getGlobalMessage()
-                ), HttpStatus.BAD_REQUEST);
+                ), HttpStatus.UNAUTHORIZED);
             }
             case 4 -> {
-                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                log.warning("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -604,7 +659,7 @@ public class RMMController {
                 ), HttpStatus.NOT_FOUND);
             }
             case 5 -> {
-                log.info("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
+                log.warning("Adding a role: '" + deliveryRequestAddRoleToUserDTO.getRoleId() +
                         "' process was finished with error: " + resultMessage.getGlobalMessage());
 
                 yield new ResponseEntity<>(new CommonExceptionResponseDTO(
@@ -644,7 +699,7 @@ public class RMMController {
                 , HttpStatus.OK);
             }
             case 1 -> {
-                log.info("Getting roles for user: '" + userId + "' " +
+                log.warning("Getting roles for user: '" + userId + "' " +
                         "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
                         "' was finished with error: " + resultMessage.getGlobalMessage());
 
@@ -658,7 +713,7 @@ public class RMMController {
                 , HttpStatus.UNAUTHORIZED);
             }
             case 2 -> {
-                log.info("Getting roles for user: '" + userId + "' " +
+                log.warning("Getting roles for user: '" + userId + "' " +
                         "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
                         "' was finished with error: " + resultMessage.getGlobalMessage());
 
@@ -672,7 +727,7 @@ public class RMMController {
                 , HttpStatus.NOT_FOUND);
             }
             case 3 -> {
-                log.info("Getting roles for user: '" + userId + "' " +
+                log.warning("Getting roles for user: '" + userId + "' " +
                         "process started by '" + getUserRolesDTO.getUserMadeRequestId() +
                         "' was finished with error: " + resultMessage.getGlobalMessage());
 
@@ -689,6 +744,148 @@ public class RMMController {
         };
     }
 
+
+    @DeleteMapping(value = "/users/roles/{role_id}")
+    public ResponseEntity<?> removeRoleFromUserList(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+                                                    @RequestBody DeliveryRequestRemoveRoleFromUserListDTO removeRoleFromUserListRequest) {
+
+        log.info("Removing role with id: '" + roleId + "' " +
+                " for user list process was started by " +
+                "'" + removeRoleFromUserListRequest.getUserMadeRequestId() + "'");
+
+        RemoveRoleFromUserListResultMessage resultMessage = universalUserService.removeRoleFromUserList(
+                removeRoleFromUserListRequest.getUserMadeRequestId(),
+                roleId,
+                removeRoleFromUserListRequest.getUserIds()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished successfully");
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseRemoveRoleFromUserListFullSuccessDTO(
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished partly successfully");
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseRemoveRoleFromUserListPartlySuccessDTO(
+                                resultMessage.getGlobalMessage(),
+                                resultMessage.getCertainResultMessages()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 2 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                16001,
+                                "Ошибка выполнения отмены роли списку пользователей",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 3 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа",
+                                401,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 4 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                16002,
+                                "Ошибка выполнения отмены роли списку пользователей",
+                                404,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 5 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                16003,
+                                "Ошибка выполнения отмены роли списку пользователей",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 6 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                16004,
+                                "Ошибка выполнения отмены роли списку пользователей",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 7 -> {
+                log.warning("Removing role with id: '" + roleId + "' " +
+                        " for user list process was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                16006,
+                                "Ошибка выполнения отмены роли списку пользователей",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
+
+
     //test controller methods - uncomment to test the project availability
 
     /*
@@ -698,21 +895,3 @@ public class RMMController {
         System.out.println("Validation!");
     }*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
