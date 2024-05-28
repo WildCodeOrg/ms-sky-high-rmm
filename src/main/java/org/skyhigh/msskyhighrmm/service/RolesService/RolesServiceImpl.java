@@ -109,14 +109,7 @@ public class RolesServiceImpl implements RolesService{
                     2
             );
 
-        List<UsersRolesEntity> assignedRoles = usersRolesRepository.findByRoleId(roleId);
-
-        // TO DO - refactor to use stored procedure instead of the current realization
-        if (assignedRoles != null && !assignedRoles.isEmpty()) {
-            for (UsersRolesEntity assignedRole : assignedRoles)
-                usersRolesRepository.deleteById(assignedRole.getId());
-        }
-
+        usersRolesRepository.deleteByRoleId(roleId);
         userGroupRolesRepository.deleteById(roleId);
 
         return new DeleteUserGroupRoleResultMessage(

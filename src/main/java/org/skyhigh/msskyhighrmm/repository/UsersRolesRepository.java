@@ -17,4 +17,9 @@ public interface UsersRolesRepository extends JpaRepository<UsersRolesEntity, UU
 
     @Query(value = "SELECT * FROM users_roles WHERE role_id = ?1", nativeQuery = true)
     List<UsersRolesEntity> findByRoleId(UUID roleId);
+
+    @Transactional
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "DELETE FROM users_roles WHERE role_id = ?1", nativeQuery = true)
+    void deleteByRoleId(UUID roleId);
 }
