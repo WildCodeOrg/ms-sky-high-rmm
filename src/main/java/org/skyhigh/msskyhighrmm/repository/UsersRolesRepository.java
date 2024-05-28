@@ -14,4 +14,7 @@ public interface UsersRolesRepository extends JpaRepository<UsersRolesEntity, UU
 
     @Query(value = "SELECT * FROM users_roles WHERE user_id = ?1", nativeQuery = true)
     List<UsersRolesEntity> findByUserId(UUID userId);
+
+    @Query(value = "SELECT * FROM users_roles WHERE role_id = ?1", nativeQuery = true)
+    List<UsersRolesEntity> findByRoleId(UUID roleId);
 }

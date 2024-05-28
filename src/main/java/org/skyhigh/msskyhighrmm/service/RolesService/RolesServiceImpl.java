@@ -4,6 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
+import org.skyhigh.msskyhighrmm.model.DBEntities.UsersRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -108,8 +109,15 @@ public class RolesServiceImpl implements RolesService{
                     2
             );
 
+        List<UsersRolesEntity> assignedRoles = usersRolesRepository.findByRoleId(roleId);
+
+        // TO DO - refactor to use stored procedure instead of the current realization
+        if (assignedRoles != null && !assignedRoles.isEmpty()) {
+            for (UsersRolesEntity assignedRole : assignedRoles)
+                usersRolesRepository.deleteById(assignedRole.getId());
+        }
+
         userGroupRolesRepository.deleteById(roleId);
-        //TO DO - очистка таблицы-связки с ролями
 
         return new DeleteUserGroupRoleResultMessage(
                 "Роль с идентификатором '" + roleId + "' успешно удалена",
