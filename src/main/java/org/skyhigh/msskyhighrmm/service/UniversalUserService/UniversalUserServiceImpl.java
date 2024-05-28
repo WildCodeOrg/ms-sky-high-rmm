@@ -4,11 +4,9 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
-import org.skyhigh.msskyhighrmm.model.DBEntities.AdministratorKeyCodeEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UsersRolesEntity;
+import org.skyhigh.msskyhighrmm.model.DBEntities.*;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
@@ -668,6 +666,35 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         resultMessage.setCertainResultMessages(removeRoleResultList);
 
         return resultMessage;
+    }
+
+    @Override
+    public AddBlockReasonResultMessage addBlockReason(UUID userMadeRequestId, String blockReasonDescription) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new AddBlockReasonResultMessage(
+                    null,
+                    1,
+                    "Пользователь, инициировавший операцию, не найден"
+            );
+
+        BlockReasonEntity blockReasonToSave = new BlockReasonEntity();
+        blockReasonToSave.setDescription(blockReasonDescription);
+
+        String createdReferenceId = (blockReasonsRepository.save(blockReasonToSave))
+                .getId();
+
+        if (createdReferenceId == null || createdReferenceId.isEmpty())
+            return new AddBlockReasonResultMessage(
+                    null,
+                    2,
+                    "Произошла непредвиденная ошибка"
+            );
+
+        return new AddBlockReasonResultMessage(
+                createdReferenceId,
+                0,
+                "Причина блокировки успешно сохранена"
+        );
     }
 
     @Override

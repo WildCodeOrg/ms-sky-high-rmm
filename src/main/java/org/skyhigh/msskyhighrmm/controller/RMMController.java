@@ -12,6 +12,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addBlockReasonDTOs.DeliveryRequestAddBlockReasonDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addBlockReasonDTOs.DeliveryResponseAddBlockReasonDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryRequestAddRoleToUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserFullSuccessfulDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserPartlySuccessfulDTO;
@@ -35,6 +37,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
@@ -885,6 +888,70 @@ public class RMMController {
         };
     }
 
+    @ValidParams
+    @PostMapping(value = "/blocks")
+    public ResponseEntity<?> addBlockReason(@RequestBody DeliveryRequestAddBlockReasonDTO addBlockReasonRequest) {
+        log.info("Adding block reason process was started by " +
+                "'" + addBlockReasonRequest.getUserMadeRequestId() + "'");
+
+        AddBlockReasonResultMessage resultMessage = universalUserService.addBlockReason(
+                addBlockReasonRequest.getUserMadeRequestId(),
+                addBlockReasonRequest.getBlockReasonDescription()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Adding block reason process started by " +
+                        "'" + addBlockReasonRequest.getUserMadeRequestId() + "'" +
+                        "was finished successfully: created a reference in block_reason table" +
+                        "with id '" + resultMessage.getCreatedReferenceId() + "'");
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseAddBlockReasonDTO(
+                                "Причина блокировки успешно сохранена.",
+                                resultMessage.getCreatedReferenceId()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Adding block reason process started by " +
+                        "'" + addBlockReasonRequest.getUserMadeRequestId() + "'" +
+                        "was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа",
+                                401,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Adding block reason process started by " +
+                        "'" + addBlockReasonRequest.getUserMadeRequestId() + "'" +
+                        "was finished with exception: " +
+                        resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                17001,
+                                "Ошибка выполнения добавления причины блокировки в Систему",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
 
     //test controller methods - uncomment to test the project availability
 

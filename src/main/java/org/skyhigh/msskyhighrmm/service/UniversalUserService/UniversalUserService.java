@@ -5,6 +5,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
@@ -201,6 +202,19 @@ public interface UniversalUserService {
      *              3 - непредвиденная ошибка.
      */
     RemoveRoleFromUserListResultMessage removeRoleFromUserList(UUID userMadeRequestId, UUID roleId, List<UUID> usersToRemoveRoleIds);
+
+    /**
+     * Выполняет создание новой причины блокировки в Системе.
+     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param blockReasonDescription - описание создаваемой причины блокировки
+     * @return - объект AddBlockReasonResultMessage, имеющий поля:
+     *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
+     *      globalOperationCode - глобальный код результата выполнения операции (число):
+     *          0 - выполнено успешно;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - непредвиденная ошибка;
+     */
+    AddBlockReasonResultMessage addBlockReason(UUID userMadeRequestId, String blockReasonDescription);
 
     /**
      * Возвращает список всех имеющихся юзеров
