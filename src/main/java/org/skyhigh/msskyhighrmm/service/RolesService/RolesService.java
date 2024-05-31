@@ -3,6 +3,7 @@ package org.skyhigh.msskyhighrmm.service.RolesService;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
@@ -13,7 +14,7 @@ import java.util.UUID;
 public interface RolesService {
 
     /**
-     * Принимает параметры создаваемой роли, создаёт и сохраняет роль в Системе,
+     * Принимает параметры создаваемой роли, создаёт и сохраняет роль (некритическую) в Системе,
      *      а также возвращает идентификатор созданной роли
      * @param roleName - наименование создаваемой роли
      * @param description - описание создаваемой роли
@@ -45,4 +46,23 @@ public interface RolesService {
      *      2 - ошибка в связи с попыткой удаления критичной роли из системы
      */
     DeleteUserGroupRoleResultMessage deleteRole(UUID roleId);
+
+    /**
+     * Обновляет параметры роли в системе и возвращает результат выполнения операции (сообщение + код)
+     *
+     * @param userMadeRequestId - ID пользователя, инициировавшего операцию;
+     * @param roleId - ID роли, параметры которой необходимо обновить;
+     * @param roleName - новое наименование роли;
+     * @param description - новое описание роли;
+     * @return - Объект класса UpdateRoleResultMessage, содержащий поле message - сообщение о
+     *      результате выполнения операции, globalOperationCode - код результата выполнения операции:
+     *      0 - упешное выполнение;
+     *      1 - пользователь, инициировавший операцию, не найден;
+     *      2 - в Системе уже существует роль с именем, идентичным переданному в запросе;
+     *      3 - роль является критической, обновление невозможно;
+     *      4 - длина наименования роли должна быть больше 0;
+     *      5 - должно быть заполнено хотя бы одно из полей [roleName, description];
+     *      6 - роли с указанным ID не существует.
+     */
+    UpdateRoleResultMessage updateRole(UUID userMadeRequestId, UUID roleId, String roleName, String description);
 }

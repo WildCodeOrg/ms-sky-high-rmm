@@ -10,6 +10,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroup
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryRequestUpdateRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryResponseUpdateRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addBlockReasonDTOs.DeliveryRequestAddBlockReasonDTO;
@@ -36,6 +38,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
@@ -946,6 +949,135 @@ public class RMMController {
                                 resultMessage.getGlobalMessage()
                         ),
                         HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
+
+    @PutMapping(value = "/roles/{role_id}")
+    public ResponseEntity<?> updateRole(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+                                        @RequestBody DeliveryRequestUpdateRoleDTO updateRoleRequest) {
+
+        log.info("Updating role with id '" + roleId + "' process was started by " +
+                "'" + updateRoleRequest.getUserMadeRequestId() + "'");
+
+        UpdateRoleResultMessage resultMessage = rolesService.updateRole(
+                updateRoleRequest.getUserMadeRequestId(),
+                roleId,
+                updateRoleRequest.getRoleName(),
+                updateRoleRequest.getDescription()
+        );
+
+        return switch (resultMessage.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished successfully");
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseUpdateRoleDTO(
+                                resultMessage.getGlobalMessage(),
+                                roleId
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа",
+                                401,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                18001,
+                                "Ошибка выполнения операции обновления роли",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 3 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                18002,
+                                "Ошибка выполнения операции обновления роли",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                18003,
+                                "Ошибка выполнения операции обновления роли",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 5 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                18004,
+                                "Ошибка выполнения операции обновления роли",
+                                400,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 6 -> {
+                log.warning("Updating role with id '" + roleId + "' process started by " +
+                        "'" + updateRoleRequest.getUserMadeRequestId() + "'" +
+                        "finished with exception: " + resultMessage.getGlobalMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                18005,
+                                "Ошибка выполнения операции обновления роли",
+                                404,
+                                resultMessage.getGlobalMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
                 );
             }
 

@@ -1,7 +1,9 @@
 package org.skyhigh.msskyhighrmm.repository;
 
+import jakarta.transaction.Transactional;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -95,4 +97,9 @@ public interface UserGroupRolesRepository extends JpaRepository<UserGroupRolesEn
             "JOIN users_roles ur on ugr.id = ur.role_id " +
             "WHERE ur.user_id = ?1", nativeQuery = true)
     List<UserGroupRolesEntity> getRolesOfUser(UUID userId);
+
+    @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "UPDATE user_group_roles SET role_name = ?2, description = ?3 WHERE id = ?1", nativeQuery = true)
+    void updateRoleAllArgsById(UUID roleId, String roleName, String description);
 }
