@@ -3,6 +3,7 @@ package org.skyhigh.msskyhighrmm.service.PermissionService;
 import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidationType;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.ValidationResult;
@@ -11,6 +12,7 @@ import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserServic
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidator.validate;
@@ -133,6 +135,88 @@ public class PermissionServiceImpl implements PermissionService {
         return new CreatePermissionResultMessage(
                 permissionId,
                 "Разрешение успешно сохранено",
+                0
+        );
+    }
+
+    @Override
+    public UpdatePermissionResultMessage updatePermission(UUID userMadeRequestId, UUID permissionId, String permissionName, String permissionEndpoint) {
+        //перенести в конфигурируемые параметры (yml), переменные окружения или сделать через НСИ
+        int maxPermissionNameLength = 255;
+        int maxEndpointLength = 350;
+        int minPermissionNameLength = 10;
+        int minEndpointLength = 10;
+
+
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new UpdatePermissionResultMessage(
+                    "Пользователь, инициировавший операцию, не найден",
+                    1
+            );
+
+        Optional<OperationPermissionsEntity> operationPermissionsEntityOptional = operationPermissionsRepository.findById(permissionId);
+        if (operationPermissionsEntityOptional.isEmpty())
+            return new UpdatePermissionResultMessage(
+                    "Разрешение с указанным permissionId не существует",
+                    9
+            );
+
+        OperationPermissionsEntity updatingPermission = operationPermissionsEntityOptional.get();
+        if (updatingPermission.is_critical())
+            return new UpdatePermissionResultMessage(
+                    "Указанное разрешение - критичное, обновление недоступно",
+                    8
+            );
+
+        if (permissionName == null && permissionEndpoint == null)
+            return new UpdatePermissionResultMessage(
+                    "Должен быть заполнен хотя бы один из следующих атрибутов разрешения: ['permissionName', 'permissionEndpoint']",
+                    7
+            );
+
+        if (permissionName != null) {
+            if (permissionName.length() > maxPermissionNameLength)
+                return new UpdatePermissionResultMessage(
+                        "Длина наименования разрешения не должна быть более  " + maxPermissionNameLength + " символов",
+                        2
+                );
+
+            if (permissionName.length() < minPermissionNameLength)
+                return new UpdatePermissionResultMessage(
+                        "Длина наименования разрешения должна быть не менее " + minPermissionNameLength + " символов",
+                        5
+                );
+        }
+        if (permissionEndpoint != null) {
+            if (permissionEndpoint.length() > maxEndpointLength)
+                return new UpdatePermissionResultMessage(
+                        "Длина эндпоинта не должна быть более " + maxEndpointLength + " символов",
+                        3
+                );
+
+            if (permissionEndpoint.length() < minEndpointLength)
+                return new UpdatePermissionResultMessage(
+                        "Длина эндпоинта должна быть не менее " + minEndpointLength + " символов",
+                        6
+                );
+
+            ValidationResult endpointFormatValidationResult = validate(permissionEndpoint, EndpointValidationType.FULL);
+
+            if (!endpointFormatValidationResult.equals(ValidationResult.SUCCESS))
+                return new UpdatePermissionResultMessage(
+                        "Эндпоинт разрешения не соответствует формату '{http_method}:\\{service_name}\\api\\{endpoint}'. Тип ошибки формата: " + endpointFormatValidationResult.toString(),
+                        4
+                );
+        }
+
+        if (permissionName != null)
+            updatingPermission.setPermission_name(permissionName);
+        if (permissionEndpoint != null)
+            updatingPermission.setOperation_endpoint(permissionEndpoint);
+
+        operationPermissionsRepository.save(updatingPermission);
+        return new UpdatePermissionResultMessage(
+                "Указанное разрешение успешно обновлено",
                 0
         );
     }

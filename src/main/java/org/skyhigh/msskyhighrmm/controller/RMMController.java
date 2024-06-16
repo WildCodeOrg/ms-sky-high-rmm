@@ -6,6 +6,8 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryRequestCreatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryResponseCreatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryRequestUpdatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryResponseUpdatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
@@ -40,6 +42,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
@@ -1259,6 +1262,184 @@ public class RMMController {
                                 result.getMessage()
                         ),
                         HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
+
+
+    @PutMapping(value = "/permissions/{permission_id}")
+    public ResponseEntity<?> updatePermission(@PathVariable(value = "permission_id") UUID permissionId, @ValidParams
+                                                   @RequestBody DeliveryRequestUpdatePermissionDTO requestDTO) {
+        log.info("Updating a permission with id '" + permissionId
+                + "' process was started by " +
+                "'" + requestDTO.getUserMadeRequestId() + "'");
+
+        UpdatePermissionResultMessage result = permissionService.updatePermission(
+                requestDTO.getUserMadeRequestId(),
+                permissionId,
+                requestDTO.getPermissionName(),
+                requestDTO.getPermissionEndpoint()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished successfully");
+                yield new ResponseEntity<>(
+                        new DeliveryResponseUpdatePermissionDTO(
+                                permissionId,
+                                result.getMessage()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20001,
+                                "Ошибка прав доступа",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20002,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 3 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20003,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20004,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 5 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20005,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 6 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20006,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 7 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20007,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 8 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20008,
+                                "Ошибка выполнения операции обновления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 9 -> {
+                log.warning("Updating a permission with id '" + permissionId
+                        + "' process started by " +
+                        "'" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                20009,
+                                "Ошибка выполнения операции обновления разрешения",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
                 );
             }
 
