@@ -1,16 +1,21 @@
 package org.skyhigh.msskyhighrmm.service.PermissionService;
 
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.ListOfOperationPermissions;
 import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidationType;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.ValidationResult;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Filters.OperationPermissionFilters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Sort.OperationPermissionSort;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.repository.*;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -162,7 +167,7 @@ public class PermissionServiceImpl implements PermissionService {
             );
 
         OperationPermissionsEntity updatingPermission = operationPermissionsEntityOptional.get();
-        if (updatingPermission.is_critical())
+        if (updatingPermission.isCritical())
             return new UpdatePermissionResultMessage(
                     "Указанное разрешение - критичное, обновление недоступно",
                     8
@@ -219,5 +224,50 @@ public class PermissionServiceImpl implements PermissionService {
                 "Указанное разрешение успешно обновлено",
                 0
         );
+    }
+
+    @Override
+    public ListOfOperationPermissions permissionSearch(PaginationInfo paginationInfo, UUID permissionId, OperationPermissionFilters operationPermissionFilters, OperationPermissionSort operationPermissionSort) {
+        ArrayList<OperationPermissionsEntity> resultPermissionList = new ArrayList<>();
+
+        if (permissionId != null) {
+            if (operationPermissionsRepository.existsById(permissionId)) {
+                resultPermissionList.add(
+                        operationPermissionsRepository.getReferenceById(permissionId)
+                );
+            } else return null;
+        } else if (operationPermissionFilters != null) {
+            resultPermissionList = OperationPermissionFilters.filter(
+                    operationPermissionFilters.getPermissionName(),
+                    operationPermissionFilters.getPermissionEndpoint(),
+                    operationPermissionFilters.getOperationCriticality(),
+                    operationPermissionsRepository
+            );
+        } else {
+            resultPermissionList = (ArrayList<OperationPermissionsEntity>) operationPermissionsRepository.findAll();
+        }
+
+        if (resultPermissionList == null) return null;
+
+        if (operationPermissionSort != null) {
+            OperationPermissionSort.sort(resultPermissionList, operationPermissionSort);
+        }
+
+        int paginationItemCount = resultPermissionList.size();
+        int paginationPageNumber = 1;
+        int itemCount = resultPermissionList.size();
+
+        if (paginationInfo != null) {
+            paginationItemCount = paginationInfo.getRequestedItemCount();
+            paginationPageNumber = paginationInfo.getPage();
+
+            PaginatedObject<OperationPermissionsEntity> paginated = new PaginatedObject<>(paginationItemCount,
+                    paginationPageNumber, resultPermissionList);
+            resultPermissionList = paginated.getResultList();
+        }
+
+        return resultPermissionList != null
+                ? new ListOfOperationPermissions(itemCount, paginationItemCount, paginationPageNumber, resultPermissionList)
+                : null;
     }
 }

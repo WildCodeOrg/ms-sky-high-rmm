@@ -27,5 +27,5 @@ public class OperationPermissionsEntity {
     private String operation_endpoint;
 
     @Column(name = "is_critical", nullable = false)
-    private boolean is_critical;
+    private boolean isCritical;
 }

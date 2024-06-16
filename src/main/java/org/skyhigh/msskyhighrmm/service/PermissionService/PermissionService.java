@@ -1,9 +1,12 @@
 package org.skyhigh.msskyhighrmm.service.PermissionService;
 
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.ListOfOperationPermissions;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Filters.OperationPermissionFilters;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Sort.OperationPermissionSort;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 
-import java.security.Permission;
 import java.util.UUID;
 
 public interface PermissionService {
@@ -64,4 +67,18 @@ public interface PermissionService {
             String permissionName,
             String permissionEndpoint
     );
+
+    /**
+     * Возвращает страницу/выборку/набор существующих разрешений в соответствии с
+     *      параметрами фильтрации и пагинации
+     * @param paginationInfo - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
+     * @param permissionId - идентификатор искомого разрешения (при вводе данного параметра - возвращает 1 объект в списке)
+     * @param operationPermissionFilters - параметры фильтрации (зависят от параметров разрешения -
+     *      название разрешения, описание разрешения, критичность разрешения)
+     * @param operationPermissionSort - параметры сортировки (направление сортировки и атрибут,
+     *      по которому необходимо отсортировать список ответов)
+     * @return список разрешений, удовлетворяющих условиям поиска
+     */
+    ListOfOperationPermissions permissionSearch(PaginationInfo paginationInfo, UUID permissionId, OperationPermissionFilters operationPermissionFilters,
+                                                OperationPermissionSort operationPermissionSort);
 }

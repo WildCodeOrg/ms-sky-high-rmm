@@ -1,11 +1,14 @@
 package org.skyhigh.msskyhighrmm.controller;
 
 import lombok.Getter;
+import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.ListOfOperationPermissions;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryRequestCreatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryResponseCreatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermissions.DeliveryRequestSearchPermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermissions.DeliveryResponseSearchPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryRequestUpdatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryResponseUpdatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
@@ -57,7 +60,6 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo
 import org.skyhigh.msskyhighrmm.service.PermissionService.PermissionService;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
-import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserServiceImpl;
 import org.skyhigh.msskyhighrmm.validation.SpringAspect.annotationsApi.ValidParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -1128,8 +1130,8 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19001,
-                                "Ошибка прав доступа",
+                                5,
+                                "Ошибка прав доступа.",
                                 401,
                                 result.getMessage()
                         ),
@@ -1144,7 +1146,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19002,
+                                19001,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1160,7 +1162,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19003,
+                                19002,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1176,7 +1178,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19004,
+                                19003,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1192,7 +1194,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19005,
+                                19004,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1208,7 +1210,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19006,
+                                19005,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1224,7 +1226,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19007,
+                                19006,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1240,7 +1242,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19008,
+                                19007,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1256,7 +1258,7 @@ public class RMMController {
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                19009,
+                                19008,
                                 "Ошибка выполнения операции создания нового некритического разрешения",
                                 400,
                                 result.getMessage()
@@ -1306,8 +1308,8 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20001,
-                                "Ошибка прав доступа",
+                                5,
+                                "Ошибка прав доступа.",
                                 401,
                                 result.getMessage()
                         ),
@@ -1322,7 +1324,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20002,
+                                20001,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1338,7 +1340,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20003,
+                                20002,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1354,7 +1356,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20004,
+                                20003,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1370,7 +1372,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20005,
+                                20004,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1386,7 +1388,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20006,
+                                20005,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1402,7 +1404,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20007,
+                                20006,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1418,7 +1420,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20008,
+                                20007,
                                 "Ошибка выполнения операции обновления разрешения",
                                 400,
                                 result.getMessage()
@@ -1434,7 +1436,7 @@ public class RMMController {
                         " finished finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
                         new CommonExceptionResponseDTO(
-                                20009,
+                                20008,
                                 "Ошибка выполнения операции обновления разрешения",
                                 404,
                                 result.getMessage()
@@ -1446,6 +1448,43 @@ public class RMMController {
             default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
         };
     }
+
+    @ValidParams
+    @PostMapping(value = "/permissions/search")
+    public ResponseEntity<?> searchPermissions(@RequestBody DeliveryRequestSearchPermissionDTO searchPermissionDTO) {
+        log.info("Getting permissions by criteria process was started by '" + searchPermissionDTO.getUserMadeRequestId() + "'");
+
+        final UUID userMadeRequestId = searchPermissionDTO.getUserMadeRequestId();
+
+        if (universalUserService.getUserById(userMadeRequestId) == null) {
+            log.warning("Getting permissions by criteria process started by '" + searchPermissionDTO.getUserMadeRequestId() +
+                    "' finished with error code 5");
+
+            return new ResponseEntity<>(new CommonExceptionResponseDTO(
+                    5,
+                    "Ошибка прав доступа.",
+                    401,
+                    "Пользователь, инициировавший операцию, не найден."
+            ), HttpStatus.UNAUTHORIZED);
+        }
+
+        ListOfOperationPermissions result = permissionService.permissionSearch(searchPermissionDTO.getPagination(),
+                searchPermissionDTO.getPermissionId(), searchPermissionDTO.getFilters(), searchPermissionDTO.getSort());
+
+        log.info("Getting permissions by criteria process started by '" + searchPermissionDTO.getUserMadeRequestId() +
+                "' was finished");
+        return result != null
+                ? new ResponseEntity<>(new DeliveryResponseSearchPermissionDTO(result.getItemCount(),
+                new PageInfo(result.getPageNumber(), result.getPaginationItemCount()),
+                result.getPermissions()), HttpStatus.OK)
+                : new ResponseEntity<>(new CommonExceptionResponseDTO(
+                21001,
+                "Ошибка выполнения поиска разрешений по параметрам.",
+                404,
+                "Разрешения, удовлетворяющие критериям поиска, не найдены."
+        ), HttpStatus.NOT_FOUND);
+    }
+
 
     //test controller methods - uncomment to test the project availability
 

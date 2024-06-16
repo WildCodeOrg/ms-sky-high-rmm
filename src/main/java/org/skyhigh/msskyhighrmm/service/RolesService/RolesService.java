@@ -1,14 +1,12 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
-import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface RolesService {
@@ -31,7 +29,7 @@ public interface RolesService {
      *      название роли, описание роли, критичность роли)
      * @param userGroupRolesSort - параметры сортировки (направление сортировки и атрибут,
      *      по которому необходимо отсортировать список ответов)
-     * @return список юзеров, удовлетворяющих условиям поиска
+     * @return список ролей, удовлетворяющих условиям поиска
      */
     ListOfUserGroupRoles rolesSearch(PaginationInfo paginationInfo, UUID roleId, UserGroupRolesFilters userGroupRolesFilters,
                                      UserGroupRolesSort userGroupRolesSort);
