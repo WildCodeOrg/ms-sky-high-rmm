@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryRequestCreatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryResponseCreatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
@@ -37,6 +39,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchUsersDTOs.DeliveryResponseSearchUsersDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
@@ -48,6 +51,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
+import org.skyhigh.msskyhighrmm.service.PermissionService.PermissionService;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserServiceImpl;
@@ -69,13 +73,13 @@ public class RMMController {
 
     private final UniversalUserService universalUserService;
     private final RolesService rolesService;
-    private final UniversalUserServiceImpl universalUserServiceImpl;
+    private final PermissionService permissionService;
 
     @Autowired
-    public RMMController(UniversalUserService universalUserService, RolesService rolesService, UniversalUserServiceImpl universalUserServiceImpl) {
+    public RMMController(UniversalUserService universalUserService, RolesService rolesService, PermissionService permissionService) {
         this.universalUserService = universalUserService;
         this.rolesService = rolesService;
-        this.universalUserServiceImpl = universalUserServiceImpl;
+        this.permissionService = permissionService;
     }
 
     //Users request mapping
@@ -1082,6 +1086,183 @@ public class RMMController {
             }
 
             default -> throw new IllegalStateException("Unexpected value: " + resultMessage.getGlobalOperationCode());
+        };
+    }
+
+    @ValidParams
+    @PostMapping(value = "/permissions")
+    public ResponseEntity<?> createPermission(@RequestBody DeliveryRequestCreatePermissionDTO createPermissionDTO) {
+        log.info("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                + "' process was started by " +
+                "'" + createPermissionDTO.getUserMadeRequestId() + "'");
+
+        CreatePermissionResultMessage result = permissionService.createPermission(
+                createPermissionDTO.getUserMadeRequestId(),
+                createPermissionDTO.getPermissionName(),
+                createPermissionDTO.getPermissionEndpoint()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished successfully. Created permission id: " +
+                        "'" + result.getPermissionID() + "'");
+                yield new ResponseEntity<>(
+                        new DeliveryResponseCreatePermissionDTO(
+                                result.getMessage(),
+                                result.getPermissionID()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19001,
+                                "Ошибка прав доступа",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19002,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 3 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19003,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19004,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 5 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19005,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 6 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19006,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 7 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19007,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 8 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19008,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 9 -> {
+                log.warning("Creating a permission with name '" + createPermissionDTO.getPermissionName()
+                        + "' process started by " +
+                        "'" + createPermissionDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                19009,
+                                "Ошибка выполнения операции создания нового некритического разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
         };
     }
 

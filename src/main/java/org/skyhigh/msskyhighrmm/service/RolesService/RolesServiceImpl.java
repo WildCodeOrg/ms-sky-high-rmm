@@ -23,8 +23,6 @@ import java.util.*;
 
 @Service
 public class RolesServiceImpl implements RolesService{
-    private static final Map<UUID, UserGroupRole> ROLE_MAP = new HashMap<>();
-
     private final UserGroupRolesRepository userGroupRolesRepository;
     private final UsersRolesRepository usersRolesRepository;
     private final RolesOperationsRepository rolesOperationsRepository;
