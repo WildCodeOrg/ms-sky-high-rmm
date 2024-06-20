@@ -33,5 +33,8 @@ public interface OperationPermissionsRepository extends JpaRepository<OperationP
             " AND is_critical = ?2", nativeQuery = true)
     List<OperationPermissionsEntity> findByEndpointAndCriticality(String permissionEndpoint, boolean isCritical);
 
-
+    @Query(value = "SELECT op.id, op.permission_name, op.operation_endpoint, op.is_critical " +
+            "FROM public.operation_permissions op JOIN public.roles_operations ro " +
+            "ON ro.permission_id = op.id WHERE ro.role_id = ?1", nativeQuery = true)
+    List<OperationPermissionsEntity> findOperationPermissionsByRoleId(UUID roleId);
 }

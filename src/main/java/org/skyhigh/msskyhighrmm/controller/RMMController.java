@@ -18,6 +18,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRol
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryResponseDeleteUserGroupRoleDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.getRolePermissionsDTOs.DeliveryRequestGetRolePermissionsDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.getRolePermissionsDTOs.DeliveryResponseGetRolePermissionsDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryRequestUpdateRoleDTO;
@@ -51,6 +53,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionSer
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
@@ -1516,7 +1519,7 @@ public class RMMController {
                 );
             }
             case 1 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1530,7 +1533,7 @@ public class RMMController {
                 );
             }
             case 2 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1544,7 +1547,7 @@ public class RMMController {
                 );
             }
             case 3 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1558,7 +1561,7 @@ public class RMMController {
                 );
             }
             case 4 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1572,7 +1575,7 @@ public class RMMController {
                 );
             }
             case 5 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1587,7 +1590,7 @@ public class RMMController {
                 );
             }
             case 6 -> {
-                log.info("Adding permissions for role '" + roleId +
+                log.warning("Adding permissions for role '" + roleId +
                         "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
                         " finished with exception: " + result.getMessage());
                 yield new ResponseEntity<>(
@@ -1605,6 +1608,76 @@ public class RMMController {
         };
     }
 
+    @GetMapping(value = "/roles/{role_id}/permissions")
+    public ResponseEntity<?> getRolePermissions(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+                                                @RequestBody DeliveryRequestGetRolePermissionsDTO requestBodyDTO) {
+        log.info("Getting permissions for role '" + roleId + "' " +
+                "process was started by '" + requestBodyDTO.getUserMadeRequestId() + "'");
+
+        GetRolePermissionsResultMessage result = rolesService.getRolePermissions(requestBodyDTO.getUserMadeRequestId(), roleId);
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Getting permissions for role '" + roleId + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished successfully");
+                yield new ResponseEntity<>(
+                        new DeliveryResponseGetRolePermissionsDTO(
+                                "Разрешения, привязанные к указанной роли, найдены успешно",
+                                result.getOperationPermissions()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Getting permissions for role '" + roleId + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Getting permissions for role '" + roleId + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                23001,
+                                "Ошибка выполнения операции получения привязанных к роли разрешений.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 3 -> {
+                log.warning("Getting permissions for role '" + roleId + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                23002,
+                                "Ошибка выполнения операции получения привязанных к роли разрешений.",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
 
     //test controller methods - uncomment to test the project availability
 

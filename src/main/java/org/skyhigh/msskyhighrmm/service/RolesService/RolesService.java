@@ -3,6 +3,7 @@ package org.skyhigh.msskyhighrmm.service.RolesService;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
@@ -90,4 +91,19 @@ public interface RolesService {
      *          message - сообщение о результате добавления указанного разрешения роли.
      */
     AddPermissionsResultMessage addPermissions(UUID userMadeRequestId, UUID roleId, List<UUID> permissionIds);
+
+    /**
+     * Получение списка привязанных к роли разрешений
+     * @param userMadeRequestId - ID пользователя, инициировавшего операцию;
+     * @param roleId - ID роли, разрешения которой необходимо найти
+     * @return - объект класса GetRolePermissionsResultMessage, содержащий поля:
+     *      globalOperationCode - код результата выполнения операции:
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - роль с указанным roleId не существует;
+     *          3 - роль с указанным roleId не содержит привязанных разрешений;
+     *      message - сообщение о результате выполнения операции;
+     *      List<OperationPermissionEntity> - список найденных разрешений, привязанных роли.
+     */
+    GetRolePermissionsResultMessage getRolePermissions(UUID userMadeRequestId, UUID roleId);
 }

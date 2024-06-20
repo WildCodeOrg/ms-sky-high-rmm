@@ -2,11 +2,13 @@ package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.UserGroupRole;
+import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.RolesOperationsEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UserGroupRolesEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -268,6 +270,41 @@ public class RolesServiceImpl implements RolesService{
         result.setResults(addPermissionsList);
 
         return result;
+    }
+
+    @Override
+    public GetRolePermissionsResultMessage getRolePermissions(UUID userMadeRequestId, UUID roleId) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new GetRolePermissionsResultMessage(
+                    1,
+                    "Пользователь, инициировавший операцию, не найден",
+                    null
+            );
+
+        if (!userGroupRolesRepository.existsById(roleId))
+            return new GetRolePermissionsResultMessage(
+                    2,
+                    "Роль с указанным roleId не существует",
+                    null
+            );
+
+        List<OperationPermissionsEntity> permissionsEntityList = operationPermissionsRepository.findOperationPermissionsByRoleId(
+                //userGroupRolesRepository.getReferenceById(roleId)
+                roleId
+        );
+
+        if (permissionsEntityList == null || permissionsEntityList.isEmpty())
+            return new GetRolePermissionsResultMessage(
+                    3,
+                    "Роль с указанным roleId не содержит привязанных разрешений",
+                    null
+            );
+
+        return new GetRolePermissionsResultMessage(
+                0,
+                "Разрешения, привязанные к указанной роли, успешно найдены",
+                permissionsEntityList
+        );
     }
 
     private UserGroupRole getRoleById(UUID id) {
