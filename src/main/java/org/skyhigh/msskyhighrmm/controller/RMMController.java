@@ -11,6 +11,9 @@ import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermiss
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermissions.DeliveryResponseSearchPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryRequestUpdatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryResponseUpdatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addPermissionsDTOs.AddPermissionExceptionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addPermissionsDTOs.DeliveryRequestAddPermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addPermissionsDTOs.DeliveryResponseAddPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryRequestAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.addUserGroupRoleDTOs.DeliveryResponseAddUserGroupRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.deleteUserGroupRoleDTOs.DeliveryRequestDeleteUserGroupRoleDTO;
@@ -46,6 +49,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
@@ -1483,6 +1487,122 @@ public class RMMController {
                 404,
                 "Разрешения, удовлетворяющие критериям поиска, не найдены."
         ), HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/roles/{role_id}/permissions")
+    public ResponseEntity<?> addPermissions(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+                                            @RequestBody DeliveryRequestAddPermissionDTO requestDTO) {
+
+        log.info("Adding permissions for role '" + roleId +
+                "' process was started by '" + requestDTO.getUserMadeRequestId() + "'");
+
+        AddPermissionsResultMessage result = rolesService.addPermissions(
+                requestDTO.getUserMadeRequestId(),
+                roleId,
+                requestDTO.getPermissionIds()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished successfully");
+                yield new ResponseEntity<>(
+                        new DeliveryResponseAddPermissionDTO(
+                                result.getMessage(),
+                                result.getResults()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+            case 1 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                "Пользователь, инициировавший операцию, не найден."
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+            case 2 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                22001,
+                                "Ошибка выполнения операции добавления разрешений для указанной роли.",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+            case 3 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                22002,
+                                "Ошибка выполнения операции добавления разрешений для указанной роли.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+            case 4 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                22003,
+                                "Ошибка выполнения операции добавления разрешений для указанной роли.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+            case 5 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new AddPermissionExceptionDTO(
+                                22004,
+                                "Ошибка выполнения операции добавления разрешений для указанной роли.",
+                                200,
+                                result.getMessage(),
+                                result.getResults()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+            case 6 -> {
+                log.info("Adding permissions for role '" + roleId +
+                        "' process started by '" + requestDTO.getUserMadeRequestId() + "'" +
+                        " finished with exception: " + result.getMessage());
+                yield new ResponseEntity<>(
+                        new AddPermissionExceptionDTO(
+                                22005,
+                                "Ошибка выполнения операции добавления разрешений для указанной роли.",
+                                400,
+                                result.getMessage(),
+                                result.getResults()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
     }
 
 

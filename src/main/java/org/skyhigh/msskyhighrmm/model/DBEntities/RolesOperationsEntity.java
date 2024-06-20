@@ -22,9 +22,9 @@ public class RolesOperationsEntity {
 
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
-    UserGroupRolesEntity role_id;
+    UserGroupRolesEntity roleId;
 
     @ManyToOne
     @JoinColumn(name = "permission_id", referencedColumnName = "id")
-    OperationPermissionsEntity permission_id;
+    OperationPermissionsEntity permissionId;
 }

@@ -1,17 +1,15 @@
 package org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class CommonExceptionResponseDTO {
-    private int code;
-    private String description;
-    private int httpCode;
-    private String message;
+    protected int code;
+    protected String description;
+    protected int httpCode;
+    protected String message;
     /*private ArrayList<Mismatch> mismatches;
 
     public void addMismatch(Mismatch mismatch) {

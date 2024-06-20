@@ -1,12 +1,14 @@
 package org.skyhigh.msskyhighrmm.service.RolesService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRolesSort;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface RolesService {
@@ -63,4 +65,29 @@ public interface RolesService {
      *      6 - роли с указанным ID не существует.
      */
     UpdateRoleResultMessage updateRole(UUID userMadeRequestId, UUID roleId, String roleName, String description);
+
+    /**
+     * Добавляет указанной роли переданные разрешения и возвращает результат выполнения операции (сообщение + код + список результатов по разрешениям)
+     *
+     * @param userMadeRequestId - ID пользователя, инициировавшего операцию;
+     * @param roleId - ID роли, для которой необходимо добавить разрешения;
+     * @param permissionIds - перечень ID разрешений, которые необходимо добавить для роли;
+     * @return - Объект класса AddPermissionsResultMessage, содержащий поле message - сообщение о
+     *      результате выполнения операции, globalOperationCode - код результата выполнения операции:
+     *          0 - упешное выполнение;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - роль с указанным roleId не существует;
+     *          3 - роль является критической, обновление списка связанных разрешений невозможно;
+     *          4 - спиок ID добавляемых роли разрешений permissionIds должен содержать не менее 1 записи;
+     *          5 - для указанной роли была добавлена лишь часть разрешений из переданного списка в связи с ошибками валидации разрешений;
+     *          6 - не удалость добавить ни одно из переданных разрешений для указанной роли в связи с ошибками валидации разрешений;
+     *      а также список (List) сообщений результата добавления конкретного разрешения типа AddPermissionsResultMessageListElement с полями:
+     *          permissionId - идентификатор добавляемого разрешения;
+     *          code - код результата добавления указанного разрешения роли:
+     *              0 - успешное выполнение;
+     *              1 - разрешение с указанным permissionId не существует;
+     *              2 - разрешение с указанным permissionId уже назначено данной роли;
+     *          message - сообщение о результате добавления указанного разрешения роли.
+     */
+    AddPermissionsResultMessage addPermissions(UUID userMadeRequestId, UUID roleId, List<UUID> permissionIds);
 }
