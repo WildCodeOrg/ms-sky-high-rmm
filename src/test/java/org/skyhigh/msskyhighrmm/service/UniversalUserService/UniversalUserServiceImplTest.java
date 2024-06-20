@@ -1,6 +1,5 @@
 package org.skyhigh.msskyhighrmm.service.UniversalUserService;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
@@ -31,6 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -324,8 +323,8 @@ public class UniversalUserServiceImplTest {
         Mockito.doNothing().when(universalUserRepository)
                 .updateUserInfoForUserWithId(testId, newUserInfoAttributes);
 
-        Mockito.when(universalUserRepository.getReferenceById(testId))
-                .thenReturn(universalUserEntityTestWithId);
+        Mockito.when(universalUserRepository.findById(testId))
+                .thenReturn(Optional.of(universalUserEntityTestWithId));
 
         UniversalUser result = universalUserService.updateUserById(testId, newUserInfoAttributes);
         Assertions.assertEquals(result.getId(), testId);
