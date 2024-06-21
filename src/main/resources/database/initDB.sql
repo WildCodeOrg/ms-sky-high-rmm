@@ -66,6 +66,16 @@ CREATE TABLE IF NOT EXISTS users_roles
 )
 ;
 
+CREATE TABLE IF NOT EXISTS user_permission
+(
+    id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    permission_id uuid NOT NULL,
+    create_date varchar(24) NOT NULL,
+    CONSTRAINT PK_user_permission PRIMARY KEY (id)
+)
+;
+
 /* Drop Foreign Key Constraints if they exist*/
 
 ALTER TABLE administrator_key_code DROP CONSTRAINT IF EXISTS FK_administrator_key_code_universal_user;
@@ -79,6 +89,10 @@ ALTER TABLE universal_user DROP CONSTRAINT IF EXISTS FK_universal_user_block_rea
 ALTER TABLE users_roles DROP CONSTRAINT IF EXISTS FK_users_roles_universal_user;
 
 ALTER TABLE users_roles DROP CONSTRAINT IF EXISTS FK_users_roles_user_group_roles;
+
+ALTER TABLE user_permission DROP CONSTRAINT IF EXISTS FK_user_permission_operation_permissions;
+
+ALTER TABLE user_permission DROP CONSTRAINT IF EXISTS FK_user_permission_universal_user;
 
 /* Create Foreign Key Constraints */
 
@@ -104,6 +118,14 @@ ALTER TABLE users_roles ADD CONSTRAINT FK_users_roles_universal_user
 
 ALTER TABLE users_roles ADD CONSTRAINT FK_users_roles_user_group_roles
     FOREIGN KEY (role_id) REFERENCES user_group_roles (id) ON DELETE No Action ON UPDATE No Action
+;
+
+ALTER TABLE user_permission ADD CONSTRAINT FK_user_permission_operation_permissions
+    FOREIGN KEY (permission_id) REFERENCES operation_permissions (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+;
+
+ALTER TABLE user_permission ADD CONSTRAINT FK_user_permission_universal_user
+    FOREIGN KEY (user_id) REFERENCES universal_user (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 ;
 
 /* CREATE OR REPLACE FUNCTIONS */
