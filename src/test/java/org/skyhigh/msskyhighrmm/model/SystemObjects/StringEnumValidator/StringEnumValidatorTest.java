@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.ValidatingEnums.UserPermissionFilter;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Map;
@@ -16,14 +15,19 @@ import java.util.logging.Logger;
 public class StringEnumValidatorTest {
     private static final Logger log = Logger.getLogger(StringEnumValidatorTest.class.getName());
 
+    private enum TestEnum {
+        TEST1,
+        TEST2
+    }
+
     @Test
     public void validateStringTestSuccess() {
-        String filterString = UserPermissionFilter.values()[0].toString();
+        String filterString = TestEnum.values()[0].toString();
 
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         boolean result = enumValidator.validateString(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 filterString
         );
 
@@ -34,10 +38,10 @@ public class StringEnumValidatorTest {
     public void validateStringTestFailure() {
         String filterString = "UNSUCCESSFUL_TEST";
 
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         boolean result = enumValidator.validateString(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 filterString
         );
 
@@ -46,11 +50,11 @@ public class StringEnumValidatorTest {
 
     @Test
     public void validateStringWithMessageTestSuccess() {
-        String filterString = UserPermissionFilter.values()[0].toString();
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        String filterString = TestEnum.values()[0].toString();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         Map<StringEnumValidator.StringEnumValidationResult, String> result = enumValidator.validateStringWithMessage(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 filterString
         );
 
@@ -66,10 +70,10 @@ public class StringEnumValidatorTest {
     @Test
     public void validateStringWithMessageTestFailure() {
         String filterString = "UNSUCCESSFUL_TEST";
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         Map<StringEnumValidator.StringEnumValidationResult, String> result = enumValidator.validateStringWithMessage(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 filterString
         );
 
@@ -80,18 +84,18 @@ public class StringEnumValidatorTest {
         //log.info(result.get(StringEnumValidator.StringEnumValidationResult.FAILURE));
 
         Assertions.assertEquals(
-                "Допустимые значения перечисления {%ATTRIBUTE_NAME%}: [ONLY_FORCED_ASSIGNED,BY_ROLES,ALL]",
+                "Допустимые значения перечисления {%ATTRIBUTE_NAME%}: [TEST1,TEST2]",
                 result.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
         );
     }
 
     @Test
     public void validateAttributeWithMessageTestSuccess() {
-        String filterString = UserPermissionFilter.values()[0].toString();
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        String filterString = TestEnum.values()[0].toString();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         Map<StringEnumValidator.StringEnumValidationResult, String> result = enumValidator.validateAttributeWithMessage(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 "permissionFilter",
                 filterString
         );
@@ -108,10 +112,10 @@ public class StringEnumValidatorTest {
     @Test
     public void validateAttributeWithMessageTestFailure() {
         String filterString = "UNSUCCESSFUL_TEST";
-        StringEnumValidator<UserPermissionFilter> enumValidator = new StringEnumValidator<>();
+        StringEnumValidator<TestEnum> enumValidator = new StringEnumValidator<>();
 
         Map<StringEnumValidator.StringEnumValidationResult, String> result = enumValidator.validateAttributeWithMessage(
-                UserPermissionFilter.class,
+                TestEnum.class,
                 "permissionFilter",
                 filterString
         );
@@ -123,7 +127,7 @@ public class StringEnumValidatorTest {
         //log.info(result.get(StringEnumValidator.StringEnumValidationResult.FAILURE));
 
         Assertions.assertEquals(
-                "Допустимые значения перечисления 'permissionFilter': [ONLY_FORCED_ASSIGNED,BY_ROLES,ALL]",
+                "Допустимые значения перечисления 'permissionFilter': [TEST1,TEST2]",
                 result.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
         );
     }
