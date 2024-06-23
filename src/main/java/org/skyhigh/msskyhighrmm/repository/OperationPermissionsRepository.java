@@ -37,4 +37,15 @@ public interface OperationPermissionsRepository extends JpaRepository<OperationP
             "FROM public.operation_permissions op JOIN public.roles_operations ro " +
             "ON ro.permission_id = op.id WHERE ro.role_id = ?1", nativeQuery = true)
     List<OperationPermissionsEntity> findOperationPermissionsByRoleId(UUID roleId);
+
+    @Query(value = "SELECT op.id, op.permission_name, op.operation_endpoint, op.is_critical " +
+            "FROM public.operation_permissions op JOIN public.roles_operations ro on op.id = ro.permission_id " +
+            "JOIN public.user_group_roles ugr on ro.role_id = ugr.id JOIN public.users_roles ur on ugr.id = ur.role_id " +
+            "WHERE ur.user_id = ?1", nativeQuery = true)
+    List<OperationPermissionsEntity> findRoleBasedUserPermissionByUserId(UUID userId);
+
+    @Query(value = "SELECT op.id, op.permission_name, op.operation_endpoint, op.is_critical " +
+            "FROM public.operation_permissions op JOIN user_permission up ON op.id = up.permission_id " +
+            "WHERE up.user_id = ?1", nativeQuery = true)
+    List<OperationPermissionsEntity> findForceAssignedUserPermissionsByUserId(UUID userId);
 }

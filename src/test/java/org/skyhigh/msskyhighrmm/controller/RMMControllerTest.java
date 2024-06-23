@@ -1,16 +1,13 @@
 package org.skyhigh.msskyhighrmm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.hamcrest.core.IsNull;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.internal.builders.NullBuilder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
@@ -22,22 +19,13 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.SortDirection;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSortParameter;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
@@ -450,7 +438,7 @@ public class RMMControllerTest {
                 new PaginationInfo(1, 5),
                 testUserMadeRequestId,
                 new UniversalUserFilters(null, new UserInfo("Alex", null, 0)),
-                new UniversalUserSort(SortDirection.ASC, UniversalUserSortParameter.LOGIN)
+                new UniversalUserSort("ASC", "LOGIN")
         );
 
         String deliveryRequestSearchUsersDTOJson = objectMapper.writeValueAsString(deliveryRequestSearchUsersDTO);

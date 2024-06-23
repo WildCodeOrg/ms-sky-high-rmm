@@ -8,6 +8,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
@@ -215,6 +216,26 @@ public interface UniversalUserService {
      *          2 - непредвиденная ошибка;
      */
     AddBlockReasonResultMessage addBlockReason(UUID userMadeRequestId, String blockReasonDescription);
+
+    /**
+     * Выполняет поиск разрешений пользователя в соответствии с фильтром и возвращает найденный список
+     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param userId - идентификатор пользователя, разрешения которого необходимо найти
+     * @param filter - фильтр (перечисление), в соответствии с которым выполняется поиск разрешений пользователя.
+     *               Возможные значения проверяются по классу UserPermissionFilter.
+     * @return - объект класса GetUserPermissionResultMessage, имеющий поля:
+     *      globalOperationCode - код результата выполнения операции (число):
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший выполнение операции, не найден;
+     *          2 - пользователь, для которого выполняется поиск разрешений, не найден;
+     *          3 - указан некорректный тип фильтрации. Допустимые значения перечисления 'Тип фильтрации': [%UserPermissionFilter.values%]
+     *          4 - у пользователя '%userId%' нет назначенных разрешений, соответствующих переданному критерию фильтрации;
+     *      message - сообщение о результате выполнения операции;
+     *      userPermissions - коллекция ключ/значение разрешений пользователя (List<OperationPermissionsEntity>),
+     *          разределенных на блоки:
+     *              ["forceAssigned", "roleBased"]
+     */
+        GetUserPermissionResultMessage getUserPermission(UUID userMadeRequestId, UUID userId, String filter);
 
     /**
      * Возвращает список всех имеющихся юзеров

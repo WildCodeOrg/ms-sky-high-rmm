@@ -7,7 +7,8 @@ import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Comparators.PermissionCriticalityComparator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Comparators.PermissionEndpointComparator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Comparators.PermissionNameComparator;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.SortDirection;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.ValidatingEnums.SortDirection;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRoleSortParameter;
 import org.skyhigh.msskyhighrmm.validation.annotations.NotEmpty;
 
 import java.util.ArrayList;
@@ -17,10 +18,10 @@ import java.util.ArrayList;
 @NoArgsConstructor
 public class OperationPermissionSort {
     @NotEmpty
-    private SortDirection direction;
+    private String direction;
 
     @NotEmpty
-    private OperationPermissionSortParameter sortBy;
+    private String sortBy;
 
     public static void sort(
             ArrayList<OperationPermissionsEntity> operationPermissions,
@@ -29,22 +30,25 @@ public class OperationPermissionSort {
         if (operationPermissions == null || operationPermissions.isEmpty())
             return;
 
-        switch (operationPermissionSort.getDirection()) {
+        SortDirection sortDirection = SortDirection.valueOf(operationPermissionSort.direction);
+        OperationPermissionSortParameter sortParameter = OperationPermissionSortParameter.valueOf(operationPermissionSort.sortBy);
+
+        switch (sortDirection) {
             case ASC -> {
-                if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.PERMISSION_NAME) {
+                if (sortParameter == OperationPermissionSortParameter.PERMISSION_NAME) {
                     operationPermissions.sort(new PermissionNameComparator());
-                } else if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.PERMISSION_ENDPOINT) {
+                } else if (sortParameter == OperationPermissionSortParameter.PERMISSION_ENDPOINT) {
                     operationPermissions.sort(new PermissionEndpointComparator());
-                } else if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.CRITICALITY) {
+                } else if (sortParameter == OperationPermissionSortParameter.CRITICALITY) {
                     operationPermissions.sort(new PermissionCriticalityComparator());
                 }
             }
             case DESC -> {
-                if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.PERMISSION_NAME) {
+                if (sortParameter == OperationPermissionSortParameter.PERMISSION_NAME) {
                     operationPermissions.sort(new PermissionNameComparator().reversed());
-                } else if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.PERMISSION_ENDPOINT) {
+                } else if (sortParameter == OperationPermissionSortParameter.PERMISSION_ENDPOINT) {
                     operationPermissions.sort(new PermissionEndpointComparator().reversed());
-                } else if (operationPermissionSort.getSortBy() == OperationPermissionSortParameter.CRITICALITY) {
+                } else if (sortParameter == OperationPermissionSortParameter.CRITICALITY) {
                     operationPermissions.sort(new PermissionCriticalityComparator().reversed());
                 }
             }

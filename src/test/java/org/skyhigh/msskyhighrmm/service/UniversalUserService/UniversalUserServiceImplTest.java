@@ -14,11 +14,9 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.SortDirection;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
-import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSortParameter;
 import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
 import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
 import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
@@ -288,7 +286,14 @@ public class UniversalUserServiceImplTest {
         universalUserEntitiesTest.add(universalUserEntity2);
         universalUserEntitiesTest.add(universalUserEntity1);
 
-        ListOfUniversalUser result = universalUserService.searchUsers(null, null, new UniversalUserSort(SortDirection.DESC, UniversalUserSortParameter.LOGIN));
+        ListOfUniversalUser result = universalUserService.searchUsers(
+                null,
+                null,
+                new UniversalUserSort(
+                        "DESC",
+                        "LOGIN"
+                )
+        );
         Assertions.assertEquals(result.getItemCount(), universalUserEntitiesTest.size());
         Assertions.assertEquals(result.getPaginationItemCount(), universalUserEntitiesTest.size());
         Assertions.assertEquals(result.getPageNumber(), 1);

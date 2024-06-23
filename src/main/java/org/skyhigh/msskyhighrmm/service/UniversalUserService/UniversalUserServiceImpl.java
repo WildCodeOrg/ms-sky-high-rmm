@@ -11,12 +11,15 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.StringEnumValidator;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.ValidatingEnums.UserPermissionFilter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Converters.UserEntityToUserBOConverter;
@@ -26,10 +29,7 @@ import org.skyhigh.msskyhighrmm.repository.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -39,6 +39,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private final AdministratorKeyCodeRepository administratorKeyCodeRepository;
     private final UsersRolesRepository usersRolesRepository;
     private final UserGroupRolesRepository usersGroupRolesRepository;
+    private final OperationPermissionsRepository operationPermissionsRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final UserGroupRolesRepository userGroupRolesRepository;
@@ -51,6 +52,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                     UsersRolesRepository usersRolesRepository,
                                     UserGroupRolesRepository userGroupRolesRepository,
                                     UserGroupRolesRepository usersGroupRolesRepository,
+                                    OperationPermissionsRepository operationPermissionsRepository,
                                     PasswordEncoder passwordEncoder) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
@@ -59,6 +61,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         this.passwordEncoder = passwordEncoder;
         this.userGroupRolesRepository = userGroupRolesRepository;
         this.usersGroupRolesRepository = usersGroupRolesRepository;
+        this.operationPermissionsRepository = operationPermissionsRepository;
     }
 
     @Override
@@ -695,6 +698,99 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 0,
                 "Причина блокировки успешно сохранена"
         );
+    }
+
+    @Override
+    public GetUserPermissionResultMessage getUserPermission(UUID userMadeRequestId, UUID userId, String filter) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new GetUserPermissionResultMessage(
+                    1,
+                    "Пользователь, инициировавший выполнение операции, не найден",
+                    null
+            );
+
+        if (!universalUserRepository.existsById(userId))
+            return new GetUserPermissionResultMessage(
+                    2,
+                    "Пользователь, для которого выполняется поиск разрешений, не найден",
+                    null
+            );
+
+        StringEnumValidator<UserPermissionFilter> validator = new StringEnumValidator<>();
+        Map<StringEnumValidator.StringEnumValidationResult, String> enumValidationResult = validator.validateAttributeWithMessage(
+                UserPermissionFilter.class,
+                "Тип фильтрации",
+                filter
+        );
+
+        if (!enumValidationResult.isEmpty() && enumValidationResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+            return new GetUserPermissionResultMessage(
+                    3,
+                    "Указан некорректный тип фильтрации. "
+                            + enumValidationResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE),
+                    null
+            );
+
+        Map<String, List<OperationPermissionsEntity>> resultPermissions = new HashMap<>();
+
+        return switch (UserPermissionFilter.valueOf(filter)) {
+            case ALL -> {
+                List<OperationPermissionsEntity> roleBasedUserPermissions = operationPermissionsRepository.findRoleBasedUserPermissionByUserId(userId);
+                List<OperationPermissionsEntity> forceAssignedUserPermissions = operationPermissionsRepository.findForceAssignedUserPermissionsByUserId(userId);
+                if (
+                        (roleBasedUserPermissions == null && forceAssignedUserPermissions == null)
+                        || (roleBasedUserPermissions != null && forceAssignedUserPermissions != null
+                                && roleBasedUserPermissions.isEmpty() && forceAssignedUserPermissions.isEmpty())
+                )
+                    yield new GetUserPermissionResultMessage(
+                           4,
+                           "У пользователя '" + userId + "' нет назначенных разрешений, соответствующих переданному критерию фильтрации",
+                           null
+                    );
+
+                resultPermissions.put("forcedAssigned", forceAssignedUserPermissions);
+                resultPermissions.put("roleBased", roleBasedUserPermissions);
+                yield new GetUserPermissionResultMessage(
+                        0,
+                        "Разрешения пользователя найдены успешно",
+                        resultPermissions
+                );
+            }
+
+            case BY_ROLES -> {
+                List<OperationPermissionsEntity> roleBasedUserPermissions = operationPermissionsRepository.findRoleBasedUserPermissionByUserId(userId);
+                if (roleBasedUserPermissions == null || roleBasedUserPermissions.isEmpty())
+                    yield new GetUserPermissionResultMessage(
+                            4,
+                            "У пользователя '" + userId + "' нет назначенных разрешений, соответствующих переданному критерию фильтрации",
+                            null
+                    );
+
+                resultPermissions.put("roleBased", roleBasedUserPermissions);
+                yield new GetUserPermissionResultMessage(
+                        0,
+                        "Разрешения пользователя найдены успешно",
+                        resultPermissions
+                );
+            }
+
+            case ONLY_FORCED_ASSIGNED -> {
+                List<OperationPermissionsEntity> forceAssignedUserPermissions = operationPermissionsRepository.findForceAssignedUserPermissionsByUserId(userId);
+                if (forceAssignedUserPermissions == null || forceAssignedUserPermissions.isEmpty())
+                    yield new GetUserPermissionResultMessage(
+                            4,
+                            "У пользователя '" + userId + "' нет назначенных разрешений, соответствующих переданному критерию фильтрации",
+                            null
+                    );
+
+                resultPermissions.put("forcedAssigned", forceAssignedUserPermissions);
+                yield new GetUserPermissionResultMessage(
+                        0,
+                        "Разрешения пользователя найдены успешно",
+                        resultPermissions
+                );
+            }
+        };
     }
 
     @Override

@@ -36,6 +36,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUs
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserPermissionDTOs.DeliveryRequestGetUserPermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserPermissionDTOs.DeliveryResponseGetUserPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserRolesDTOs.DeliveryRequestGetUserRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserRolesDTOs.DeliveryResponseGetUserRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.loginUserDTOs.DeliveryRequestLoginUserDTO;
@@ -59,11 +61,17 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Sort.OperationPermissionSortParameter;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.StringEnumValidator;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.ValidatingEnums.SortDirection;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PageInfo;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSortParameter;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Sort.UserGroupRoleSortParameter;
 import org.skyhigh.msskyhighrmm.service.PermissionService.PermissionService;
 import org.skyhigh.msskyhighrmm.service.RolesService.RolesService;
 import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
@@ -74,6 +82,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -295,6 +304,46 @@ public class RMMController {
 
         final UUID userMadeRequestId = searchUsersDTO.getUserMadeRequestId();
 
+        if (searchUsersDTO.getSort() != null) {
+            StringEnumValidator<SortDirection> validatorDir = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortDirResult
+                    = validatorDir.validateAttributeWithMessage(
+                            SortDirection.class,
+                            "sort.direction",
+                            searchUsersDTO.getSort().getDirection()
+                    );
+
+            if (!sortDirResult.isEmpty() && sortDirResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortDirResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+
+            StringEnumValidator<UniversalUserSortParameter> validatorPar = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortParResult
+                    = validatorPar.validateAttributeWithMessage(
+                    UniversalUserSortParameter.class,
+                    "sort.sortBy",
+                    searchUsersDTO.getSort().getSortBy()
+            );
+
+            if (!sortParResult.isEmpty() && sortParResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortParResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+        }
+
         if (universalUserService.getUserById(userMadeRequestId) == null) {
             log.warning("Getting users by criteria process started by '" + searchUsersDTO.getUserMadeRequestId() +
                     "' finished with exception code 5");
@@ -472,6 +521,46 @@ public class RMMController {
     @PostMapping(value = "/roles/search")
     public ResponseEntity<?> searchRoles(@RequestBody DeliveryRequestSearchRolesDTO searchRolesDTO) {
         log.info("Getting roles by criteria process was started by '" + searchRolesDTO.getUserMadeRequestId() + "'");
+
+        if (searchRolesDTO.getSort() != null) {
+            StringEnumValidator<SortDirection> validatorDir = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortDirResult
+                    = validatorDir.validateAttributeWithMessage(
+                    SortDirection.class,
+                    "sort.direction",
+                    searchRolesDTO.getSort().getDirection()
+            );
+
+            if (!sortDirResult.isEmpty() && sortDirResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortDirResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+
+            StringEnumValidator<UserGroupRoleSortParameter> validatorPar = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortParResult
+                    = validatorPar.validateAttributeWithMessage(
+                    UserGroupRoleSortParameter.class,
+                    "sort.sortBy",
+                    searchRolesDTO.getSort().getSortBy()
+            );
+
+            if (!sortParResult.isEmpty() && sortParResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortParResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+        }
 
         final UUID userMadeRequestId = searchRolesDTO.getUserMadeRequestId();
 
@@ -1461,6 +1550,46 @@ public class RMMController {
     public ResponseEntity<?> searchPermissions(@RequestBody DeliveryRequestSearchPermissionDTO searchPermissionDTO) {
         log.info("Getting permissions by criteria process was started by '" + searchPermissionDTO.getUserMadeRequestId() + "'");
 
+        if (searchPermissionDTO.getSort() != null) {
+            StringEnumValidator<SortDirection> validatorDir = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortDirResult
+                    = validatorDir.validateAttributeWithMessage(
+                    SortDirection.class,
+                    "sort.direction",
+                    searchPermissionDTO.getSort().getDirection()
+            );
+
+            if (!sortDirResult.isEmpty() && sortDirResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortDirResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+
+            StringEnumValidator<OperationPermissionSortParameter> validatorPar = new StringEnumValidator<>();
+            Map<StringEnumValidator.StringEnumValidationResult, String> sortParResult
+                    = validatorPar.validateAttributeWithMessage(
+                    OperationPermissionSortParameter.class,
+                    "sort.sortBy",
+                    searchPermissionDTO.getSort().getSortBy()
+            );
+
+            if (!sortParResult.isEmpty() && sortParResult.get(StringEnumValidator.StringEnumValidationResult.SUCCESS) == null)
+                return new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                999999,
+                                "Ошибка валидации",
+                                400,
+                                sortParResult.get(StringEnumValidator.StringEnumValidationResult.FAILURE)
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+        }
+
         final UUID userMadeRequestId = searchPermissionDTO.getUserMadeRequestId();
 
         if (universalUserService.getUserById(userMadeRequestId) == null) {
@@ -1668,6 +1797,106 @@ public class RMMController {
                         new CommonExceptionResponseDTO(
                                 23002,
                                 "Ошибка выполнения операции получения привязанных к роли разрешений.",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
+
+    @PostMapping(value = "/users/{user_id}/permissions/filtering")
+    public ResponseEntity<?> getUserPermissions(@PathVariable(value = "user_id") UUID userId, @ValidParams
+                                                @RequestBody DeliveryRequestGetUserPermissionDTO requestBodyDTO) {
+        log.info("Getting permissions for user '" + userId + "' " +
+                "process was started by '" + requestBodyDTO.getUserMadeRequestId() + "'");
+
+        GetUserPermissionResultMessage result = universalUserService.getUserPermission(
+                requestBodyDTO.getUserMadeRequestId(),
+                userId,
+                requestBodyDTO.getPermissionFilter()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info("Getting permissions for user '" + userId + "' " +
+                        "with filter '" + requestBodyDTO.getPermissionFilter() + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished successfully");
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseGetUserPermissionDTO(
+                                "Разрешения пользователя найдены успешно",
+                                result.getUserPermissions()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning("Getting permissions for user '" + userId + "' " +
+                        "with filter '" + requestBodyDTO.getPermissionFilter() + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning("Getting permissions for user '" + userId + "' " +
+                        "with filter '" + requestBodyDTO.getPermissionFilter() + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                24001,
+                                "Ошибка выполнения операции получения разрешений пользователя",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 3 -> {
+                log.warning("Getting permissions for user '" + userId + "' " +
+                        "with filter '" + requestBodyDTO.getPermissionFilter() + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                24002,
+                                "Ошибка выполнения операции получения разрешений пользователя",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning("Getting permissions for user '" + userId + "' " +
+                        "with filter '" + requestBodyDTO.getPermissionFilter() + "' " +
+                        "process started by '" + requestBodyDTO.getUserMadeRequestId() + "' " +
+                        "was finished with exception: " + result.getMessage());
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                24003,
+                                "Ошибка выполнения операции получения разрешений пользователя",
                                 404,
                                 result.getMessage()
                         ),
