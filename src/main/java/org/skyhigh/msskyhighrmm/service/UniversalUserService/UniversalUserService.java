@@ -6,6 +6,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
@@ -25,11 +26,11 @@ public interface UniversalUserService {
 
     /**
      * Создает нового юзера
-     * @param login - логин юзера для создания
-     * @param password - пароль юзера для создания
-     * @param isAdmin - признак, является ли регистрирующийся пользователь админом (true - да, false - нет)
-     * @param adminKey - ключ-код админа
-     * @return - RegisterUserResultMessage, имеющий поля:
+     * @param login Логин юзера для создания
+     * @param password Пароль юзера для создания
+     * @param isAdmin Признак, является ли регистрирующийся пользователь админом (true - да, false - нет)
+     * @param adminKey Ключ-код админа
+     * @return RegisterUserResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *         0 - выполнено успешно;
@@ -46,26 +47,26 @@ public interface UniversalUserService {
 
     /**
      * Проверяет, есть ли юзер с заданным логином в Системе
-     * @param login - логин юзера, по которому осущствляется поиск
-     * @return - значение UUID записи юзера, если он был найден,
+     * @param login Логин юзера, по которому осущствляется поиск
+     * @return Значение UUID записи юзера, если он был найден,
      * null - если такого юзера не существует
      */
     UUID checkUser(String login);
 
     /**
      * Возвращает юзера по его ID
-     * @param id - ID юзера
-     * @return - объект юзера с заданным ID
+     * @param id ID юзера
+     * @return Объект юзера с заданным ID
      */
     UniversalUser getUserById(UUID id);
 
     /**
      * Возвращает страницу/выборку/набор зарегистрированных юзеров в соответствии с
      *      параметрами фильтрации и пагинации
-     * @param paginationInfo - параметры пагинации (номер запрашиваемой страницы/выборки/набора)
-     * @param universalUserFilters - параметры фильтрации (зависят от параметров юзера -
+     * @param paginationInfo Параметры пагинации (номер запрашиваемой страницы/выборки/набора)
+     * @param universalUserFilters Параметры фильтрации (зависят от параметров юзера -
      *      причина блокировки, ФИО, возраст и т.п.)
-     * @return список юзеров, удовлетворяющих условиям поиска
+     * @return Список юзеров, удовлетворяющих условиям поиска
      */
     ListOfUniversalUser searchUsers(PaginationInfo paginationInfo,
                                     UniversalUserFilters universalUserFilters,
@@ -73,9 +74,9 @@ public interface UniversalUserService {
 
     /**
      * Обновляет данные о пользователе по его id и возвращает обновленный объект юзера
-     * @param userId - идентификатор юзера, данные о котором необходимо обновить
-     * @param newUserInfoAttributes - объект с новыми значениями полей иноформации о юзере
-     * @return обновленный объект юзера
+     * @param userId Идентификатор юзера, данные о котором необходимо обновить
+     * @param newUserInfoAttributes Объект с новыми значениями полей иноформации о юзере
+     * @return Обновленный объект юзера
      */
     UniversalUser updateUserById(UUID userId, UserInfo newUserInfoAttributes);
 
@@ -84,13 +85,13 @@ public interface UniversalUserService {
      *      переданными идентификаторами указанный код причины блокировки) и возвращает
      *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждой
      *      переданной связке "id юзера + код причины блокировки")
-     * @param usersInfoToBlock - список связок "userId + blockReasonId" (id пользователя, которого нужно
+     * @param usersInfoToBlock Список связок "userId + blockReasonId" (id пользователя, которого нужно
 *           заблокировать, а также код причины блокировки)
-     * @param userToBlockId - идентификатор пользователя, которого нужно заблокировать (передается либо он,
+     * @param userToBlockId Идентификатор пользователя, которого нужно заблокировать (передается либо он,
      *                      либо usersInfoToBlock - при попытке передаче обоих параметров возникает ошибка)
-     * @param blockReasonId - код причины блокировки для указанного пользователя (не передается, если указан
+     * @param blockReasonId Код причины блокировки для указанного пользователя (не передается, если указан
      *                      usersInfoToBlock - выбрасывает ошибку)
-     * @return - объект BlockUsersResultMessage, имеющий поля:
+     * @return Объект BlockUsersResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *          0 - выполнено успешно для всех переданных связок;
@@ -108,8 +109,8 @@ public interface UniversalUserService {
 
     /**
      * Метод авторизации пользователя в системе
-     * @param login - логин пользователя
-     * @param password - пароль пользователя
+     * @param login Логин пользователя
+     * @param password Пароль пользователя
      * @return LoginUserResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
@@ -123,9 +124,9 @@ public interface UniversalUserService {
 
     /**
      * Метод добавления нового ключ-кода админа
-     * @param userMadeRequest - ID пользователя, инициировавшего операцию (считается,
+     * @param userMadeRequest ID пользователя, инициировавшего операцию (считается,
      *                        что такой пользователь на момент вызова метода существует)
-     * @param adminKey - значение ключ-кода
+     * @param adminKey Значение ключ-кода
      * @return AddAdminKeyResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
@@ -140,10 +141,10 @@ public interface UniversalUserService {
      * Выполняет выдачу роли списку пользователей и возвращает
      *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждому
      *      переданному id юзера)
-     * @param usersToAddRoleIds - список id юзеров, которым необходимо выдать указанную роль
-     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
+     * @param usersToAddRoleIds Список id юзеров, которым необходимо выдать указанную роль
+     * @param userMadeRequestId Идентификатор пользователя, инициировавшего операцию
      * @param roleId - id выдаваемой пользователям роли
-     * @return - объект AddRoleToUserResultMessage, имеющий поля:
+     * @return Объект AddRoleToUserResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *          0 - выполнено успешно для всех переданных id юзеров;
@@ -165,7 +166,7 @@ public interface UniversalUserService {
      * Выполняет поиск и выдачу ролей пользователя
      * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
      * @param userId - id пользователя, роли которого необходимо отобразить;
-     * @return - объект GetUserRolesResultMessage, имеющий поля:
+     * @return Объект GetUserRolesResultMessage, имеющий поля:
      *      globalMessage -  глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *          0 - выполнено успешно;
@@ -180,10 +181,10 @@ public interface UniversalUserService {
      * Выполняет отмену роли списку пользователей и возвращает
      *      результат выполнения операции (глобальные сообщение + код, а также сообщения + код по каждому
      *      переданному id юзера)
-     * @param usersToRemoveRoleIds - список id юзеров, у которых необходимо отменить указанную роль
-     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
-     * @param roleId - id отменяемой у пользователей роли
-     * @return - объект AddRoleToUserResultMessage, имеющий поля:
+     * @param usersToRemoveRoleIds список id юзеров, у которых необходимо отменить указанную роль
+     * @param userMadeRequestId идентификатор пользователя, инициировавшего операцию
+     * @param roleId id отменяемой у пользователей роли
+     * @return Объект AddRoleToUserResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *          0 - выполнено успешно для всех переданных id юзеров;
@@ -206,9 +207,9 @@ public interface UniversalUserService {
 
     /**
      * Выполняет создание новой причины блокировки в Системе.
-     * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
-     * @param blockReasonDescription - описание создаваемой причины блокировки
-     * @return - объект AddBlockReasonResultMessage, имеющий поля:
+     * @param userMadeRequestId идентификатор пользователя, инициировавшего операцию
+     * @param blockReasonDescription описание создаваемой причины блокировки
+     * @return Объект AddBlockReasonResultMessage, имеющий поля:
      *      globalMessage - глобальное сообщение о результате выполнения операции (строка);
      *      globalOperationCode - глобальный код результата выполнения операции (число):
      *          0 - выполнено успешно;
@@ -220,10 +221,10 @@ public interface UniversalUserService {
     /**
      * Выполняет поиск разрешений пользователя в соответствии с фильтром и возвращает найденный список
      * @param userMadeRequestId - идентификатор пользователя, инициировавшего операцию
-     * @param userId - идентификатор пользователя, разрешения которого необходимо найти
-     * @param filter - фильтр (перечисление), в соответствии с которым выполняется поиск разрешений пользователя.
+     * @param userId идентификатор пользователя, разрешения которого необходимо найти
+     * @param filter фильтр (перечисление), в соответствии с которым выполняется поиск разрешений пользователя.
      *               Возможные значения проверяются по классу UserPermissionFilter.
-     * @return - объект класса GetUserPermissionResultMessage, имеющий поля:
+     * @return Объект класса GetUserPermissionResultMessage, имеющий поля:
      *      globalOperationCode - код результата выполнения операции (число):
      *          0 - успешное выполнение операции;
      *          1 - пользователь, инициировавший выполнение операции, не найден;
@@ -235,7 +236,31 @@ public interface UniversalUserService {
      *          разределенных на блоки:
      *              ["forceAssigned", "roleBased"]
      */
-        GetUserPermissionResultMessage getUserPermission(UUID userMadeRequestId, UUID userId, String filter);
+    GetUserPermissionResultMessage getUserPermission(UUID userMadeRequestId, UUID userId, String filter);
+
+    /**
+     * Добавляет разрешения пользователю и возвращает результат выполнения операции (код + сообщение + сообщения с кодами для каждого переданного разрешения)
+     * @param userMadeRequestId Идентификатор пользователя, инициировавшего операцию
+     * @param userId Идентификатор пользователя, которому назначают разрешения
+     * @param permissionIds Список идентификаторов назначаемых пользователю разрешений
+     * @return Объект класса UserAddPermissionResultMessage, содержащий поля:
+     *      globalOperationCode - код результата выполнения операции, возможные значения которого:
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший выполнение операции, не найден;
+     *          2 - пользователь, для которого выполняется операция назначения разрешений, не найден;
+     *          3 - переданный список идентификаторов назначаемых пользователю разрешений не может быть пустым;
+     *          4 - успешно назначена пользователю лишь часть из списка переданных разрешений;
+     *          5 - ни одно из указанных разрешений не было назначено пользователю;
+     *      message - сообщение о результате выполнения операции;
+     *      Список объектов UserAddPermissionResultMessageListElement (поля code, permissionId, message) - сообщений о результате
+     *          добавления каждого из переданных разрешений;
+     *          возможные значения поля code класса UserAddPermissionResultMessageListElement:
+     *              0 - разрешение успешно назначено пользователю;
+     *              1 - указанное разрешение не существует;
+     *              2 - указанное разрешение уже назначено пользователю.
+     *
+     */
+    UserAddPermissionResultMessage userAddPermission(UUID userMadeRequestId, UUID userId, List<UUID> permissionIds);
 
     /**
      * Возвращает список всех имеющихся юзеров

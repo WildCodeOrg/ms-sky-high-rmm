@@ -28,6 +28,8 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdmi
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryResponseAddAdminKeyCodeDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addBlockReasonDTOs.DeliveryRequestAddBlockReasonDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addBlockReasonDTOs.DeliveryResponseAddBlockReasonDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addPermissionsToUser.DeliveryRequestAddPermissionsToUserDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addPermissionsToUser.DeliveryResponseAddPermissionsToUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryRequestAddRoleToUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserFullSuccessfulDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRoleToUserDTOs.DeliveryResponseAddRoleToUserPartlySuccessfulDTO;
@@ -59,6 +61,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceM
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
@@ -1809,8 +1812,8 @@ public class RMMController {
     }
 
     @PostMapping(value = "/users/{user_id}/permissions/filtering")
-    public ResponseEntity<?> getUserPermissions(@PathVariable(value = "user_id") UUID userId, @ValidParams
-                                                @RequestBody DeliveryRequestGetUserPermissionDTO requestBodyDTO) {
+    public ResponseEntity<?> getUserPermissions(@PathVariable(value = "user_id") UUID userId,
+                                                @RequestBody @ValidParams DeliveryRequestGetUserPermissionDTO requestBodyDTO) {
         log.info("Getting permissions for user '" + userId + "' " +
                 "process was started by '" + requestBodyDTO.getUserMadeRequestId() + "'");
 
@@ -1907,6 +1910,130 @@ public class RMMController {
             default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
         };
     }
+
+    @PostMapping(value = "/users/{user_id}/permissions")
+    public ResponseEntity<?> addPermissionsToUser(@PathVariable(value = "user_id") UUID userId, @ValidParams
+                                                  @RequestBody DeliveryRequestAddPermissionsToUserDTO requestBodyDTO) {
+
+        log.info(
+                "Assigning permissions to user '" + userId + "' " +
+                        "process was started by '" + requestBodyDTO.getUserMadeRequestId()
+        );
+
+        UserAddPermissionResultMessage result = universalUserService.userAddPermission(
+                requestBodyDTO.getUserMadeRequestId(),
+                userId,
+                requestBodyDTO.getPermissionIds()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished successfully"
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseAddPermissionsToUserDTO(
+                                "Все разрешения успешно назначены пользователю",
+                                result.getMessagesPerPermissions()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                25001,
+                                "Ошибка выполнения операции назначения разрешений пользователю",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 3 -> {
+                log.warning(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                25002,
+                                "Ошибка выполнения операции назначения разрешений пользователю",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 4 -> {
+                log.info(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished partly-successfully: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseAddPermissionsToUserDTO(
+                                result.getMessage(),
+                                result.getMessagesPerPermissions()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 5 -> {
+                log.info(
+                        "Assigning permissions to user '" + userId + "' " +
+                                "process started by '" + requestBodyDTO.getUserMadeRequestId() +
+                                " finished with fully unsuccessful results per permissions: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseAddPermissionsToUserDTO(
+                                result.getMessage(),
+                                result.getMessagesPerPermissions()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
+
+    //валидация не работает когда ValidParams в аргументах
 
     //test controller methods - uncomment to test the project availability
 

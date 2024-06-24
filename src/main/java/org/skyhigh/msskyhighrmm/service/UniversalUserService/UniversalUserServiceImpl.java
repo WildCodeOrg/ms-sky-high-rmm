@@ -7,10 +7,13 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoList
 import org.skyhigh.msskyhighrmm.model.DBEntities.*;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddRoleToUser.AddRoleToUserResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionForceAssignedPermission;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
@@ -18,6 +21,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RemoveRoleFromUserList.RemoveRoleFromUserListResultMessageListElement;
+import org.skyhigh.msskyhighrmm.model.SystemObjects.DateTimeFormatter.DateTimeFormatter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.StringEnumValidator;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.StringEnumValidator.ValidatingEnums.UserPermissionFilter;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
@@ -40,9 +44,9 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private final UsersRolesRepository usersRolesRepository;
     private final UserGroupRolesRepository usersGroupRolesRepository;
     private final OperationPermissionsRepository operationPermissionsRepository;
+    private final UserPermissionRepository userPermissionRepository;
 
     private final PasswordEncoder passwordEncoder;
-    private final UserGroupRolesRepository userGroupRolesRepository;
 
     private static final Logger log = Logger.getLogger(UniversalUserServiceImpl.class.getName());
 
@@ -50,18 +54,17 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                     BlockReasonsRepository blockReasonsRepository,
                                     AdministratorKeyCodeRepository administratorKeyCodeRepository,
                                     UsersRolesRepository usersRolesRepository,
-                                    UserGroupRolesRepository userGroupRolesRepository,
                                     UserGroupRolesRepository usersGroupRolesRepository,
                                     OperationPermissionsRepository operationPermissionsRepository,
-                                    PasswordEncoder passwordEncoder) {
+                                    PasswordEncoder passwordEncoder, UserPermissionRepository userPermissionRepository) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
         this.usersRolesRepository = usersRolesRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userGroupRolesRepository = userGroupRolesRepository;
         this.usersGroupRolesRepository = usersGroupRolesRepository;
         this.operationPermissionsRepository = operationPermissionsRepository;
+        this.userPermissionRepository = userPermissionRepository;
     }
 
     @Override
@@ -521,7 +524,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     null
             );
 
-        List<UserGroupRolesEntity> rolesOfUser = userGroupRolesRepository.getRolesOfUser(userId);
+        List<UserGroupRolesEntity> rolesOfUser = usersGroupRolesRepository.getRolesOfUser(userId);
         if (rolesOfUser == null || rolesOfUser.isEmpty())
             return new GetUserRolesResultMessage(
                     "У пользователя с id '" + userId + "' нет назначенных ролей.",
@@ -553,7 +556,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     null
             );
 
-        if (!userGroupRolesRepository.existsById(roleId))
+        if (!usersGroupRolesRepository.existsById(roleId))
             return new RemoveRoleFromUserListResultMessage(
                     "Роли с указанным id не существует.",
                     4,
@@ -567,7 +570,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     null
             );
 
-        Optional<UserGroupRolesEntity> userGroupRolesEntityOptional = userGroupRolesRepository.findById(roleId);
+        Optional<UserGroupRolesEntity> userGroupRolesEntityOptional = usersGroupRolesRepository.findById(roleId);
 
         if (userGroupRolesEntityOptional.isEmpty())
             return new RemoveRoleFromUserListResultMessage(
@@ -731,15 +734,22 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                     null
             );
 
-        Map<String, List<OperationPermissionsEntity>> resultPermissions = new HashMap<>();
+        Map<String, List<?>> resultPermissions = new HashMap<>();
 
         return switch (UserPermissionFilter.valueOf(filter)) {
             case ALL -> {
+                List<UserPermissionEntity> forceAssignedUserPermissionsRelationshipReferences = userPermissionRepository.findByUserId(userId);
                 List<OperationPermissionsEntity> roleBasedUserPermissions = operationPermissionsRepository.findRoleBasedUserPermissionByUserId(userId);
-                List<OperationPermissionsEntity> forceAssignedUserPermissions = operationPermissionsRepository.findForceAssignedUserPermissionsByUserId(userId);
+                List<GetUserPermissionForceAssignedPermission> forceAssignedUserPermissions = forceAssignedUserPermissionsRelationshipReferences.stream()
+                        .map(x -> new GetUserPermissionForceAssignedPermission(
+                                x.getPermissionId(),
+                                x.getCreateDate()
+                        )
+                ).toList();
+
                 if (
-                        (roleBasedUserPermissions == null && forceAssignedUserPermissions == null)
-                        || (roleBasedUserPermissions != null && forceAssignedUserPermissions != null
+                       // (roleBasedUserPermissions == null && forceAssignedUserPermissions == null) ||
+                                (roleBasedUserPermissions != null //&& forceAssignedUserPermissions != null
                                 && roleBasedUserPermissions.isEmpty() && forceAssignedUserPermissions.isEmpty())
                 )
                     yield new GetUserPermissionResultMessage(
@@ -791,6 +801,94 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 );
             }
         };
+    }
+
+    @Override
+    public UserAddPermissionResultMessage userAddPermission(UUID userMadeRequestId, UUID userId, List<UUID> permissionIds) {
+        if (!universalUserRepository.existsById(userMadeRequestId))
+            return new UserAddPermissionResultMessage(
+                 1,
+                 "Пользователь, инициировавщий выполнение операции, не найден",
+                 null
+            );
+
+        if (!universalUserRepository.existsById(userId))
+            return new UserAddPermissionResultMessage(
+                    2,
+                    "Пользователь, для которого выполняется операция назначения разрешений, не найден",
+                    null
+            );
+
+        if (permissionIds == null || permissionIds.isEmpty())
+            return new UserAddPermissionResultMessage(
+                    3,
+                    "Переданный список идентификаторов назначаемых пользователю разрешений не может быть пустым",
+                    null
+            );
+
+        UniversalUserEntity addedPermissionsUser = universalUserRepository.getReferenceById(userId);
+        UserAddPermissionResultMessage result = new UserAddPermissionResultMessage();
+        List<UserAddPermissionResultMessageListElement> resultsPerPermissions = new ArrayList<>();
+
+        for (UUID permissionId : permissionIds) {
+            List<UserPermissionEntity> checkReferenceExistenceList = userPermissionRepository
+                    .findByUserIdAndPermissionId(userId, permissionId);
+
+            if (!operationPermissionsRepository.existsById(permissionId))
+                resultsPerPermissions.add(new UserAddPermissionResultMessageListElement(
+                        permissionId,
+                        1,
+                        "Указанное разрешение не существует"
+                ));
+            else if (checkReferenceExistenceList != null && !checkReferenceExistenceList.isEmpty())
+                resultsPerPermissions.add(new UserAddPermissionResultMessageListElement(
+                        permissionId,
+                        2,
+                        "Указанное разрешение уже назначено пользователю"
+                ));
+            else {
+                OperationPermissionsEntity operationPermissionsEntity = operationPermissionsRepository.getReferenceById(permissionId);
+                UserPermissionEntity userPermissionRelationship = new UserPermissionEntity();
+                userPermissionRelationship.setPermissionId(operationPermissionsEntity);
+                userPermissionRelationship.setUserId(addedPermissionsUser);
+
+                //Getting current date-time
+                String currentDateTime = DateTimeFormatter.getCurrentDateTimeStringWithTZ();
+                userPermissionRelationship.setCreateDate(currentDateTime);
+
+                UUID savedRelationshipReferenceId = (userPermissionRepository.save(userPermissionRelationship)).getId();
+
+                resultsPerPermissions.add(new UserAddPermissionResultMessageListElement(
+                        permissionId,
+                        0,
+                        "Разрешение успешно назначено"
+                ));
+
+                log.info("There was a userPermissionRelationship reference created in table user_permission with parameters: " +
+                        "{id:'" + savedRelationshipReferenceId + "',user_id:'" +
+                        userId + "',permission_id:'" + permissionId + "',}");
+            }
+        }
+
+        int unsuccessfullyUserPermissionAddAmount = 0;
+        for (UserAddPermissionResultMessageListElement element : resultsPerPermissions) {
+            if (element.getCode() != 0)
+                unsuccessfullyUserPermissionAddAmount++;
+        }
+
+        if (unsuccessfullyUserPermissionAddAmount == resultsPerPermissions.size()) {
+            result.setGlobalOperationCode(5);
+            result.setMessage("Ни одно из указанных разрешений не было назначено пользователю");
+        }
+        else if (unsuccessfullyUserPermissionAddAmount != 0) {
+            result.setGlobalOperationCode(4);
+            result.setMessage("Успешно назначена пользователю лишь часть из списка переданных разрешений");
+        } else {
+            result.setMessage("Все разрешения были успешно назначены указанному пользователю");
+        }
+
+        result.setMessagesPerPermissions(resultsPerPermissions);
+        return result;
     }
 
     @Override

@@ -3,7 +3,6 @@ package org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUse
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 
 import java.util.List;
 import java.util.Map;
@@ -13,5 +12,5 @@ import java.util.Map;
 @NoArgsConstructor
 public class DeliveryResponseGetUserPermissionDTO {
     private String message;
-    private Map<String, List<OperationPermissionsEntity>> permissions;
+    private Map<String, List<?>> permissions;
 }
