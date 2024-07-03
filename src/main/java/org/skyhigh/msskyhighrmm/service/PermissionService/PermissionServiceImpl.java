@@ -3,6 +3,7 @@ package org.skyhigh.msskyhighrmm.service.PermissionService;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.ListOfOperationPermissions;
 import org.skyhigh.msskyhighrmm.model.DBEntities.OperationPermissionsEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.DeletePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidationType;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.EndpointValidator.EndpointValidator;
@@ -12,7 +13,6 @@ import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Sort.Ope
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.repository.*;
-import org.skyhigh.msskyhighrmm.service.UniversalUserService.UniversalUserService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +29,7 @@ public class PermissionServiceImpl implements PermissionService {
     private final UserGroupRolesRepository userGroupRolesRepository;
     private final RolesOperationsRepository rolesOperationsRepository;
     private final UniversalUserRepository universalUserRepository;
+    private final UserPermissionRepository userPermissionRepository;
 
     private final EndpointValidator endpointValidator = new EndpointValidator();
 
@@ -36,8 +37,8 @@ public class PermissionServiceImpl implements PermissionService {
             OperationPermissionsRepository operationPermissionsRepository,
             UsersRolesRepository usersRolesRepository,
             UserGroupRolesRepository userGroupRolesRepository,
+            UserPermissionRepository userPermissionRepository,
             RolesOperationsRepository rolesOperationsRepository,
-            UniversalUserService universalUserService,
             UniversalUserRepository universalUserRepository
     ) {
         this.operationPermissionsRepository = operationPermissionsRepository;
@@ -45,6 +46,7 @@ public class PermissionServiceImpl implements PermissionService {
         this.userGroupRolesRepository = userGroupRolesRepository;
         this.rolesOperationsRepository = rolesOperationsRepository;
         this.universalUserRepository = universalUserRepository;
+        this.userPermissionRepository = userPermissionRepository;
     }
 
     @Override
@@ -269,5 +271,38 @@ public class PermissionServiceImpl implements PermissionService {
         return resultPermissionList != null
                 ? new ListOfOperationPermissions(itemCount, paginationItemCount, paginationPageNumber, resultPermissionList)
                 : null;
+    }
+
+    @Override
+    public DeletePermissionResultMessage deletePermission(UUID userMadeRequestId, UUID permissionId) {
+        if (userMadeRequestId == null || !universalUserRepository.existsById(userMadeRequestId))
+            return new DeletePermissionResultMessage(
+                    1,
+                    "Пользователь, инициировавший выполнение операции, не найден"
+            );
+
+        Optional<OperationPermissionsEntity> deletingPermissionOptional = operationPermissionsRepository.findById(permissionId);
+        if (deletingPermissionOptional.isEmpty())
+            return new DeletePermissionResultMessage(
+                    2,
+                    "Разрешение по указанному идентификатору не найдено"
+            );
+
+        if (deletingPermissionOptional.get().isCritical())
+            return new DeletePermissionResultMessage(
+                    3,
+                    "Разрешение является критичным - удаление невозможно"
+            );
+
+        //List<RolesOperationsEntity> relatedRolesOperationsReferences = rolesOperationsRepository.findByPermissionId(permissionId);
+        //List<UserPermissionEntity> relatedUserPermissionReferences = userPermissionRepository.findByPermissionId(permissionId);
+        //написать транзакцию для удаления связей с ролями и пользователями, а также самого разрешения (возможно через каскад)
+
+        operationPermissionsRepository.delete(deletingPermissionOptional.get());
+
+        return new DeletePermissionResultMessage(
+                0,
+                "Разрешение успешно удалено"
+        );
     }
 }

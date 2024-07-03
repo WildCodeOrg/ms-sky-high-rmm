@@ -14,4 +14,7 @@ public interface UserPermissionRepository extends JpaRepository<UserPermissionEn
 
     @Query(value = "SELECT * FROM public.user_permission up WHERE up.user_id = ?1 AND up.permission_id = ?2", nativeQuery = true)
     List<UserPermissionEntity> findByUserIdAndPermissionId(UUID userId, UUID permissionId);
+
+    @Query(value = "SELECT * FROM public.user_permission up WHERE up.permission_id = ?1", nativeQuery = true)
+    List<UserPermissionEntity> findByPermissionId(UUID permissionId);
 }

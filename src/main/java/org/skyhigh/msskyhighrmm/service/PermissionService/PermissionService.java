@@ -2,6 +2,7 @@ package org.skyhigh.msskyhighrmm.service.PermissionService;
 
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Permissions.ListOfOperationPermissions;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.DeletePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Filters.OperationPermissionFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.OperationPermission.Sort.OperationPermissionSort;
@@ -81,4 +82,18 @@ public interface PermissionService {
      */
     ListOfOperationPermissions permissionSearch(PaginationInfo paginationInfo, UUID permissionId, OperationPermissionFilters operationPermissionFilters,
                                                 OperationPermissionSort operationPermissionSort);
+
+    /**
+     * Удаляет некритическое разрешение из Системы
+     * @param userMadeRequestId Идентификатор пользователя, инициировавшего выполнение операции
+     * @param permissionId Идентификатор удаляемого из Системы разрешения
+     * @return Объект класса DeletePermissionResultMessage - резуьтат выполнения операции, содержащий поля:
+     *      globalOperationCode - код результата выполнения операции, возможные значения которого:
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший выполнение операции, не найден;
+     *          2 - разрешение по указанному идентификатору не найдено;
+     *          3 - разрешение является критичным - удаление невозможно;
+     *      message - сообщение о результате выполнения операции;
+     */
+    DeletePermissionResultMessage deletePermission (UUID userMadeRequestId, UUID permissionId);
 }

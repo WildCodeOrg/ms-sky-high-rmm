@@ -7,6 +7,8 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryRequestCreatePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.CreatePermission.DeliveryResponseCreatePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.DeletePermission.DeliveryRequestDeletePermissionDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.DeletePermission.DeliveryResponseDeletePermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermissions.DeliveryRequestSearchPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.SearchPermissions.DeliveryResponseSearchPermissionDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.permissionsRMMController.UpdatePermission.DeliveryRequestUpdatePermissionDTO;
@@ -54,6 +56,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.searchU
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryRequestUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.updateUserByIdDTOs.DeliveryResponseUpdateUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.CreatePermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.DeletePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionServiceMessages.UpdatePermissionResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
@@ -2034,6 +2037,94 @@ public class RMMController {
     }
 
     //валидация не работает когда ValidParams в аргументах
+
+    @DeleteMapping(value = "/permissions/{permission_id}")
+    public ResponseEntity<?> deletePermission(@PathVariable(value = "permission_id") UUID permissionId, @ValidParams
+                                              @RequestBody DeliveryRequestDeletePermissionDTO requestBody) {
+
+        log.info(
+                "Deleting permission '" + permissionId + "' " +
+                        "process was started by '" + requestBody.getUserMadeRequestId() + "'"
+        );
+
+        DeletePermissionResultMessage result = permissionService.deletePermission(
+                requestBody.getUserMadeRequestId(),
+                permissionId
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info(
+                        "Deleting permission '" + permissionId + "' " +
+                                "process was started by '" + requestBody.getUserMadeRequestId() + "' " +
+                                "finished successfully"
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseDeletePermissionDTO(
+                            "Разрешение '" + permissionId + "' успешно удалено"
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning(
+                        "Deleting permission '" + permissionId + "' " +
+                                "process was started by '" + requestBody.getUserMadeRequestId() + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning(
+                        "Deleting permission '" + permissionId + "' " +
+                                "process was started by '" + requestBody.getUserMadeRequestId() + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                26001,
+                                "Ошибка выполнения операции удаления разрешения",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 3 -> {
+                log.warning(
+                        "Deleting permission '" + permissionId + "' " +
+                                "process was started by '" + requestBody.getUserMadeRequestId() + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                26002,
+                                "Ошибка выполнения операции удаления разрешения",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
 
     //test controller methods - uncomment to test the project availability
 

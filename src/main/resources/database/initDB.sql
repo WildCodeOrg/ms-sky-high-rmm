@@ -100,9 +100,11 @@ ALTER TABLE administrator_key_code ADD CONSTRAINT FK_administrator_key_code_univ
     FOREIGN KEY (user_id) REFERENCES universal_user (id) ON DELETE No Action ON UPDATE No Action
 ;
 
-ALTER TABLE roles_operations ADD CONSTRAINT FK_roles_operations_operation_permissions
-    FOREIGN KEY (permission_id) REFERENCES operation_permissions (id) ON DELETE No Action ON UPDATE No Action
-;
+ALTER TABLE roles_operations
+    ADD CONSTRAINT FK_roles_operations_operation_permissions
+    FOREIGN KEY (permission_id)
+    REFERENCES operation_permissions (id)
+    ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE roles_operations ADD CONSTRAINT FK_roles_operations_user_group_roles
     FOREIGN KEY (role_id) REFERENCES user_group_roles (id) ON DELETE No Action ON UPDATE No Action
@@ -120,13 +122,17 @@ ALTER TABLE users_roles ADD CONSTRAINT FK_users_roles_user_group_roles
     FOREIGN KEY (role_id) REFERENCES user_group_roles (id) ON DELETE No Action ON UPDATE No Action
 ;
 
-ALTER TABLE user_permission ADD CONSTRAINT FK_user_permission_operation_permissions
-    FOREIGN KEY (permission_id) REFERENCES operation_permissions (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-;
+ALTER TABLE user_permission
+    ADD CONSTRAINT FK_user_permission_operation_permissions
+    FOREIGN KEY (permission_id)
+    REFERENCES operation_permissions (id)
+    ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE user_permission ADD CONSTRAINT FK_user_permission_universal_user
-    FOREIGN KEY (user_id) REFERENCES universal_user (id) ON DELETE NO ACTION ON UPDATE NO ACTION
-;
+ALTER TABLE user_permission
+    ADD CONSTRAINT FK_user_permission_universal_user
+    FOREIGN KEY (user_id)
+    REFERENCES universal_user (id)
+    ON DELETE CASCADE ON UPDATE CASCADE;
 
 /* CREATE OR REPLACE FUNCTIONS */
 
