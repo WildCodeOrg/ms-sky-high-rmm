@@ -7,6 +7,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
 public class AnnotationBasedParamValidatorImpl implements ParamValidator {
 
     private final Map<Class<? extends Annotation>, FieldValidator> validationFunctions;
@@ -18,10 +20,13 @@ public class AnnotationBasedParamValidatorImpl implements ParamValidator {
     }
     @Override
     public void validate(Object param) {
-        if (param == null) {
+        if (param == null)
             throw new ValidationException("Passed param is null");
-        }
+
         Class<?> clazz = param.getClass();
+
+        if (clazz.equals(String.class) || clazz.equals(UUID.class) || clazz.equals(Integer.class))
+            return;
 
         Field[] declaredFields = clazz.getDeclaredFields();
         for (Field field : declaredFields) {

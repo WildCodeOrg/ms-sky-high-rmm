@@ -24,6 +24,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.getRolePermissi
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.getRolePermissionsDTOs.DeliveryResponseGetRolePermissionsDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.unassignPermissionsDTOs.DeliveryRequestUnassignPermissionsDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryRequestUpdateRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryResponseUpdateRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
@@ -266,7 +267,8 @@ public class RMMController {
     }
 
     @GetMapping(value = "/users/{user_id}")
-    public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> getUserById(@PathVariable(name = "user_id") UUID searchForUserId,
                                          @RequestBody DeliveryRequestGetUserByIdDTO getUserByIdDTO) {
         log.info("Getting user by Id '" + searchForUserId +
                 "' process was started by '" + getUserByIdDTO.getUserMadeRequestId() + "'");
@@ -381,7 +383,8 @@ public class RMMController {
     }
 
     @PutMapping(value = "/users/{user_id}")
-    public ResponseEntity<?> updateUserById(@PathVariable(name = "user_id") UUID updateUserId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> updateUserById(@PathVariable(name = "user_id") UUID updateUserId,
                                             @RequestBody DeliveryRequestUpdateUserByIdDTO updateUserByIdDTO) {
         log.info("Updating user with id '" + updateUserId +
                 "' process was started by '" + updateUserByIdDTO.getUserMadeRequestId() + "'");
@@ -792,7 +795,8 @@ public class RMMController {
 
 
     @GetMapping(value = "/users/{user_id}/roles")
-    public ResponseEntity<?> getUserRoles(@PathVariable(name = "user_id") UUID userId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> getUserRoles(@PathVariable(name = "user_id") UUID userId,
                                           @RequestBody DeliveryRequestGetUserRolesDTO getUserRolesDTO) {
         log.info("Getting roles for user: '" + userId + "' " +
                 "process was started by '" + getUserRolesDTO.getUserMadeRequestId() + "'");
@@ -863,7 +867,8 @@ public class RMMController {
 
 
     @DeleteMapping(value = "/users/roles/{role_id}")
-    public ResponseEntity<?> removeRoleFromUserList(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> removeRoleFromUserList(@PathVariable(value = "role_id") UUID roleId,
                                                     @RequestBody DeliveryRequestRemoveRoleFromUserListDTO removeRoleFromUserListRequest) {
 
         log.info("Removing role with id: '" + roleId + "' " +
@@ -1068,7 +1073,8 @@ public class RMMController {
     }
 
     @PutMapping(value = "/roles/{role_id}")
-    public ResponseEntity<?> updateRole(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> updateRole(@PathVariable(value = "role_id") UUID roleId,
                                         @RequestBody DeliveryRequestUpdateRoleDTO updateRoleRequest) {
 
         log.info("Updating role with id '" + roleId + "' process was started by " +
@@ -1375,7 +1381,8 @@ public class RMMController {
 
 
     @PutMapping(value = "/permissions/{permission_id}")
-    public ResponseEntity<?> updatePermission(@PathVariable(value = "permission_id") UUID permissionId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> updatePermission(@PathVariable(value = "permission_id") UUID permissionId,
                                                    @RequestBody DeliveryRequestUpdatePermissionDTO requestDTO) {
         log.info("Updating a permission with id '" + permissionId
                 + "' process was started by " +
@@ -1628,7 +1635,8 @@ public class RMMController {
     }
 
     @PostMapping(value = "/roles/{role_id}/permissions")
-    public ResponseEntity<?> addPermissions(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> addPermissions(@PathVariable(value = "role_id") UUID roleId,
                                             @RequestBody DeliveryRequestAddPermissionDTO requestDTO) {
 
         log.info("Adding permissions for role '" + roleId +
@@ -1744,7 +1752,8 @@ public class RMMController {
     }
 
     @GetMapping(value = "/roles/{role_id}/permissions")
-    public ResponseEntity<?> getRolePermissions(@PathVariable(value = "role_id") UUID roleId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> getRolePermissions(@PathVariable(value = "role_id") UUID roleId,
                                                 @RequestBody DeliveryRequestGetRolePermissionsDTO requestBodyDTO) {
         log.info("Getting permissions for role '" + roleId + "' " +
                 "process was started by '" + requestBodyDTO.getUserMadeRequestId() + "'");
@@ -1815,8 +1824,9 @@ public class RMMController {
     }
 
     @PostMapping(value = "/users/{user_id}/permissions/filtering")
+    @ValidParams
     public ResponseEntity<?> getUserPermissions(@PathVariable(value = "user_id") UUID userId,
-                                                @RequestBody @ValidParams DeliveryRequestGetUserPermissionDTO requestBodyDTO) {
+                                                @RequestBody DeliveryRequestGetUserPermissionDTO requestBodyDTO) {
         log.info("Getting permissions for user '" + userId + "' " +
                 "process was started by '" + requestBodyDTO.getUserMadeRequestId() + "'");
 
@@ -1915,7 +1925,8 @@ public class RMMController {
     }
 
     @PostMapping(value = "/users/{user_id}/permissions")
-    public ResponseEntity<?> addPermissionsToUser(@PathVariable(value = "user_id") UUID userId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> addPermissionsToUser(@PathVariable(value = "user_id") UUID userId,
                                                   @RequestBody DeliveryRequestAddPermissionsToUserDTO requestBodyDTO) {
 
         log.info(
@@ -2036,10 +2047,9 @@ public class RMMController {
         };
     }
 
-    //валидация не работает когда ValidParams в аргументах
-
     @DeleteMapping(value = "/permissions/{permission_id}")
-    public ResponseEntity<?> deletePermission(@PathVariable(value = "permission_id") UUID permissionId, @ValidParams
+    @ValidParams
+    public ResponseEntity<?> deletePermission(@PathVariable(value = "permission_id") UUID permissionId,
                                               @RequestBody DeliveryRequestDeletePermissionDTO requestBody) {
 
         log.info(
@@ -2124,6 +2134,13 @@ public class RMMController {
 
             default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
         };
+    }
+
+    @DeleteMapping(value = "/roles/{role_id}/permissions")
+    @ValidParams
+    public ResponseEntity<?> unassignPermissions(@PathVariable(value = "role_id") UUID roleId,
+                                                 @RequestBody DeliveryRequestUnassignPermissionsDTO requestBody) {
+        return null;
     }
 
     //test controller methods - uncomment to test the project availability

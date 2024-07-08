@@ -7,7 +7,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 
 public class NotEmptyValidatorImpl implements FieldValidator {
-
     @Override
     public void validate(Object entity, Field field) {
 

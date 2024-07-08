@@ -4,6 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Roles.ListOfUserGroupRoles
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UserGroupRole.Filters.UserGroupRolesFilters;
@@ -79,7 +80,7 @@ public interface RolesService {
      *          1 - пользователь, инициировавший операцию, не найден;
      *          2 - роль с указанным roleId не существует;
      *          3 - роль является критической, обновление списка связанных разрешений невозможно;
-     *          4 - спиок ID добавляемых роли разрешений permissionIds должен содержать не менее 1 записи;
+     *          4 - список ID добавляемых роли разрешений permissionIds должен содержать не менее 1 записи;
      *          5 - для указанной роли была добавлена лишь часть разрешений из переданного списка в связи с ошибками валидации разрешений;
      *          6 - не удалость добавить ни одно из переданных разрешений для указанной роли в связи с ошибками валидации разрешений;
      *      а также список (List) сообщений результата добавления конкретного разрешения типа AddPermissionsResultMessageListElement с полями:
@@ -106,4 +107,29 @@ public interface RolesService {
      *      List<OperationPermissionEntity> - список найденных разрешений, привязанных роли.
      */
     GetRolePermissionsResultMessage getRolePermissions(UUID userMadeRequestId, UUID roleId);
+
+    /**
+     * Отвязывание списка привязанных к роли разрешений
+     * @param userMadeRequestId ID пользователя, инициировавшего операцию;
+     * @param roleId ID роли, разрешение которой необходимо найти
+     * @param permissionIds Список идентификаторов отвязываемых от роли разрешений
+     * @return Объект класса UnassignPermissionsResultMessage, содержащий поля:
+     *      globalOperationCode - код результата выполнения операции:
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - роль с указанным roleId не существует;
+     *          3 - список идентификаторов permissionIds должен быть заполнен хотя бы одним значением;
+     *          4 - роль с указанным roleId является критичной - удаление привязанных разрешений невозможно;
+     *          5 - от указанной роли была отвязана лишь часть разрешений по причине возникновения ошибок;
+     *          6 - от указанной роли не было отвязано ни одно из разрешений по причине возникновения ошибок;
+     *      message - сообщение о результате выполнения операции;
+     *      messages - список результатов выполнения отвязывания по разрешениям. Содержит объекты класса UnassignPermissionsResultMessageListElement:
+     *          permissionId - идентификатор отвязываемого разрешения;
+     *          code - код результата отвязывания разрешения. Возможные значения:
+     *              0 - успешное удаление связи роль-разрешение;
+     *              1 - разрешение с указанным идентификатором не существует;
+     *              2 - разрешение с указанным идентификатором не привязано к данной роли;
+     *          message - сообщение о результате выполнения операции;
+     */
+    UnassignPermissionsResultMessage unassignPermissions(UUID userMadeRequestId, UUID roleId, List<UUID> permissionIds);
 }

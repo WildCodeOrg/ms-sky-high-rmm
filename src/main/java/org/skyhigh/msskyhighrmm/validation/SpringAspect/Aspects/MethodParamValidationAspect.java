@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 @Aspect
 @Component
 public class MethodParamValidationAspect {
-
     private final ParamValidator validator;
 
     public MethodParamValidationAspect(ParamValidator validator) {

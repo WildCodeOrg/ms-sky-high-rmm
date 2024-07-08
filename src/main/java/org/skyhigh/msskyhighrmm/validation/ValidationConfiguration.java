@@ -14,7 +14,6 @@ import java.util.Map;
 
 @Configuration
 public class ValidationConfiguration {
-
     @Bean
     public ParamValidator getParamValidator() {
         Map<Class<? extends Annotation>, FieldValidator> validatorMap = new HashMap<>();

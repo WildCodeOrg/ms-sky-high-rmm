@@ -9,6 +9,8 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceM
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginatedObject;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
@@ -305,6 +307,89 @@ public class RolesServiceImpl implements RolesService{
                 "Разрешения, привязанные к указанной роли, успешно найдены",
                 permissionsEntityList
         );
+    }
+
+    @Override
+    public UnassignPermissionsResultMessage unassignPermissions(UUID userMadeRequestId, UUID roleId, List<UUID> permissionIds) {
+        if (userMadeRequestId == null || !universalUserRepository.existsById(userMadeRequestId))
+            return new UnassignPermissionsResultMessage(
+                    1,
+                    "Пользователь, инициировавший операцию, не найден",
+                    null
+            );
+
+        if (permissionIds == null || permissionIds.isEmpty())
+            return new UnassignPermissionsResultMessage(
+                    3,
+                    "Список идентификаторов permissionIds должен быть заполнен хотя бы одним значением",
+                    null
+            );
+
+        Optional<UserGroupRolesEntity> userGroupRolesEntityOptional = userGroupRolesRepository.findById(roleId);
+        if (userGroupRolesEntityOptional.isEmpty())
+            return new UnassignPermissionsResultMessage(
+                    2,
+                    "Роль с указанным roleId не существует",
+                    null
+            );
+
+        if (userGroupRolesEntityOptional.get().isCritical())
+            return new UnassignPermissionsResultMessage(
+                    4,
+                    "Роль с указанным roleId является критичной - удаление привязанных разрешений невозможно",
+                    null
+            );
+
+
+        List<UnassignPermissionsResultMessageListElement> resultMessageList = new ArrayList<>();
+        for (UUID permissionId : permissionIds) {
+            Optional<OperationPermissionsEntity> operationPermissionsEntityOptional = operationPermissionsRepository.findById(permissionId);
+            List<RolesOperationsEntity> rolesOperationsEntities = rolesOperationsRepository.findByRoleIdAndPermissionId(roleId, permissionId);
+
+            if (operationPermissionsEntityOptional.isEmpty())
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        1,
+                        "Разрешение с указанным идентификатором не существует"
+                ));
+            else if (rolesOperationsEntities == null || rolesOperationsEntities.isEmpty())
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        2,
+                        "Разрешение с указанным идентификатором не привязано к данной роли"
+                ));
+            else {
+                rolesOperationsRepository.delete(rolesOperationsEntities.get(0));
+                log.info("A reference '" + rolesOperationsEntities.get(0).getId() + "' was deleted in table roles_operations");
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        0,
+                        "Разрешение с указанным идентификатором успешно отвязано от данной роли"
+                ));
+            }
+        }
+
+        UnassignPermissionsResultMessage result = new UnassignPermissionsResultMessage();
+
+        int unsuccessfullyUnassignPermissionAmount = 0;
+        for (UnassignPermissionsResultMessageListElement unassignPermissionsResultMessageListElement : resultMessageList) {
+            if (unassignPermissionsResultMessageListElement.getCode() != 0)
+                unsuccessfullyUnassignPermissionAmount++;
+        }
+
+        if (unsuccessfullyUnassignPermissionAmount == resultMessageList.size()) {
+            result.setGlobalOperationCode(6);
+            result.setMessage("От указанной роли не было отвязано ни одно из разрешений по причине возникновения ошибок");
+        } else if (unsuccessfullyUnassignPermissionAmount != 0) {
+            result.setGlobalOperationCode(5);
+            result.setMessage("От указанной роли была отвязана лишь часть разрешений по причине возникновения ошибок");
+        } else {
+            result.setGlobalOperationCode(0);
+            result.setMessage("Все разрешения были успешно отвязаны от указанной роли.");
+        }
+
+        result.setMessages(resultMessageList);
+        return result;
     }
 
     private UserGroupRole getRoleById(UUID id) {
