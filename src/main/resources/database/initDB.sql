@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS users_roles
     id uuid NOT NULL,
     user_id uuid NOT NULL,
     role_id uuid NOT NULL,
+    assign_date varchar(24) NOT NULL,
     CONSTRAINT PK_users_roles PRIMARY KEY (id)
 )
 ;

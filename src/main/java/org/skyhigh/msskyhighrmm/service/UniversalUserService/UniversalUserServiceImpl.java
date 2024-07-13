@@ -17,6 +17,7 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUser
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.BlockUsers.BlockUsersResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionForceAssignedPermission;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserPermission.GetUserPermissionsRoleBasedPermissionRole;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.GetUserRoles.GetUserRolesResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
@@ -470,9 +471,14 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                             2
                     ));
                 } else {
+
                     UsersRolesEntity usersRolesEntity = new UsersRolesEntity();
                     usersRolesEntity.setUser_id(userToAddRole.get());
                     usersRolesEntity.setRole_id(role.get());
+
+                    //Getting current date-time
+                    String currentDateTime = DateTimeFormatter.getCurrentDateTimeStringWithTZ();
+                    usersRolesEntity.setAssignDate(currentDateTime);
 
                     UUID createdReferenceId = (usersRolesRepository.save(usersRolesEntity)).getId();
                     log.info("Adding role with id '" + roleId + "' process log: "
@@ -741,17 +747,33 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         return switch (UserPermissionFilter.valueOf(filter)) {
             case ALL -> {
                 List<UserPermissionEntity> forceAssignedUserPermissionsRelationshipReferences = userPermissionRepository.findByUserId(userId);
-                List<OperationPermissionsEntity> roleBasedUserPermissions = operationPermissionsRepository.findRoleBasedUserPermissionByUserId(userId);
+                List<UsersRolesEntity> usersRolesEntities = usersRolesRepository.findByUserId(userId);
+                List<GetUserPermissionsRoleBasedPermissionRole> roleBasedUserPermissions;
+
+                if (usersRolesEntities != null && !usersRolesEntities.isEmpty())
+                    roleBasedUserPermissions = usersRolesEntities.stream()
+                        .map(x -> new GetUserPermissionsRoleBasedPermissionRole(
+                                    operationPermissionsRepository.findOperationPermissionsByRoleId(x.getRole_id().getId()),
+                                    x.getRole_id().getId(),
+                                    usersGroupRolesRepository
+                                            .findById(x.getRole_id().getId())
+                                            .map(UserGroupRolesEntity::getRoleName)
+                                            .orElse(null),
+                                    x.getAssignDate()
+                                )
+                        ).toList();
+                else
+                    roleBasedUserPermissions = null;
+
                 List<GetUserPermissionForceAssignedPermission> forceAssignedUserPermissions = forceAssignedUserPermissionsRelationshipReferences.stream()
                         .map(x -> new GetUserPermissionForceAssignedPermission(
                                 x.getPermissionId(),
                                 x.getCreateDate()
-                        )
-                ).toList();
+                            )
+                        ).toList();
 
                 if (
-                       // (roleBasedUserPermissions == null && forceAssignedUserPermissions == null) ||
-                                (roleBasedUserPermissions != null //&& forceAssignedUserPermissions != null
+                       (roleBasedUserPermissions != null //&& forceAssignedUserPermissions != null
                                 && roleBasedUserPermissions.isEmpty() && forceAssignedUserPermissions.isEmpty())
                 )
                     yield new GetUserPermissionResultMessage(
@@ -778,7 +800,25 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                             null
                     );
 
-                resultPermissions.put("roleBased", roleBasedUserPermissions);
+                List<UsersRolesEntity> usersRolesEntities = usersRolesRepository.findByUserId(userId);
+                List<GetUserPermissionsRoleBasedPermissionRole> getUserPermissionsRoleBasedPermissionRole;
+
+                if (usersRolesEntities != null && !usersRolesEntities.isEmpty())
+                    getUserPermissionsRoleBasedPermissionRole = usersRolesEntities.stream()
+                            .map(x -> new GetUserPermissionsRoleBasedPermissionRole(
+                                            operationPermissionsRepository.findOperationPermissionsByRoleId(x.getRole_id().getId()),
+                                            x.getRole_id().getId(),
+                                            usersGroupRolesRepository
+                                                    .findById(x.getRole_id().getId())
+                                                    .map(UserGroupRolesEntity::getRoleName)
+                                                    .orElse(null),
+                                            x.getAssignDate()
+                                    )
+                            ).toList();
+                else
+                    getUserPermissionsRoleBasedPermissionRole = null;
+
+                resultPermissions.put("roleBased", getUserPermissionsRoleBasedPermissionRole);
                 yield new GetUserPermissionResultMessage(
                         0,
                         "Разрешения пользователя найдены успешно",

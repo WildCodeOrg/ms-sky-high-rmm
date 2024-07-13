@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
@@ -27,4 +28,8 @@ public class UsersRolesEntity {
     @ManyToOne
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     UserGroupRolesEntity role_id;
+
+    @Column(name = "assign_date")
+    @Length(min = 24, max = 24)
+    String assignDate;
 }
