@@ -25,6 +25,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.getRolePermissi
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryRequestSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.searchRolesDTOs.DeliveryResponseSearchRolesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.unassignPermissionsDTOs.DeliveryRequestUnassignPermissionsDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.unassignPermissionsDTOs.DeliveryResponseUnassignPermissionsDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryRequestUpdateRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.rolesRMMControllerDTOs.updateRoleDTOs.DeliveryResponseUpdateRoleDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addAdminKeyCodeDTOs.DeliveryRequestAddAdminKeyCodeDTO;
@@ -39,6 +40,7 @@ import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.addRole
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryRequestBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.blockUserDTOs.DeliveryResponseBlockUserDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseDTO;
+import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.exceptionDTOs.CommonExceptionResponseWithMismatchesDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryRequestGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserByIdDTOs.DeliveryResponseGetUserByIdDTO;
 import org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.getUserPermissionDTOs.DeliveryRequestGetUserPermissionDTO;
@@ -62,6 +64,8 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.PermissionSer
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.AddPermissions.AddPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
@@ -2140,7 +2144,147 @@ public class RMMController {
     @ValidParams
     public ResponseEntity<?> unassignPermissions(@PathVariable(value = "role_id") UUID roleId,
                                                  @RequestBody DeliveryRequestUnassignPermissionsDTO requestBody) {
-        return null;
+        UUID userMadeRequestId = requestBody.getUserMadeRequestId();
+
+        log.info(
+                "Unassigning permissions of role '" + roleId + "' " +
+                        "process was started by '" + userMadeRequestId + "'"
+        );
+
+        UnassignPermissionsResultMessage result = rolesService.unassignPermissions(
+                userMadeRequestId,
+                roleId,
+                requestBody.getPermissionIds()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                "process was started by '" + userMadeRequestId + "' finished successfully"
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseUnassignPermissionsDTO(
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                27001,
+                                "Ошибка выполнения операции отвязывания разрешений от роли.",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 3 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                27002,
+                                "Ошибка выполнения операции отвязывания разрешений от роли.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                27003,
+                                "Ошибка выполнения операции отвязывания разрешений от роли.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 5 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                    new CommonExceptionResponseWithMismatchesDTO<UnassignPermissionsResultMessageListElement> (
+                        27004,
+                        "Частичное выполнение операции отвязывания разрешений от роли.",
+                        200,
+                        result.getMessage(),
+                        result.getMessages()
+                    ),
+                    HttpStatus.OK
+                );
+            }
+
+            case 6 -> {
+                log.warning(
+                        "Unassigning permissions of role '" + roleId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                    new CommonExceptionResponseWithMismatchesDTO<UnassignPermissionsResultMessageListElement> (
+                            27005,
+                            "Ошибка выполнения операции отвязывания разрешений от роли.",
+                            400,
+                            result.getMessage(),
+                            result.getMessages()
+                    ),
+                    HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
     }
 
     //test controller methods - uncomment to test the project availability

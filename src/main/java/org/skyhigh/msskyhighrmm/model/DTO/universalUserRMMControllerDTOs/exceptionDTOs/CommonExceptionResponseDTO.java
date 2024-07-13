@@ -10,9 +10,4 @@ public class CommonExceptionResponseDTO {
     protected String description;
     protected int httpCode;
     protected String message;
-    /*private ArrayList<Mismatch> mismatches;
-
-    public void addMismatch(Mismatch mismatch) {
-        mismatches.add(mismatch);
-    }*/
 }
