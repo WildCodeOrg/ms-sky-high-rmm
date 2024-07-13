@@ -65,7 +65,6 @@ import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceM
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.DeleteUserGroupRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.GetRolePermissions.GetRolePermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
-import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UpdateRole.UpdateRoleResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
@@ -2142,7 +2141,7 @@ public class RMMController {
 
     @DeleteMapping(value = "/roles/{role_id}/permissions")
     @ValidParams
-    public ResponseEntity<?> unassignPermissions(@PathVariable(value = "role_id") UUID roleId,
+    public ResponseEntity<?> unassignRolePermissions(@PathVariable(value = "role_id") UUID roleId,
                                                  @RequestBody DeliveryRequestUnassignPermissionsDTO requestBody) {
         UUID userMadeRequestId = requestBody.getUserMadeRequestId();
 
@@ -2253,13 +2252,13 @@ public class RMMController {
                 );
 
                 yield new ResponseEntity<>(
-                    new CommonExceptionResponseWithMismatchesDTO<UnassignPermissionsResultMessageListElement> (
-                        27004,
-                        "Частичное выполнение операции отвязывания разрешений от роли.",
-                        200,
-                        result.getMessage(),
-                        result.getMessages()
-                    ),
+                        new CommonExceptionResponseWithMismatchesDTO(
+                                27004,
+                                "Частичное выполнение операции отвязывания разрешений от роли.",
+                                200,
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
                     HttpStatus.OK
                 );
             }
@@ -2272,14 +2271,143 @@ public class RMMController {
                 );
 
                 yield new ResponseEntity<>(
-                    new CommonExceptionResponseWithMismatchesDTO<UnassignPermissionsResultMessageListElement> (
-                            27005,
-                            "Ошибка выполнения операции отвязывания разрешений от роли.",
-                            400,
-                            result.getMessage(),
-                            result.getMessages()
-                    ),
+                        new CommonExceptionResponseWithMismatchesDTO(
+                                27005,
+                                "Ошибка выполнения операции отвязывания разрешений от роли.",
+                                400,
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
                     HttpStatus.BAD_REQUEST
+                );
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + result.getGlobalOperationCode());
+        };
+    }
+
+    @DeleteMapping(value = "/users/permissions")
+    @ValidParams
+    public ResponseEntity<?> unassignUserPermissions(@RequestBody org.skyhigh.msskyhighrmm.model.DTO.universalUserRMMControllerDTOs.unassignPermissionsDTOs.DeliveryRequestUnassignPermissionsDTO requestBody) {
+        UUID userMadeRequestId = requestBody.getUserMadeRequestId();
+        UUID userId = requestBody.getUserId();
+
+        log.info(
+                "Unassigning permissions of user '" + userId + "' " +
+                        "process was started by '" + userMadeRequestId + "'"
+        );
+
+        UnassignPermissionsResultMessage result = universalUserService.unassignPermissions(
+                userMadeRequestId,
+                userId,
+                requestBody.getPermissionIds()
+        );
+
+        return switch (result.getGlobalOperationCode()) {
+            case 0 -> {
+                log.info(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' finished successfully"
+                );
+
+                yield new ResponseEntity<>(
+                        new DeliveryResponseUnassignPermissionsDTO(
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 1 -> {
+                log.warning(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                5,
+                                "Ошибка прав доступа.",
+                                401,
+                                result.getMessage()
+                        ),
+                        HttpStatus.UNAUTHORIZED
+                );
+            }
+
+            case 2 -> {
+                log.warning(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                27001,
+                                "Ошибка выполнения операции отвязывания разрешений от пользователя.",
+                                404,
+                                result.getMessage()
+                        ),
+                        HttpStatus.NOT_FOUND
+                );
+            }
+
+            case 3 -> {
+                log.warning(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseDTO(
+                                27002,
+                                "Ошибка выполнения операции отвязывания разрешений от пользователя.",
+                                400,
+                                result.getMessage()
+                        ),
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            case 4 -> {
+                log.warning(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseWithMismatchesDTO(
+                                27003,
+                                "Частичное выполнение операции отвязывания разрешений от пользователя.",
+                                200,
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
+                        HttpStatus.OK
+                );
+            }
+
+            case 5 -> {
+                log.warning(
+                        "Unassigning permissions of user '" + userId + "' " +
+                                "process was started by '" + userMadeRequestId + "' " +
+                                "finished with exception: " + result.getMessage()
+                );
+
+                yield new ResponseEntity<>(
+                        new CommonExceptionResponseWithMismatchesDTO(
+                                27004,
+                                "Ошибка выполнения операции отвязывания разрешений от пользователя.",
+                                400,
+                                result.getMessage(),
+                                result.getMessages()
+                        ),
+                        HttpStatus.BAD_REQUEST
                 );
             }
 

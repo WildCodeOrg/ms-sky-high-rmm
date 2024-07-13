@@ -340,7 +340,6 @@ public class RolesServiceImpl implements RolesService{
                     null
             );
 
-
         List<UnassignPermissionsResultMessageListElement> resultMessageList = new ArrayList<>();
         for (UUID permissionId : permissionIds) {
             Optional<OperationPermissionsEntity> operationPermissionsEntityOptional = operationPermissionsRepository.findById(permissionId);

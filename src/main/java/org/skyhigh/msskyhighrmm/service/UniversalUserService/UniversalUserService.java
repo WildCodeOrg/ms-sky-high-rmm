@@ -4,6 +4,7 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessage;
@@ -261,6 +262,30 @@ public interface UniversalUserService {
      *
      */
     UserAddPermissionResultMessage userAddPermission(UUID userMadeRequestId, UUID userId, List<UUID> permissionIds);
+
+    /**
+     * Отвязывание списка привязанных к пользователю разрешений
+     * @param userMadeRequestId ID пользователя, инициировавшего операцию;
+     * @param userId ID пользователя, разрешения которого необходимо отвязать
+     * @param permissionIds Список идентификаторов отвязываемых от пользователя разрешений
+     * @return Объект класса UnassignPermissionsResultMessage, содержащий поля:
+     *      globalOperationCode - код результата выполнения операции:
+     *          0 - успешное выполнение операции;
+     *          1 - пользователь, инициировавший операцию, не найден;
+     *          2 - пользователь с указанным userId не существует;
+     *          3 - список идентификаторов permissionIds должен быть заполнен хотя бы одним значением;
+     *          4 - у указанного пользователя была отозвана лишь часть разрешений по причине возникновения ошибок;
+     *          5 - у указанного пользователя не было отозвано ни одно из разрешений по причине возникновения ошибок;
+     *      message - сообщение о результате выполнения операции;
+     *      messages - список результатов выполнения отвязывания по разрешениям. Содержит объекты класса UnassignPermissionsResultMessageListElement:
+     *          permissionId - идентификатор отвязываемого разрешения;
+     *          code - код результата отвязывания разрешения. Возможные значения:
+     *              0 - успешное удаление связи пользователь-разрешение;
+     *              1 - разрешение с указанным идентификатором не существует;
+     *              2 - разрешение с указанным идентификатором не привязано к данному пользователю;
+     *          message - сообщение о результате выполнения операции;
+     */
+    UnassignPermissionsResultMessage unassignPermissions(UUID userMadeRequestId, UUID userId, List<UUID> permissionIds);
 
     /**
      * Возвращает список всех имеющихся юзеров

@@ -5,6 +5,8 @@ import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UsersToBlockInfoListElement;
 import org.skyhigh.msskyhighrmm.model.DBEntities.*;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessage;
+import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.RolesServiceMessages.UnassignPermissions.UnassignPermissionsResultMessageListElement;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddAdminKey.AddAdminKeyResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddBlockReason.AddBlockReasonResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.AddPermission.UserAddPermissionResultMessage;
@@ -888,6 +890,81 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         }
 
         result.setMessagesPerPermissions(resultsPerPermissions);
+        return result;
+    }
+
+    @Override
+    public UnassignPermissionsResultMessage unassignPermissions(UUID userMadeRequestId, UUID userId, List<UUID> permissionIds) {
+        if (userMadeRequestId == null || !universalUserRepository.existsById(userMadeRequestId))
+            return new UnassignPermissionsResultMessage(
+                    1,
+                    "Пользователь, инициировавший операцию, не найден",
+                    null
+            );
+
+        if (permissionIds == null || permissionIds.isEmpty())
+            return new UnassignPermissionsResultMessage(
+                    3,
+                    "Список идентификаторов permissionIds должен быть заполнен хотя бы одним значением",
+                    null
+            );
+
+        Optional<UniversalUserEntity> universalUserEntityOptional = universalUserRepository.findById(userId);
+        if (universalUserEntityOptional.isEmpty())
+            return new UnassignPermissionsResultMessage(
+                    2,
+                    "Пользователь с указанным userId не существует",
+                    null
+            );
+
+        List<UnassignPermissionsResultMessageListElement> resultMessageList = new ArrayList<>();
+        for (UUID permissionId : permissionIds) {
+            Optional<OperationPermissionsEntity> operationPermissionsEntityOptional = operationPermissionsRepository.findById(permissionId);
+            List<UserPermissionEntity> userPermissionEntities = userPermissionRepository.findByUserIdAndPermissionId(userId, permissionId);
+
+            if (operationPermissionsEntityOptional.isEmpty())
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        1,
+                        "Разрешение с указанным идентификатором не существует"
+                ));
+            else if (userPermissionEntities == null || userPermissionEntities.isEmpty())
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        2,
+                        "Разрешение с указанным идентификатором не привязано к данному пользователю"
+                ));
+            else {
+                userPermissionRepository.delete(userPermissionEntities.get(0));
+                log.info("A reference '" + userPermissionEntities.get(0).getId() + "' was deleted in table roles_operations");
+                resultMessageList.add(new UnassignPermissionsResultMessageListElement(
+                        permissionId,
+                        0,
+                        "Разрешение с указанным идентификатором успешно отозвано у данного пользователя"
+                ));
+            }
+        }
+
+        UnassignPermissionsResultMessage result = new UnassignPermissionsResultMessage();
+
+        int unsuccessfullyUnassignPermissionAmount = 0;
+        for (UnassignPermissionsResultMessageListElement unassignPermissionsResultMessageListElement : resultMessageList) {
+            if (unassignPermissionsResultMessageListElement.getCode() != 0)
+                unsuccessfullyUnassignPermissionAmount++;
+        }
+
+        if (unsuccessfullyUnassignPermissionAmount == resultMessageList.size()) {
+            result.setGlobalOperationCode(5);
+            result.setMessage("У указанного пользователя не было отозвано ни одно из разрешений по причине возникновения ошибок");
+        } else if (unsuccessfullyUnassignPermissionAmount != 0) {
+            result.setGlobalOperationCode(4);
+            result.setMessage("У указанного пользователя была отозвана лишь часть разрешений по причине возникновения ошибок");
+        } else {
+            result.setGlobalOperationCode(0);
+            result.setMessage("Все разрешения были успешно отозваны от указанного пользователя.");
+        }
+
+        result.setMessages(resultMessageList);
         return result;
     }
 

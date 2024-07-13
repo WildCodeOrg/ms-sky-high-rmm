@@ -111,7 +111,7 @@ public interface RolesService {
     /**
      * Отвязывание списка привязанных к роли разрешений
      * @param userMadeRequestId ID пользователя, инициировавшего операцию;
-     * @param roleId ID роли, разрешение которой необходимо найти
+     * @param roleId ID роли, разрешения которой необходимо отвязать
      * @param permissionIds Список идентификаторов отвязываемых от роли разрешений
      * @return Объект класса UnassignPermissionsResultMessage, содержащий поля:
      *      globalOperationCode - код результата выполнения операции:
