@@ -487,11 +487,13 @@ END;'
 /* CREATE OR REPLACE TRIGGERS */
 
 CREATE OR REPLACE TRIGGER secret_login_update_trigger
-  AFTER update of login
+  AFTER UPDATE OF login
   ON public.secret
   FOR EACH ROW
   EXECUTE PROCEDURE secret_login_update_trigger_fnc();
 
-create trigger universal_user_login_update_trigger
-    before update of login on
-    public.universal_user for each row execute function universal_user_login_update_trigger_fnc()
+CREATE OR REPLACE TRIGGER universal_user_login_update_trigger
+    BEFORE UPDATE OF login
+    ON public.universal_user
+    FOR EACH ROW
+    EXECUTE PROCEDURE universal_user_login_update_trigger_fnc();
