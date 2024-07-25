@@ -394,6 +394,7 @@ public class RMMControllerTest {
     @Test
     public void getUserByIdTest_Success() throws Exception {
         UUID testUserMadeRequestId = UUID.randomUUID();
+        UUID s1Id = UUID.randomUUID();
 
         DeliveryRequestGetUserByIdDTO deliveryRequestGetUserByIdDTO = new DeliveryRequestGetUserByIdDTO(
                 testUserMadeRequestId
@@ -403,8 +404,7 @@ public class RMMControllerTest {
         UUID testUserId = UUID.randomUUID();
         UniversalUser foundUniversalUserTest = new UniversalUser();
         foundUniversalUserTest.setId(testUserId);
-        foundUniversalUserTest.setLogin("Alexra11");
-        foundUniversalUserTest.setPassword("123455678");
+        foundUniversalUserTest.setSecretId(s1Id);
 
         when(universalUserService.getUserById(
                 testUserMadeRequestId)).thenReturn(foundUniversalUserTest);
@@ -417,8 +417,7 @@ public class RMMControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Пользователь найден."))
                 .andExpect(jsonPath("$.foundUniversalUser.id").value(foundUniversalUserTest.getId().toString()))
-                .andExpect(jsonPath("$.foundUniversalUser.login").value(foundUniversalUserTest.getLogin()))
-                .andExpect(jsonPath("$.foundUniversalUser.password").value(foundUniversalUserTest.getPassword()))
+                .andExpect(jsonPath("$.foundUniversalUser.secretId").value(foundUniversalUserTest.getSecretId().toString()))
                 .andExpect(jsonPath("$.foundUniversalUser.user_info").value(IsNull.nullValue()))
                 .andExpect(jsonPath("$.foundUniversalUser.block_reason_id").value(IsNull.nullValue()));
 
@@ -433,6 +432,7 @@ public class RMMControllerTest {
     @Test
     public void searchUsersTest_Success() throws Exception {
         UUID testUserMadeRequestId = UUID.randomUUID();
+        UUID s1Id = UUID.randomUUID();
 
         DeliveryRequestSearchUsersDTO deliveryRequestSearchUsersDTO = new DeliveryRequestSearchUsersDTO(
                 new PaginationInfo(1, 5),
@@ -446,8 +446,7 @@ public class RMMControllerTest {
 
         UniversalUser foundUniversalUserTest = new UniversalUser();
         foundUniversalUserTest.setId(testUserId);
-        foundUniversalUserTest.setLogin("Alexra11");
-        foundUniversalUserTest.setPassword("123455678");
+        foundUniversalUserTest.setSecretId(s1Id);
         foundUniversalUserTest.setUser_info(new UserInfo("Alex", null, 0));
         foundUniversalUserTest.setBlock_reason_id(null);
 
@@ -476,8 +475,7 @@ public class RMMControllerTest {
                 .andExpect(jsonPath("$.pageInfo.pageNumber").value(resultListOfUniversalUserTest.getPageNumber()))
                 .andExpect(jsonPath("$.pageInfo.onPageItemCount").value(resultListOfUniversalUserTest.getPaginationItemCount()))
                 .andExpect(jsonPath("$.universalUsers[0].id").value(foundUniversalUserTest.getId().toString()))
-                .andExpect(jsonPath("$.universalUsers[0].login").value(foundUniversalUserTest.getLogin()))
-                .andExpect(jsonPath("$.universalUsers[0].password").value(foundUniversalUserTest.getPassword()))
+                .andExpect(jsonPath("$.universalUsers[0].secretId").value(foundUniversalUserTest.getSecretId().toString()))
                 .andExpect(jsonPath("$.universalUsers[0].block_reason_id").value(IsNull.nullValue()))
                 .andExpect(jsonPath("$.universalUsers[0].user_info.firstName").value(foundUniversalUserTest.getUser_info().getFirstName()))
                 .andExpect(jsonPath("$.universalUsers[0].user_info.secondName").value(foundUniversalUserTest.getUser_info().getSecondName()))
@@ -496,6 +494,7 @@ public class RMMControllerTest {
     @Test
     public void updateUserByIdTest_Success() throws Exception {
         UUID testUserMadeRequestId = UUID.randomUUID();
+        UUID s1Id = UUID.randomUUID();
 
         DeliveryRequestUpdateUserByIdDTO deliveryRequestUpdateUserByIdDTO = new DeliveryRequestUpdateUserByIdDTO(
                 testUserMadeRequestId,
@@ -506,8 +505,7 @@ public class RMMControllerTest {
         UUID testUserId = UUID.randomUUID();
         UniversalUser foundUniversalUserTest = new UniversalUser();
         foundUniversalUserTest.setId(testUserId);
-        foundUniversalUserTest.setLogin("Alexra11");
-        foundUniversalUserTest.setPassword("123455678");
+        foundUniversalUserTest.setSecretId(s1Id);
 
         when(universalUserService.getUserById(
                 testUserMadeRequestId)).thenReturn(foundUniversalUserTest);
@@ -524,8 +522,7 @@ public class RMMControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Запись пользователя успешно обновлена"))
                 .andExpect(jsonPath("$.updatedUniversalUser.id").value(foundUniversalUserTest.getId().toString()))
-                .andExpect(jsonPath("$.updatedUniversalUser.login").value(foundUniversalUserTest.getLogin()))
-                .andExpect(jsonPath("$.updatedUniversalUser.password").value(foundUniversalUserTest.getPassword()))
+                .andExpect(jsonPath("$.updatedUniversalUser.secretId").value(foundUniversalUserTest.getSecretId().toString()))
                 .andExpect(jsonPath("$.updatedUniversalUser.user_info").value(deliveryRequestUpdateUserByIdDTO.getNewUserInfoAttributes()))
                 .andExpect(jsonPath("$.updatedUniversalUser.block_reason_id").value(IsNull.nullValue()));
 

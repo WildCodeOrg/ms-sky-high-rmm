@@ -122,6 +122,9 @@ public interface UniversalUserRepository extends JpaRepository<UniversalUserEnti
             String block_reason_id
     );
 
+    @Query(value = "SELECT * FROM universal_user WHERE secret_id = ?1", nativeQuery = true)
+    List<UniversalUserEntity> findBySecretId(UUID secretId);
+
     //изменение информации о пользователе
     @Transactional
     @Modifying(clearAutomatically=true, flushAutomatically=true)

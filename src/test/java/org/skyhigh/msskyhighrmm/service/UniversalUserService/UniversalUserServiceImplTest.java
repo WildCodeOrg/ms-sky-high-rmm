@@ -11,16 +11,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.ListOfUniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UniversalUser;
 import org.skyhigh.msskyhighrmm.model.BusinessObjects.Users.UserInfo.UserInfo;
+import org.skyhigh.msskyhighrmm.model.DBEntities.SecretEntity;
 import org.skyhigh.msskyhighrmm.model.DBEntities.UniversalUserEntity;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.LoginUser.LoginUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.ServiceMethodsResultMessages.UniversalUserServiceMessages.RegisterUser.RegisterUserResultMessage;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalPagination.PaginationInfo;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Filters.UniversalUserFilters;
 import org.skyhigh.msskyhighrmm.model.SystemObjects.UniversalUser.Sort.UniversalUserSort;
-import org.skyhigh.msskyhighrmm.repository.AdministratorKeyCodeRepository;
-import org.skyhigh.msskyhighrmm.repository.BlockReasonsRepository;
-import org.skyhigh.msskyhighrmm.repository.UniversalUserRepository;
-import org.skyhigh.msskyhighrmm.repository.UsersRolesRepository;
+import org.skyhigh.msskyhighrmm.repository.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -49,6 +47,9 @@ public class UniversalUserServiceImplTest {
     private UsersRolesRepository usersRolesRepository;
 
     @Mock
+    private SecretRepository secretRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     private final PasswordEncoder passwordEncoderTest = new BCryptPasswordEncoder();
@@ -60,25 +61,35 @@ public class UniversalUserServiceImplTest {
         boolean isAdmin = false;
         String adminKey = null;
         UUID testId = UUID.randomUUID();
+        UUID testSecretId = UUID.randomUUID();
+        String encodedTestPass = passwordEncoderTest.encode(testPassword);
+
+        SecretEntity secretForUserWithId = new SecretEntity(
+                testSecretId,
+                testLogin,
+                encodedTestPass
+        );
 
         UniversalUserEntity universalUserEntityTestWithId = new UniversalUserEntity();
-        universalUserEntityTestWithId.setLogin(testLogin);
-        universalUserEntityTestWithId.setPassword(passwordEncoderTest.encode(testPassword));
+        universalUserEntityTestWithId.setSecretId(testSecretId);
         universalUserEntityTestWithId.setId(testId);
+        universalUserEntityTestWithId.setLogin(testLogin);
 
         UniversalUserEntity universalUserEntityTestWithoutId = new UniversalUserEntity();
+        universalUserEntityTestWithoutId.setSecretId(testSecretId);
         universalUserEntityTestWithoutId.setLogin(testLogin);
-        universalUserEntityTestWithoutId.setPassword(passwordEncoderTest.encode(testPassword));
 
 
-        List<UniversalUserEntity> universalUserEntitiesTest = new ArrayList<>();
+        List<SecretEntity> secretsForTest = new ArrayList<>();
 
         Mockito.when(passwordEncoder.encode(testPassword))
                 .thenReturn(passwordEncoderTest.encode(testPassword));
-        Mockito.when(universalUserRepository.findByLogin(testLogin))
-                .thenReturn(universalUserEntitiesTest);
+        Mockito.when(secretRepository.findByLogin(testLogin))
+                .thenReturn(secretsForTest);
         Mockito.when(universalUserRepository.save(universalUserEntityTestWithoutId))
                 .thenReturn(universalUserEntityTestWithId);
+        Mockito.when(secretRepository.save(Mockito.any()))
+                .thenReturn(secretForUserWithId);
 
         RegisterUserResultMessage result = universalUserService.registerUser(testLogin, testPassword, isAdmin, adminKey);
         Assertions.assertEquals("User created successfully.", result.getGlobalMessage());
@@ -90,22 +101,32 @@ public class UniversalUserServiceImplTest {
     public void loginUserTest_Success() {
         String testLogin = "testLogin";
         String testPassword = "testPassword";
-        boolean isAdmin = false;
-        String adminKey = null;
         UUID testId = UUID.randomUUID();
+        UUID testSecretId = UUID.randomUUID();
 
-        UniversalUserEntity universalUserEntityTestWithId = new UniversalUserEntity();
-        universalUserEntityTestWithId.setLogin(testLogin);
-        universalUserEntityTestWithId.setPassword(passwordEncoderTest.encode(testPassword));
-        universalUserEntityTestWithId.setId(testId);
+        SecretEntity secretForUser = new SecretEntity(
+                testSecretId,
+                testLogin,
+                passwordEncoderTest.encode(testPassword)
+        );
 
-        List<UniversalUserEntity> universalUserEntitiesTest = new ArrayList<>();
-        universalUserEntitiesTest.add(universalUserEntityTestWithId);
+        List<SecretEntity> secrets = new ArrayList<>();
+        secrets.add(secretForUser);
+        List<UniversalUserEntity> universalUsers = new ArrayList<>();
+        universalUsers.add(new UniversalUserEntity(
+                testId,
+                testSecretId,
+                null,
+                testLogin,
+                null
+        ));
 
-        Mockito.when(universalUserRepository.findByLogin(testLogin))
-                .thenReturn(universalUserEntitiesTest);
-        Mockito.when(passwordEncoder.matches(testPassword, universalUserEntityTestWithId.getPassword())).
+        Mockito.when(secretRepository.findByLogin(testLogin))
+                .thenReturn(secrets);
+        Mockito.when(passwordEncoder.matches(testPassword, secretForUser.getPassword())).
                 thenReturn(true);
+        Mockito.when(universalUserRepository.findBySecretId(testSecretId))
+                .thenReturn(universalUsers);
 
         LoginUserResultMessage result = universalUserService.loginUser(testLogin, testPassword);
         Assertions.assertEquals(0, result.getGlobalOperationCode());
@@ -117,21 +138,23 @@ public class UniversalUserServiceImplTest {
     public void searchUsersTest_Success_NoFilters_NoPagination_NoSort() {
         UUID user1Id = UUID.randomUUID();
         UUID user2Id = UUID.randomUUID();
+        UUID s1Id = UUID.randomUUID();
+        UUID s2Id = UUID.randomUUID();
         String testPassword = "testPassword";
 
         UniversalUserEntity universalUserEntity1 = new UniversalUserEntity(
                 user1Id,
-                "TestUser1",
-                passwordEncoderTest.encode(testPassword),
+                s1Id,
                 null,
+                "TestUser1",
                 null
         );
 
         UniversalUserEntity universalUserEntity2 = new UniversalUserEntity(
                 user2Id,
-                "TestUser2",
-                passwordEncoderTest.encode(testPassword),
+                s2Id,
                 null,
+                "TestUser2",
                 null
         );
 
@@ -149,8 +172,7 @@ public class UniversalUserServiceImplTest {
         Assertions.assertEquals(result.getUniversalUsers().size(), universalUserEntitiesTest.size());
         for (int i = 0; i < result.getUniversalUsers().size(); i++) {
             Assertions.assertEquals(result.getUniversalUsers().get(i).getId(), universalUserEntitiesTest.get(i).getId());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getLogin(), universalUserEntitiesTest.get(i).getLogin());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getPassword(), universalUserEntitiesTest.get(i).getPassword());
+            Assertions.assertEquals(result.getUniversalUsers().get(i).getSecretId(), universalUserEntitiesTest.get(i).getSecretId());
         }
     }
 
@@ -158,21 +180,22 @@ public class UniversalUserServiceImplTest {
     public void searchUsersTest_Success_WithFilters_NoPagination_NoSort() {
         UUID user1Id = UUID.randomUUID();
         UUID user2Id = UUID.randomUUID();
-        String testPassword = "testPassword";
+        UUID s1Id = UUID.randomUUID();
+        UUID s2Id = UUID.randomUUID();
 
         UniversalUserEntity universalUserEntity1 = new UniversalUserEntity(
                 user1Id,
-                "TestUser1",
-                passwordEncoderTest.encode(testPassword),
+                s1Id,
                 null,
+                "TestUser2",
                 null
         );
 
         UniversalUserEntity universalUserEntity2 = new UniversalUserEntity(
                 user2Id,
-                "TestUser2",
-                passwordEncoderTest.encode(testPassword),
+                s2Id,
                 new UserInfo("Alex", null, 0),
+                "TestUser1",
                 null
         );
 
@@ -200,8 +223,7 @@ public class UniversalUserServiceImplTest {
         Assertions.assertEquals(result.getUniversalUsers().size(), universalUserEntitiesTest.size());
         for (int i = 0; i < result.getUniversalUsers().size(); i++) {
             Assertions.assertEquals(result.getUniversalUsers().get(i).getId(), universalUserEntitiesTest.get(i).getId());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getLogin(), universalUserEntitiesTest.get(i).getLogin());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getPassword(), universalUserEntitiesTest.get(i).getPassword());
+            Assertions.assertEquals(result.getUniversalUsers().get(i).getSecretId(), universalUserEntitiesTest.get(i).getSecretId());
             Assertions.assertNotNull(result.getUniversalUsers().get(i).getUser_info());
             Assertions.assertEquals(result.getUniversalUsers().get(i).getUser_info().getFirstName(), universalUserEntitiesTest.get(i).getUser_info().getFirstName());
         }
@@ -211,21 +233,22 @@ public class UniversalUserServiceImplTest {
     public void searchUsersTest_Success_NoFilters_WithPagination_NoSort() {
         UUID user1Id = UUID.randomUUID();
         UUID user2Id = UUID.randomUUID();
-        String testPassword = "testPassword";
+        UUID s1Id = UUID.randomUUID();
+        UUID s2Id = UUID.randomUUID();
 
         UniversalUserEntity universalUserEntity1 = new UniversalUserEntity(
                 user1Id,
-                "TestUser1",
-                passwordEncoderTest.encode(testPassword),
+                s1Id,
                 null,
+                "TestUser2",
                 null
         );
 
         UniversalUserEntity universalUserEntity2 = new UniversalUserEntity(
                 user2Id,
-                "TestUser2",
-                passwordEncoderTest.encode(testPassword),
+                s2Id,
                 null,
+                "TestUser1",
                 null
         );
 
@@ -248,8 +271,7 @@ public class UniversalUserServiceImplTest {
         Assertions.assertEquals(result.getUniversalUsers().size(), 1);
         for (int i = 0; i < result.getUniversalUsers().size(); i++) {
             Assertions.assertEquals(result.getUniversalUsers().get(i).getId(), universalUserEntitiesTest.get(i).getId());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getLogin(), universalUserEntitiesTest.get(i).getLogin());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getPassword(), universalUserEntitiesTest.get(i).getPassword());
+            Assertions.assertEquals(result.getUniversalUsers().get(i).getSecretId(), universalUserEntitiesTest.get(i).getSecretId());
         }
     }
 
@@ -257,21 +279,22 @@ public class UniversalUserServiceImplTest {
     public void searchUsersTest_Success_NoFilters_NoPagination_WithSort() {
         UUID user1Id = UUID.randomUUID();
         UUID user2Id = UUID.randomUUID();
-        String testPassword = "testPassword";
+        UUID s1Id = UUID.randomUUID();
+        UUID s2Id = UUID.randomUUID();
 
         UniversalUserEntity universalUserEntity1 = new UniversalUserEntity(
                 user1Id,
-                "TestUser1",
-                passwordEncoderTest.encode(testPassword),
+                s1Id,
                 null,
+                "TestUser1",
                 null
         );
 
         UniversalUserEntity universalUserEntity2 = new UniversalUserEntity(
                 user2Id,
-                "TestUser2",
-                passwordEncoderTest.encode(testPassword),
+                s2Id,
                 null,
+                "TestUser2",
                 null
         );
 
@@ -300,22 +323,17 @@ public class UniversalUserServiceImplTest {
         Assertions.assertEquals(result.getUniversalUsers().size(), universalUserEntitiesTest.size());
         for (int i = 0; i < result.getUniversalUsers().size(); i++) {
             Assertions.assertEquals(result.getUniversalUsers().get(i).getId(), universalUserEntitiesTest.get(i).getId());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getLogin(), universalUserEntitiesTest.get(i).getLogin());
-            Assertions.assertEquals(result.getUniversalUsers().get(i).getPassword(), universalUserEntitiesTest.get(i).getPassword());
+            Assertions.assertEquals(result.getUniversalUsers().get(i).getSecretId(), universalUserEntitiesTest.get(i).getSecretId());
         }
     }
 
     @Test
     public void updateUserByIdTest() {
-        String testLogin = "testLogin";
-        String testPassword = "testPassword";
-        boolean isAdmin = false;
-        String adminKey = null;
+        UUID s1Id = UUID.randomUUID();
         UUID testId = UUID.randomUUID();
 
         UniversalUserEntity universalUserEntityTestWithId = new UniversalUserEntity();
-        universalUserEntityTestWithId.setLogin(testLogin);
-        universalUserEntityTestWithId.setPassword(passwordEncoderTest.encode(testPassword));
+        universalUserEntityTestWithId.setSecretId(s1Id);
         universalUserEntityTestWithId.setId(testId);
 
         Mockito.when(universalUserRepository.existsById(testId))
@@ -333,8 +351,7 @@ public class UniversalUserServiceImplTest {
 
         UniversalUser result = universalUserService.updateUserById(testId, newUserInfoAttributes);
         Assertions.assertEquals(result.getId(), testId);
-        Assertions.assertEquals(result.getLogin(), testLogin);
-        Assertions.assertEquals(result.getPassword(), universalUserEntityTestWithId.getPassword());
+        Assertions.assertEquals(result.getSecretId(), s1Id);
         Assertions.assertNotNull(result.getUser_info());
         Assertions.assertEquals(result.getUser_info().getFirstName(), newUserInfoAttributes.getFirstName());
         Assertions.assertNull(result.getUser_info().getSecondName());

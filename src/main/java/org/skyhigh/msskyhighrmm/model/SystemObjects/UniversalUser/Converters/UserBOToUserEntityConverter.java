@@ -16,10 +16,9 @@ public class UserBOToUserEntityConverter {
         UniversalUserEntity resultUser = new UniversalUserEntity();
 
         if (user.getId() != null) resultUser.setId(user.getId());
-        resultUser.setLogin(user.getLogin());
-        resultUser.setPassword(user.getPassword());
+        resultUser.setSecretId(user.getSecretId());
         resultUser.setBlock_reason_id(user.getBlock_reason_id());
-
+        resultUser.setLogin(user.getLogin());
         resultUser.setUser_info(user.getUser_info());
         return resultUser;
     }

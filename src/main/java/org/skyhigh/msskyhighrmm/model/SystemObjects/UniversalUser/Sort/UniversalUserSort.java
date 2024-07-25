@@ -22,6 +22,8 @@ public class UniversalUserSort {
     @NotEmpty
     private String sortBy;
 
+
+
     public static void sort(ArrayList<UniversalUser> usersListToSort, UniversalUserSort universalUserSort)
     {
         if (usersListToSort == null || usersListToSort.isEmpty())

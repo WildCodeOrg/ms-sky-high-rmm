@@ -9,6 +9,15 @@ CREATE TABLE IF NOT EXISTS administrator_key_code
 )
 ;
 
+CREATE TABLE IF NOT EXISTS secret
+(
+    id uuid NOT NULL,
+    login varchar(20) NOT NULL,
+    password varchar(120) NOT NULL,
+    CONSTRAINT PK_secret PRIMARY KEY (id)
+)
+;
+
 CREATE TABLE IF NOT EXISTS block_reasons
 (
     id varchar(10) NOT NULL,
@@ -39,10 +48,10 @@ CREATE TABLE IF NOT EXISTS roles_operations
 CREATE TABLE IF NOT EXISTS universal_user
 (
     id uuid NOT NULL,
-    login varchar(20) NOT NULL,
-    password varchar(120) NOT NULL,
     user_info JSONB NULL,
     block_reason_id varchar(10) NULL,
+    secret_id uuid NOT NULL,
+    login varchar(20),
     CONSTRAINT PK_UniversalUser PRIMARY KEY (id)
 )
 ;
@@ -95,6 +104,8 @@ ALTER TABLE user_permission DROP CONSTRAINT IF EXISTS FK_user_permission_operati
 
 ALTER TABLE user_permission DROP CONSTRAINT IF EXISTS FK_user_permission_universal_user;
 
+ALTER TABLE universal_user DROP CONSTRAINT IF EXISTS FK_universal_user_secret;
+
 /* Create Foreign Key Constraints */
 
 ALTER TABLE administrator_key_code ADD CONSTRAINT FK_administrator_key_code_universal_user
@@ -135,6 +146,13 @@ ALTER TABLE user_permission
     REFERENCES universal_user (id)
     ON DELETE CASCADE ON UPDATE CASCADE;
 
+ALTER TABLE universal_user
+    ADD CONSTRAINT FK_universal_user_secret
+    FOREIGN KEY (secret_id)
+    REFERENCES secret (id)
+    ON DELETE No Action ON UPDATE No Action
+;
+
 /* CREATE OR REPLACE FUNCTIONS */
 
 CREATE OR REPLACE FUNCTION public.find_a_key_code_by_value(p_key_code_value character varying)
@@ -155,15 +173,14 @@ end;
 ';
 
 CREATE OR REPLACE FUNCTION public.find_by_age(p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -175,15 +192,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_age(p_block_reason_id uuid, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -196,15 +212,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name(p_block_reason_id uuid, p_f_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -217,15 +232,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_age(p_block_reason_id uuid, p_f_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -239,15 +253,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_second_name(p_block_reason_id uuid, p_f_name character varying, p_s_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -261,15 +274,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_first_name_and_second_name_and_age(p_block_reason_id uuid, p_f_name character varying, p_s_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -284,15 +296,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_second_name(p_block_reason_id uuid, p_s_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -305,15 +316,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_block_reason_id_and_second_name_and_age(p_block_reason_id uuid, p_s_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -328,15 +338,14 @@ end;
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name(p_f_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -349,15 +358,14 @@ end;'
 
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_and_age(p_f_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -370,15 +378,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_and_second_name(p_f_name character varying, p_s_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -391,15 +398,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_first_name_ans_second_name_and_age(p_f_name character varying, p_s_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -413,15 +419,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_second_name(p_s_name character varying)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -433,15 +438,14 @@ end;'
 ;
 
 CREATE OR REPLACE FUNCTION public.find_by_second_name_and_age(p_s_name character varying, p_age integer)
-    RETURNS TABLE(id uuid, login character varying, password character varying, user_info jsonb, block_reason_id character varying)
+    RETURNS TABLE(id uuid, secret_id uuid, user_info jsonb, block_reason_id character varying)
     LANGUAGE plpgsql
 AS '
 begin
     return query
         select
             us.id as id,
-            us.login as login,
-            us.password as password,
+            us.secret_id as secret_id,
             us.user_info as user_info,
             us.block_reason_id as block_reason_id
         from
@@ -452,3 +456,42 @@ begin
           and us.user_info ->> ''age'' = p_age::text;
 end;'
 ;
+
+CREATE OR REPLACE FUNCTION secret_login_update_trigger_fnc()
+   RETURNS trigger
+   LANGUAGE plpgsql 
+AS '
+BEGIN
+   update public.universal_user 
+   set login = (
+ 	  select login
+ 	  from public.secret s
+ 	  where secret_id = s.id
+   );
+   RETURN NEW;
+END;'
+;
+
+CREATE OR REPLACE FUNCTION public.universal_user_login_update_trigger_fnc()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS '
+BEGIN
+    if not new.login = (select login from public.secret where old.secret_id = id) then
+        raise ''Changes of column login in universal_user table allowed only by changing the login value in table secret'';
+    end if;
+    RETURN NEW;
+END;'
+;
+
+/* CREATE OR REPLACE TRIGGERS */
+
+CREATE OR REPLACE TRIGGER secret_login_update_trigger
+  AFTER update of login
+  ON public.secret
+  FOR EACH ROW
+  EXECUTE PROCEDURE secret_login_update_trigger_fnc();
+
+create trigger universal_user_login_update_trigger
+    before update of login on
+    public.universal_user for each row execute function universal_user_login_update_trigger_fnc()

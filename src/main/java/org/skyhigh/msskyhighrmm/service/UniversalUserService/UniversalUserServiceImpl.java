@@ -48,6 +48,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private final UserGroupRolesRepository usersGroupRolesRepository;
     private final OperationPermissionsRepository operationPermissionsRepository;
     private final UserPermissionRepository userPermissionRepository;
+    private final SecretRepository secretRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -59,7 +60,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                     UsersRolesRepository usersRolesRepository,
                                     UserGroupRolesRepository usersGroupRolesRepository,
                                     OperationPermissionsRepository operationPermissionsRepository,
-                                    PasswordEncoder passwordEncoder, UserPermissionRepository userPermissionRepository) {
+                                    PasswordEncoder passwordEncoder, UserPermissionRepository userPermissionRepository, SecretRepository secretRepository) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
@@ -68,6 +69,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         this.usersGroupRolesRepository = usersGroupRolesRepository;
         this.operationPermissionsRepository = operationPermissionsRepository;
         this.userPermissionRepository = userPermissionRepository;
+        this.secretRepository = secretRepository;
     }
 
     @Override
@@ -123,20 +125,28 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 );
         }
 
-        if (!universalUserRepository.findByLogin(login).isEmpty())
+        if (!secretRepository.findByLogin(login).isEmpty())
             return new RegisterUserResultMessage(
-                    "User with this id already exists.",
+                    "User with this login already exists.",
                     3,
                     null
             );
 
         String encodedPass = passwordEncoder.encode(password);
 
-        UniversalUserEntity user = new UniversalUserEntity(
+        SecretEntity secretEntity = new SecretEntity(
                 null,
                 login,
-                encodedPass,
+                encodedPass
+        );
+
+        UUID savedSecretId = (secretRepository.save(secretEntity)).getId();
+
+        UniversalUserEntity user = new UniversalUserEntity(
                 null,
+                savedSecretId,
+                null,
+                login,
                 null
         );
 
@@ -160,23 +170,30 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     public LoginUserResultMessage loginUser(String login, String password) {
         LoginUserResultMessage result = new LoginUserResultMessage();
 
-        ArrayList<UniversalUserEntity> users = (ArrayList<UniversalUserEntity>) universalUserRepository
-                .findByLogin(login);
+        ArrayList<SecretEntity> userSecrets = (ArrayList<SecretEntity>) secretRepository.findByLogin(login);
 
-        if (users.size() != 1) {
+        if (userSecrets.size() != 1) {
             result.setGlobalOperationCode(1);
             result.setGlobalMessage("Пользователя не существует.");
             return result;
         }
 
-        if (!passwordEncoder.matches(password, users.get(0).getPassword())) {
+        if (!passwordEncoder.matches(password, userSecrets.get(0).getPassword())) {
             result.setGlobalOperationCode(2);
             result.setGlobalMessage("Неправильный пароль.");
             return result;
         }
 
+        List<UniversalUserEntity> user = universalUserRepository.findBySecretId(userSecrets.get(0).getId());
+
+        if (user == null || user.size() != 1) {
+            result.setGlobalOperationCode(1);
+            result.setGlobalMessage("Пользователя не существует.");
+            return result;
+        }
+
         result.setGlobalOperationCode(0);
-        result.setLogonUserId(users.get(0).getId());
+        result.setLogonUserId(user.get(0).getId());
         return result;
     }
 

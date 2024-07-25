@@ -16,11 +16,10 @@ public class UserEntityToUserBOConverter {
         UniversalUser resultUser = new UniversalUser();
 
         resultUser.setId(user.getId());
-        resultUser.setLogin(user.getLogin());
-        resultUser.setPassword(user.getPassword());
+        resultUser.setSecretId(user.getSecretId());
         resultUser.setBlock_reason_id(user.getBlock_reason_id());
-
         resultUser.setUser_info(user.getUser_info());
+        resultUser.setLogin(user.getLogin());
         return resultUser;
     }
 
