@@ -462,12 +462,10 @@ CREATE OR REPLACE FUNCTION secret_login_update_trigger_fnc()
    LANGUAGE plpgsql 
 AS '
 BEGIN
-   update public.universal_user 
-   set login = (
- 	  select login
- 	  from public.secret s
- 	  where secret_id = s.id
-   );
+    UPDATE public.universal_user
+    SET login = secret.login
+    FROM public.secret
+    where secret.id = secret_id;
    RETURN NEW;
 END;'
 ;
