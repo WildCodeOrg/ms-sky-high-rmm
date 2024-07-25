@@ -10,7 +10,8 @@ INSERT INTO universal_user VALUES
         '6cc23ff9-79ac-4ee4-be0f-22d6679fc2e4',
         NULL,
         NULL,
-        'f40f1ee2-c2f3-4382-bc7b-c9225a716b9c'
+        'f40f1ee2-c2f3-4382-bc7b-c9225a716b9c',
+        'SUPERUSER'
     ) ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO administrator_key_code VALUES
