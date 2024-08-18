@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class UniversalUser{
     private UUID id;
-    private UUID secretId;
+    private int secretId;
     private UserInfo user_info;
     private String login;
     private String block_reason_id;

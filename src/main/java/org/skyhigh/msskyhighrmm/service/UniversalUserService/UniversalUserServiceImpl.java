@@ -48,7 +48,6 @@ public class UniversalUserServiceImpl implements UniversalUserService {
     private final UserGroupRolesRepository usersGroupRolesRepository;
     private final OperationPermissionsRepository operationPermissionsRepository;
     private final UserPermissionRepository userPermissionRepository;
-    private final SecretRepository secretRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -60,7 +59,7 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                                     UsersRolesRepository usersRolesRepository,
                                     UserGroupRolesRepository usersGroupRolesRepository,
                                     OperationPermissionsRepository operationPermissionsRepository,
-                                    PasswordEncoder passwordEncoder, UserPermissionRepository userPermissionRepository, SecretRepository secretRepository) {
+                                    PasswordEncoder passwordEncoder, UserPermissionRepository userPermissionRepository) {
         this.universalUserRepository = universalUserRepository;
         this.blockReasonsRepository = blockReasonsRepository;
         this.administratorKeyCodeRepository = administratorKeyCodeRepository;
@@ -69,10 +68,9 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         this.usersGroupRolesRepository = usersGroupRolesRepository;
         this.operationPermissionsRepository = operationPermissionsRepository;
         this.userPermissionRepository = userPermissionRepository;
-        this.secretRepository = secretRepository;
     }
 
-    @Override
+    @Override //need to be updated
     public RegisterUserResultMessage registerUser(String login, String password, boolean isAdmin, String adminKey) {
         List<AdministratorKeyCodeEntity> adminKeyCodeEntities = new ArrayList<>();
 
@@ -125,26 +123,18 @@ public class UniversalUserServiceImpl implements UniversalUserService {
                 );
         }
 
-        if (!secretRepository.findByLogin(login).isEmpty())
+        /*if (!secretRepository.findByLogin(login).isEmpty())
             return new RegisterUserResultMessage(
                     "User with this login already exists.",
                     3,
                     null
-            );
+            );*/
 
         String encodedPass = passwordEncoder.encode(password);
 
-        SecretEntity secretEntity = new SecretEntity(
-                null,
-                login,
-                encodedPass
-        );
-
-        UUID savedSecretId = (secretRepository.save(secretEntity)).getId();
-
         UniversalUserEntity user = new UniversalUserEntity(
                 null,
-                savedSecretId,
+                0, //заглушка
                 null,
                 login,
                 null
@@ -166,13 +156,13 @@ public class UniversalUserServiceImpl implements UniversalUserService {
         );
     }
 
-    @Override
+    @Override //need to be updated
     public LoginUserResultMessage loginUser(String login, String password) {
         LoginUserResultMessage result = new LoginUserResultMessage();
 
-        ArrayList<SecretEntity> userSecrets = (ArrayList<SecretEntity>) secretRepository.findByLogin(login);
+        //ArrayList<SecretEntity> userSecrets = (ArrayList<SecretEntity>) secretRepository.findByLogin(login);
 
-        if (userSecrets.size() != 1) {
+        /*if (userSecrets.size() != 1) {
             result.setGlobalOperationCode(1);
             result.setGlobalMessage("Пользователя не существует.");
             return result;
@@ -182,18 +172,18 @@ public class UniversalUserServiceImpl implements UniversalUserService {
             result.setGlobalOperationCode(2);
             result.setGlobalMessage("Неправильный пароль.");
             return result;
-        }
+        }*/
 
-        List<UniversalUserEntity> user = universalUserRepository.findBySecretId(userSecrets.get(0).getId());
+        //List<UniversalUserEntity> user = universalUserRepository.findBySecretId(userSecrets.get(0).getId());
 
-        if (user == null || user.size() != 1) {
-            result.setGlobalOperationCode(1);
-            result.setGlobalMessage("Пользователя не существует.");
-            return result;
-        }
+        //if (user == null || user.size() != 1) {
+        //    result.setGlobalOperationCode(1);
+        //    result.setGlobalMessage("Пользователя не существует.");
+        //    return result;
+        //}
 
         result.setGlobalOperationCode(0);
-        result.setLogonUserId(user.get(0).getId());
+        //result.setLogonUserId(user.get(0).getId());
         return result;
     }
 

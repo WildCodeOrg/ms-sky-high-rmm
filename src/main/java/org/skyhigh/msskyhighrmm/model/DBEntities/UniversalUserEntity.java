@@ -24,7 +24,7 @@ public class UniversalUserEntity {
     private UUID id;
 
     @Column(name = "secret_id", nullable = false)
-    private UUID secretId;
+    private int secretId;
 
     @Column(name = "user_info", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
